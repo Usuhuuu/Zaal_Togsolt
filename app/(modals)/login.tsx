@@ -6,44 +6,38 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ImageBackground,
-  Image,
   ActivityIndicator,
+  Image,
+  ImageBackground,
 } from "react-native";
-import { Ionicons , Zocial} from "@expo/vector-icons";
+import { Ionicons, Zocial } from "@expo/vector-icons";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Colors from "@/constants/Colors";
 import { API_URL } from "@env";
-import { defaultStyles } from "@/constants/Styles";
+import * as SecureStore from "expo-secure-store";
 
 const Page = () => {
+  const axiosConfig = {
+    timeout: 5000,
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordHide, setPasswordHide] = useState(true);
-  const [confirmPasswordHide, setConfirmPasswordHide] = useState(true);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [er, setEr] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handlePasswordToggle = () => setPasswordHide(!passwordHide);
-  const handleConfirmPasswordToggle = () => setConfirmPasswordHide(!confirmPasswordHide);
+  const [passwordHide, setPasswordHide] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   const handleSubmit = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match.");
-      return;
-    }
-
     setLoading(true);
     try {
       const response = await axios.post(
         `${API_URL}/auth/login`,
         { email, password },
-        { timeout: 5000, withCredentials: true }
+        { ...axiosConfig, withCredentials: true }
       );
       if (response.status === 200) {
-        await AsyncStorage.setItem(
+        await SecureStore.setItemAsync(
           "Tokens",
           JSON.stringify({
             accessToken: response.data.accessToken,
@@ -52,36 +46,71 @@ const Page = () => {
         );
         Alert.alert("Login successful");
       } else {
-        setError("Login failed");
-        Alert.alert("Login failed", response.data.message || "Please try again");
+        setEr("Login failed");
+        Alert.alert(er);
       }
     } catch (err) {
-      console.error(err);
-      setError("Login failed");
-      Alert.alert("Login failed", "An error occurred. Please try again.");
+      console.log(err);
+      setEr("An error occurred during login.");
+      Alert.alert("Error", er);
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePasswordToggle = () => {
+    setPasswordHide(!passwordHide);
+  };
+
+  const mobileVerify = async () => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/phoneVerification`,
+        { phoneNumber },
+        { ...axiosConfig, withCredentials: true }
+      );
+      response.status === 200
+        ? Alert.alert("Verification Sent", "Verification code sent")
+        : Alert.alert("Error", "Verification code not sent");
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Failed to send verification code");
+    }
+  };
+
+  const mobileVerifyCheck = async () => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/verifyCode`,
+        { verifyCode },
+        { ...axiosConfig, withCredentials: true }
+      );
+      response.status === 200
+        ? setIsVerified(true)
+        : Alert.alert("Error", "Failed to verify");
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Failed to verify the code");
+    }
+  };
+
   return (
     <ImageBackground
-      source={require('../../assets/images/zurag1.jpg')}
+      source={require("../../assets/images/zurag1.jpg")}
       style={styles.background}
       resizeMode="cover"
     >
       <View style={styles.container}>
-        <View style={styles.emailContainer}>
+        <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
             placeholder="Email"
             value={email}
-            autoFocus
             onChangeText={setEmail}
             style={styles.input}
           />
         </View>
-        <View style={styles.emailContainer}>
+        <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
             placeholder="Password"
@@ -97,24 +126,42 @@ const Page = () => {
             <Ionicons
               name={passwordHide ? "eye-off" : "eye"}
               size={24}
-              color={Colors.grey}
+              color="#666"
             />
           </TouchableOpacity>
         </View>
         <View style={styles.verificationContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder="utasnii dugaar"
-            style={ [defaultStyles.inputField, styles.input]}
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            style={styles.input}
           />
           <TouchableOpacity
             style={styles.verifyButton}
+            onPress={mobileVerify}
           >
             <Text style={styles.verifyButtonText}>Verify</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity 
-          style={[styles.button, styles.loginBtn]} 
+        <View style={styles.inputContainer}>
+          <TextInput
+            autoCapitalize="none"
+            placeholder="Verification Code"
+            value={verifyCode}
+            onChangeText={setVerifyCode}
+            style={styles.input}
+          />
+          <TouchableOpacity
+            style={styles.verifyButton}
+            onPress={mobileVerifyCheck}
+          >
+            <Text style={styles.verifyButtonText}>Check Code</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, styles.loginBtn]}
           onPress={handleSubmit}
           disabled={loading}
         >
@@ -131,8 +178,8 @@ const Page = () => {
         </View>
         <View style={styles.socialButtons}>
           <TouchableOpacity style={styles.btnOutline}>
-          <Zocial name="guest" size={24} style={styles.btnIcon} />
-            <Text style={styles.btnOutlineText}>zochnoor nevtreh</Text>
+            <Zocial name="guest" size={24} style={styles.btnIcon} />
+            <Text style={styles.btnOutlineText}>Login as Guest</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.btnOutline}>
             <Ionicons name="logo-google" size={24} style={styles.btnIcon} />
@@ -144,7 +191,7 @@ const Page = () => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.btnOutline}>
             <Image
-              source={require('../../assets/images/emongolia.png')}
+              source={require("../../assets/images/emongolia.png")}
               style={styles.imageIcon}
             />
             <Text style={styles.btnOutlineText}>Continue with E-Mongolia</Text>
@@ -158,55 +205,54 @@ const Page = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    justifyContent: "center",
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: 26,
   },
-  emailContainer: {
-    marginBottom: 20,
+  inputContainer: {
+    marginBottom: 15,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
+    height: 50,
     borderWidth: 1,
-    borderRadius: 5,
+    borderColor: "#ccc",
     paddingHorizontal: 10,
+    borderRadius: 5,
     backgroundColor: "#fff",
   },
   eyeIcon: {
-    position: 'absolute',
+    position: "absolute",
     right: 10,
-    top: 10,
+    top: 15,
   },
   verificationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
   },
   verifyButton: {
+    marginLeft: 10,
     backgroundColor: Colors.primary,
-    borderRadius: 5,
-    paddingVertical: 10,
     paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 5,
   },
   verifyButtonText: {
     color: "#fff",
-    fontWeight: "bold",
   },
   button: {
-    height: 50,
+    backgroundColor: Colors.primary,
+    padding: 15,
     borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
   },
   loginBtn: {
-    backgroundColor: Colors.primary,
+    marginTop: 10,
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontSize: 16,
   },
   separatorView: {
     flexDirection: "row",
@@ -221,7 +267,7 @@ const styles = StyleSheet.create({
   },
   separatorText: {
     marginHorizontal: 10,
-    color: Colors.grey,
+    color: "#666",
   },
   socialButtons: {
     marginTop: 20,
@@ -229,7 +275,7 @@ const styles = StyleSheet.create({
   btnOutline: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: Colors.grey,
+    borderColor: "#ccc",
     height: 50,
     borderRadius: 5,
     alignItems: "center",
