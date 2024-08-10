@@ -6,7 +6,8 @@ import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient
 import Colors from "@/constants/Colors";
-
+// end nemev code
+// ahiad shhHA
 const categories = [
   { name: 'Sags', icon: 'basketball-ball' },
   { name: 'Volley-ball', icon: 'volleyball-ball' },
