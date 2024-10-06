@@ -1,20 +1,17 @@
 import React, { useRef, useState } from "react";
-import { StatusBar, View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { StatusBar, View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
-import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient
-import Colors from "@/constants/Colors";
-// end nemev code
-// ahiad shhHA
+import { LinearGradient } from 'expo-linear-gradient'; 
+
 const categories = [
-  { name: 'Sags', icon: 'basketball-ball' },
-  { name: 'Volley-ball', icon: 'volleyball-ball' },
-  { name: 'Hol-Bombog', icon: 'futbol' },
-  { name: 'Tennis', icon: 'table-tennis' },
-  { name: 'Bowling', icon: 'bowling-ball' },
-  { name: 'Golf', icon: 'golf-ball' },
+  { name: 'Sags', source: require("../assets/sport-icons/basketball.png") },
+  { name: 'Volley-ball', source: require("../assets/sport-icons/volleyball.png") },
+  { name: 'Hol-Bombog', source: require("../assets/sport-icons/football.png") },
+  { name: 'Tennis', source: require("../assets/sport-icons/table-tennis.png") },
+  { name: 'Bowling', source: require("../assets/sport-icons/lanes.png") },
+  { name: 'Golf', source: require("../assets/sport-icons/golf.png") },
 ];
 
 interface Props {
@@ -23,48 +20,48 @@ interface Props {
 
 const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
-  const itemsRef = useRef<Array<TouchableOpacity | null>>([]);
+  const itemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
   const selectCategory = (index: number) => {
     const selected = itemsRef.current[index];
     setActiveIndex(index);
 
-    selected?.measure((fx, fy, width, height, px, py) => {
-      if (scrollRef.current) {
+    if (selected) {
+      (selected as unknown as View).measure((_fx, fy, width, height, px, py) => {
         scrollRef.current?.scrollTo({ x: px - 16, animated: true });
-      }
-    });
+      });
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onCategoryChanged(categories[index].name);
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar 
-        barStyle="light-content" 
-        backgroundColor="#EB5757"
-        translucent // Make StatusBar background transparent
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#2a85d5" />
       <View style={styles.container}>
-        {/* LinearGradient background */}
         <LinearGradient
-          colors={['#003973',`#EB5757`,`#004E92`]} // Gradient colors
-          start={[0,0]} // Gradient starts from the top-left corner
-          end={[0,1]} // Gradient ends at the bottom-right corner
-          locations={[0, 0.3, 0.6, 1]} // Adjust the position of each color
+          colors={['#2a85d5', '#559DDD']}
+          start={[0, 0]}
+          end={[0, 1]}
+          locations={[0, 0.4]}
           style={styles.background} 
         />
         <View style={styles.content}>
           <View style={styles.actionRow}>
             <Link href={`/(modals)/sags`} asChild>
               <TouchableOpacity style={styles.searchbtn}>
-                <Ionicons name="search" size={24} />
+                <Image
+                  source={require("../assets/images/ranking.png")}
+                  style={{ width: 26, height: 26 }}
+                />
               </TouchableOpacity>
             </Link>
-
             <TouchableOpacity style={styles.filterButton}>
-              <Ionicons name="menu" size={22} color= "#fff" />
+              <Image
+                source={require("../assets/images/category.png")}
+                style={{ width: 20, height: 20 }}
+              />
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -81,7 +78,10 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 onPress={() => selectCategory(index)}
               >
                 <View style={styles.iconContainer}>
-                  <FontAwesome5 size={24} name={item.icon as any} color={activeIndex === index ? Colors.primary : Colors.dark} />
+                  <Image
+                    source={item.source}
+                    style={{ width: 26, height: 26 }}
+                  />
                 </View>
                 <Text style={styles.titleText}>{item.name}</Text>
               </TouchableOpacity>
@@ -93,9 +93,10 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
-    height: 180,
+    height: 150,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     overflow: 'hidden', // Ensures the gradient does not overflow outside the container
@@ -105,22 +106,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    height: 300,
+    height: '100%', // Ensure gradient covers full height
   },
   content: {
     flex: 1,
     justifyContent: 'space-between',
-    padding: 16,
+    padding: 8,
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 16,
+    paddingBottom: 6,
     gap: 25,
   },
   filterButton: {
-    padding: 15,
+    padding: 12,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'black',
@@ -128,10 +129,9 @@ const styles = StyleSheet.create({
   searchbtn: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 45,
-    height: 45,
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    backgroundColor: '#fff',
     borderColor: 'black',
     borderWidth: 1,
   },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   titleText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: 'bold',
   },
   scrollViewContent: {
@@ -160,16 +160,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingBottom: 8,
-    borderBottomColor: '#000',
-    borderBottomWidth: 3,
+    borderBottomColor: '#fff',
+    borderBottomWidth: 1,
   },
   iconContainer: {
-    backgroundColor: '#fff',
     padding: 10,
     borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
 export default ExploreHeader;
-
-//The ExploreHeader component is a custom header that displays a list of categories. When a category is selected, the active category is highlighted with a border at the bottom of the category button. The component also includes a search button and a filter button.

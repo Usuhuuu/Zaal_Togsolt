@@ -1,64 +1,111 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { Tabs } from 'expo-router'
-import Colors from '@/constants/Colors'
-import { Ionicons,FontAwesome6} from '@expo/vector-icons';
+import { View, StyleSheet, Image } from 'react-native';
+import React from 'react';
+import {Tabs } from 'expo-router';
+import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Layout = () => {
   return (
-    //tab hesnii ongo todorhoilno
-    //index huudasni buyu undsen huudasnii tab hesgiin ner 
-    <Tabs screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarStyle: {
-            backgroundColor: `#ffffff`,
-            borderColor: `#000046`,
-            borderWidth : 3,
-            borderStyle: 'solid',
-            borderTopWidth: 3,
-            height: 70,
-            paddingBottom: 10,
-            paddingTop: 10,
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          tabBarInactiveTintColor: Colors.dark,
+          tabBarActiveTintColor: Colors.light,
+          tabBarStyle: {
+            height: 50,
+            paddingBottom: 5,
+            paddingTop: 5,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
+            borderColor: Colors.dark,
+            borderWidth: 1,
             position: 'absolute',
             left: 5,
             right: 5,
             bottom: 5,
-        },
-        }}>
-        <Tabs.Screen name = "index" 
-        options ={{
-            tabBarLabel: `Undsen Tses`,
-            tabBarIcon: ({color,size})=>
-                <Ionicons name="home" size={24} color="black" />
+            overflow: 'hidden',
+          },
+          tabBarBackground: () => (
+            <LinearGradient
+              colors={['#559DDD', '#73B6E3']}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
+              locations={[0.1, 0.2]} 
+              style={StyleSheet.absoluteFill}
+            />
+          ),
         }}
-    />
-        <Tabs.Screen name = "inbox" 
-        options ={{
-            tabBarLabel: `Hamtdaa`,
-            tabBarIcon: ({color,size})=>
-                <FontAwesome6 name="people-line" size={24} color="black" />
-        }}
-    />
-        <Tabs.Screen name = "explore" 
-        options ={{
-            tabBarLabel: `zahialga`,
-            tabBarIcon: ({color,size})=>
-                <FontAwesome6 name="basket-shopping" size={24} color="black" />
-        }}
-    />
-        <Tabs.Screen name = "profile" 
-        options ={{
-            tabBarLabel: `minii huudas`,
-            tabBarIcon: ({color,size})=>
-                <FontAwesome6 name="user" size={24} color="black" />
-        }}
-    />
-   </Tabs>  
-  )
-}
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            tabBarLabel: 'Undsen Tses',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('../../assets/tab-icons/home.png')}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Home Tab"
+                accessibilityHint="Navigates to the home screen"
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="inbox"
+          options={{
+            tabBarLabel: 'Hamtdaa',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('../../assets/tab-icons/teamwork.png')}
+                style={{ width: 26, height: 26 }}
+                accessibilityLabel="Inbox Tab"
+                accessibilityHint="Navigates to the inbox screen"
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            tabBarLabel: 'Zahialga',
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('../../assets/tab-icons/order.png')}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Explore Tab"
+                accessibilityHint="Navigates to the explore screen"
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarLabel: 'minii huudas',
+            tabBarIcon: ({ color, size ,}) => (
+              <Image
+                source={require('../../assets/tab-icons/athlete.png')}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Profile Tab"
+                accessibilityHint="Navigates to the profile screen"
+              />
+            ),
+            headerShown: false,
 
-export default Layout
+          }}
+        />
+      </Tabs>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  icon: {
+    color: `#fff`,
+    fontSize: 24,
+  },
+});
+
+export default Layout;

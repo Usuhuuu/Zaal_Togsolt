@@ -12,11 +12,18 @@ import {
 } from "react-native";
 import { Ionicons, Zocial } from "@expo/vector-icons";
 import axios from "axios";
-import { API_URL } from "@env";
+import Constants from 'expo-constants';
 import * as SecureStore from "expo-secure-store";
 import Colors from "@/constants/Colors";
 
 const Page = () => {
+  // Access the API URL from the environment variables
+  const apiUrl = Constants.expoConfig?.extra?.apiUrl;
+
+  if (!apiUrl) {
+    throw new Error("API_URL is not defined in the environment variables");
+  }
+
   const axiosConfig = {
     timeout: 5000,
   };
@@ -33,7 +40,7 @@ const Page = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${API_URL}/auth/login`,
+        `${apiUrl}/auth/login`, // Use apiUrl from environment variable
         { email, password },
         { ...axiosConfig, withCredentials: true }
       );
@@ -66,7 +73,7 @@ const Page = () => {
   const mobileVerify = async () => {
     try {
       const response = await axios.post(
-        `${API_URL}/auth/phoneVerification`,
+        `${apiUrl}/auth/phoneVerification`, // Use apiUrl from environment variable
         { phoneNumber },
         { ...axiosConfig, withCredentials: true }
       );
@@ -82,7 +89,7 @@ const Page = () => {
   const mobileVerifyCheck = async () => {
     try {
       const response = await axios.post(
-        `${API_URL}/auth/verifyCode`,
+        `${apiUrl}/auth/verifyCode`, // Use apiUrl from environment variable
         { verifyCode },
         { ...axiosConfig, withCredentials: true }
       );
