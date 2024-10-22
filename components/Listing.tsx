@@ -13,23 +13,25 @@ import { useRouter } from "expo-router"; // Import useRouter from expo-router
 import { Listing } from "@/interfaces/listing";
 import { MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import BottomSheet, { BottomSheetFlatList, BottomSheetFlatListMethods } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetFlatListMethods,
+} from "@gorhom/bottom-sheet";
 
 interface Props {
   listings: Listing[];
   category: string;
-  refresh : number; 
+  refresh: number;
 }
 
-const ListingComponent = ({ listings: items, category ,refresh }: Props) => {
+const ListingComponent = ({ listings: items, category, refresh }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
   const router = useRouter(); // Initialize the router
-  
-  useEffect(()=>{
-    console.log('refresh listings');
 
-  },[refresh]);
+  useEffect(() => {
+    console.log("refresh listings");
+  }, [refresh]);
 
   useEffect(() => {
     console.log("Reloading items", items.length);
@@ -49,10 +51,10 @@ const ListingComponent = ({ listings: items, category ,refresh }: Props) => {
         <Image style={styles.thumbnail} source={{ uri: item.medium_url }} />
         <View style={styles.filterButtonContainer}>
           <TouchableOpacity>
-          <Image
-            source={require("../assets/sport-icons/olympic.png")}
-            style={styles.filterButton}
-          />
+            <Image
+              source={require("../assets/sport-icons/olympic.png")}
+              style={styles.filterButton}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.detailsContainer}>
@@ -68,9 +70,9 @@ const ListingComponent = ({ listings: items, category ,refresh }: Props) => {
             source={require("../assets/images/placeholder.png")}
             style={styles.placeholderImage}
           />
-           <Text>{item.city}</Text>
+          <Text>{item.city}</Text>
           <Text>{item.neighbourhood}</Text>
-          <Text>  $ {item.price} tugrug</Text>
+          <Text> $ {item.price} tugrug</Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -1,19 +1,33 @@
-import React, { useLayoutEffect, useState } from 'react';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Share, Modal} from 'react-native';
-import listingsData from '@/assets/Data/airbnb-listings.json'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import Colors from '@/constants/Colors';
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+  Share,
+  Modal,
+  StatusBar,
+  SafeAreaView,
+} from "react-native";
+import listingsData from "@/assets/Data/airbnb-listings.json";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
 import Animated, {
   SlideInDown,
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
   useScrollViewOffset,
-} from 'react-native-reanimated';
-import { defaultStyles } from '@/constants/Styles';
+} from "react-native-reanimated";
+import { defaultStyles } from "@/constants/Styles";
+import axios from "axios";
+import Constants from "expo-constants";
+import CalendarStrip from "react-native-calendar-strip";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
 
 const ScheduleScreen = () => (
@@ -22,20 +36,21 @@ const ScheduleScreen = () => (
   </View>
 );
 
-
-const OrderScreen = () => (
-  <View style={styles.modalContent}>
-    <Text>This is the order screen!</Text>
-  </View>
-);
-
 const DetailsPage = () => {
   const [isScheduleVisible, setIsScheduleVisible] = useState(false);
   const [isOrderScreenVisible, setIsOrderScreenVisible] = useState(false);
+  const zaalFormData = {
+    zaalId: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+  };
   const { id } = useLocalSearchParams();
   const listing = (listingsData as any[]).find((item) => item.id === id);
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
+
+  const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
 
   const shareListing = async () => {
     try {
@@ -47,29 +62,137 @@ const DetailsPage = () => {
       console.log(err);
     }
   };
+  const baseTimeSlots = [
+    { start_time: "10:00", end_time: "12:00" },
+    { start_time: "12:00", end_time: "14:00" },
+    { start_time: "14:00", end_time: "16:00" },
+  ];
+  const [availableTimes, setAvailableTimes] = useState(baseTimeSlots); // Initialize with baseTimeSlots
+  const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [zahialgaBtn, setZahialgaBtn] = useState(false);
+  const dateSlotGiver = async (date: any) => {
+    try {
+      const odor = date.toISOString().split("T")[0];
+      const zaalniID = zaalFormData.zaalId;
+      const response = await axios.get(`${apiUrl}/timeslotscheck`, {
+        params: { zaalniID, odor },
+      });
+      if (!response.data.available && response.data.not_possible_time != "") {
+        //mean theres not avaible time and that times are saved on not_possible_time
+        const notPossibleTime: string[] =
+          response.data.not_possible_time.orderedTime.map(
+            (time: any) => `${time.start_time} ~ ${time.end_time}`
+          );
+        setUnavailableTimes(notPossibleTime); // Update the unavailable times as strings
+        setIsAvailable(false);
+      } else {
+        setUnavailableTimes([]);
+        setIsAvailable(true);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const handlePressTimeSlot = (timeSlot: any) => {
+    console.log(`Time slot pressed: ${timeSlot}`);
+    setZahialgaBtn(true);
+  };
+  const OrderScreen = () => {
+    return (
+      <View style={styles.zahialgaView}>
+        <CalendarStrip
+          style={styles.calendars}
+          scrollerPaging={true}
+          daySelectionAnimation={{
+            type: "border",
+            duration: 200,
+            borderWidth: 1,
+            borderHighlightColor: "black",
+          }}
+          startingDate={new Date()}
+          calendarAnimation={{ type: "sequence", duration: 5 }}
+          onDateSelected={(e) => dateSlotGiver(e)}
+        />
+        <View>
+          {/* Render available and unavailable time slots */}
+          {baseTimeSlots.map((timeSlot, index) => {
+            const timeString = `${timeSlot.start_time} ~ ${timeSlot.end_time}`;
+            const isDisabled = unavailableTimes.includes(timeString);
+            return (
+              <View style={styles.timeSlotView}>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handlePressTimeSlot(timeString)}
+                  disabled={isDisabled}
+                  style={{
+                    padding: 10,
+                    marginVertical: 5,
+                    backgroundColor: isDisabled ? "grey" : "white",
+                    borderWidth: 0.5,
+                    borderRadius: 20,
+                    opacity: isDisabled ? 0.5 : 1,
+                    width: "40%",
+                    marginHorizontal: 10,
+                    alignItems: "center",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Text>{timeString}</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              marginVertical: 5,
+              borderWidth: 0.5,
+              borderRadius: 20,
+              width: "40%",
+              alignItems: "center",
+            }}
+          >
+            <Text>Zahialga sha</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: '',
+      headerTitle: "",
       headerTransparent: true,
 
       headerBackground: () => (
-        <Animated.View style={[headerAnimatedStyle, styles.header]}></Animated.View>
+        <Animated.View
+          style={[headerAnimatedStyle, styles.header]}
+        ></Animated.View>
       ),
       headerRight: () => (
         <View style={styles.bar}>
-          <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
-            <Image source={require('@/assets/images/listingicons/share.png')}
-              style={styles.headerButton} />
+          <TouchableOpacity
+            style={styles.timeSlotButton}
+            onPress={shareListing}
+          >
+            <Image
+              source={require("@/assets/images/listingicons/share.png")}
+              style={styles.headerButton}
+            />
           </TouchableOpacity>
           <TouchableOpacity style={styles.roundButton}>
-            <Ionicons name="heart" size={30} color={'red'} />
+            <Ionicons name="heart" size={30} color={"red"} />
           </TouchableOpacity>
         </View>
       ),
       headerLeft: () => (
-        <TouchableOpacity style={styles.roundButton} onPress={() => navigation.goBack()}>
-          <Image source={require('@/assets/images/listingicons/arrow.png')}
+        <TouchableOpacity
+          style={styles.roundButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Image
+            source={require("@/assets/images/listingicons/arrow.png")}
             style={styles.headerButton}
           />
         </TouchableOpacity>
@@ -90,7 +213,11 @@ const DetailsPage = () => {
           ),
         },
         {
-          scale: interpolate(scrollOffset.value, [-IMG_HEIGHT, 0, IMG_HEIGHT], [2, 1, 1]),
+          scale: interpolate(
+            scrollOffset.value,
+            [-IMG_HEIGHT, 0, IMG_HEIGHT],
+            [2, 1, 1]
+          ),
         },
       ],
     };
@@ -102,50 +229,64 @@ const DetailsPage = () => {
     };
   }, []);
 
+  const handleZaalId = (input: any) => {
+    zaalFormData.zaalId = input;
+  };
+  useEffect(() => {
+    handleZaalId(id);
+  }, [zaalFormData]);
+
   return (
     <View style={styles.container}>
       <Animated.ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         ref={scrollRef}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={16}
+      >
         <Animated.Image
           source={{ uri: listing.xl_picture_url }}
           style={[styles.image, imageAnimatedStyle]}
           resizeMode="cover"
         />
-
+        <Text>{listing.id}</Text>
         <View style={styles.infoContainer}>
           <Text style={styles.name}>{listing.name}</Text>
-          <TouchableOpacity>  
-          <Text style={styles.location}>
-            <Image source={require('@/assets/images/placeholder.png')} 
-            style={styles.placeholderImage}
-            />
-            {listing.smart_location}
-          </Text>
+          <TouchableOpacity>
+            <Text style={styles.location}>
+              <Image
+                source={require("@/assets/images/placeholder.png")}
+                style={styles.placeholderImage}
+              />
+              {listing.smart_location}
+            </Text>
           </TouchableOpacity>
           <Text style={styles.rooms}>
-            {listing.guests_included} guests · {listing.bedrooms} bedrooms · {listing.beds} bed ·{' '}
-            {listing.bathrooms} bathrooms
+            {listing.guests_included} guests · {listing.bedrooms} bedrooms ·{" "}
+            {listing.beds} bed · {listing.bathrooms} bathrooms
           </Text>
-          <View style={{ flexDirection: 'row', gap: 4 }}>
-          <MaterialIcons name="sports-score" size={24} color="red" />
-          <Text style ={{fontSize: 16 }}>
+          <View style={{ flexDirection: "row", gap: 4 }}>
+            <MaterialIcons name="sports-score" size={24} color="red" />
+            <Text style={{ fontSize: 16 }}>
               {listing.review_scores_rating / 20} -
-          </Text>
-          <TouchableOpacity>
-          <Text style={styles.ratings}>
-              {listing.number_of_reviews} reviews
-          </Text>
-          </TouchableOpacity>
+            </Text>
+            <TouchableOpacity>
+              <Text style={styles.ratings}>
+                {listing.number_of_reviews} reviews
+              </Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.divider} />
 
           <View style={styles.hostView}>
-            <Image source={{ uri: listing.host_picture_url }} style={styles.host} />
+            <Image
+              source={{ uri: listing.host_picture_url }}
+              style={styles.host}
+            />
 
             <View>
-              <Text style={{ fontWeight: '500', fontSize: 16 }}>Hosted by {listing.host_name}</Text>
+              <Text style={{ fontWeight: "500", fontSize: 16 }}>
+                Hosted by {listing.host_name}
+              </Text>
               <Text>Host since {listing.host_since}</Text>
             </View>
           </View>
@@ -157,21 +298,31 @@ const DetailsPage = () => {
       </Animated.ScrollView>
 
       <Animated.View style={styles.footer} entering={SlideInDown.delay(200)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <TouchableOpacity style={styles.footerText}>
             <Text style={styles.footerPrice}>€{listing.price}</Text>
             <Text>night</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            onPress={() => setIsScheduleVisible(true)}
-            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}>
+          <TouchableOpacity
+            onPress={() => {
+              setIsScheduleVisible(true);
+            }}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
+          >
             <Text style={defaultStyles.btnText}>tsagiin huvaari </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-          onPress={() => setIsOrderScreenVisible(true)}
-          style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}>
+          <TouchableOpacity
+            onPress={() => setIsOrderScreenVisible(true)}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
+          >
             <Text style={defaultStyles.btnText}>zahialga</Text>
           </TouchableOpacity>
         </View>
@@ -182,7 +333,8 @@ const DetailsPage = () => {
         animationType="slide"
         visible={isScheduleVisible}
         transparent={true}
-        onRequestClose={() => setIsScheduleVisible(false)}>
+        onRequestClose={() => setIsScheduleVisible(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity onPress={() => setIsScheduleVisible(false)}>
@@ -193,11 +345,12 @@ const DetailsPage = () => {
         </View>
       </Modal>
 
-    <Modal
+      <Modal
         animationType="slide"
         visible={isOrderScreenVisible}
         transparent={true}
-        onRequestClose={() => setIsOrderScreenVisible(false)}>
+        onRequestClose={() => setIsOrderScreenVisible(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity onPress={() => setIsOrderScreenVisible(false)}>
@@ -207,17 +360,14 @@ const DetailsPage = () => {
           </View>
         </View>
       </Modal>
-
     </View>
   );
 };
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   image: {
     height: IMG_HEIGHT,
@@ -225,25 +375,25 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     padding: 24,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   text: {
-    fontFamily: 'mon',
+    fontFamily: "mon",
   },
   boldText: {
-    fontFamily: 'mon-sb',
+    fontFamily: "mon-sb",
   },
   name: {
     fontSize: 26,
-    fontWeight: 'bold',
-    fontFamily: 'mon-sb',
+    fontWeight: "bold",
+    fontFamily: "mon-sb",
   },
   location: {
-    flexDirection: 'row',
+    flexDirection: "row",
     fontSize: 18,
     marginTop: 10,
-    fontFamily: 'mon-sb',
-    color: Colors.primary
+    fontFamily: "mon-sb",
+    color: Colors.primary,
   },
   rooms: {
     fontSize: 16,
@@ -253,7 +403,7 @@ const styles = StyleSheet.create({
   ratings: {
     color: Colors.primary,
     fontSize: 16,
-    fontFamily: 'mon-sb',
+    fontFamily: "mon-sb",
   },
   divider: {
     height: StyleSheet.hairlineWidth,
@@ -271,50 +421,50 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.grey,
   },
   hostView: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   footer: {
-    position: 'absolute',
+    position: "absolute",
     height: 60,
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderTopColor: Colors.primary,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   footerText: {
-    height: '100%',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
+    height: "100%",
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   footerPrice: {
     fontSize: 18,
-    fontFamily: 'mon-sb',
+    fontFamily: "mon-sb",
   },
   roundButton: {
     width: 40,
     height: 40,
     borderRadius: 50,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
     color: Colors.primary,
   },
   bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     height: 100,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.grey,
@@ -326,7 +476,7 @@ const styles = StyleSheet.create({
   headerButton: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: "black",
     width: 40,
     height: 40,
   },
@@ -334,21 +484,42 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 20,
     padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    width: '90%',
-    height: '90%',
+    width: "90%",
+    height: "90%",
+  },
+
+  zahialgaView: {
+    width: "100%",
+    height: "95%",
+    paddingBottom: 100,
+    borderBottomWidth: 1,
+  },
+  timeSlotView: {
+    width: "100%",
+    paddingTop: 5,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    backgroundColor: "black",
+  },
+  timeSlotButton: {},
+  calendars: {
+    height: "20%",
+    width: "100%",
+    borderBlockColor: "black",
+    borderBottomWidth: 1,
   },
 });
 

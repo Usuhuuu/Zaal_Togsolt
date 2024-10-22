@@ -1,8 +1,8 @@
-import { View, StyleSheet, Image } from 'react-native';
-import React from 'react';
-import {Tabs } from 'expo-router';
-import Colors from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet, Image } from "react-native";
+import React from "react";
+import { Tabs } from "expo-router";
+import Colors from "@/constants/Colors";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Layout = () => {
   return (
@@ -21,18 +21,18 @@ const Layout = () => {
             borderBottomRightRadius: 20,
             borderColor: Colors.dark,
             borderWidth: 1,
-            position: 'absolute',
+            position: "absolute",
             left: 5,
             right: 5,
             bottom: 5,
-            overflow: 'hidden',
+            overflow: "hidden",
           },
           tabBarBackground: () => (
             <LinearGradient
-              colors={['#559DDD', '#73B6E3']}
+              colors={["#559DDD", "#73B6E3"]}
               start={{ x: 0, y: 1 }}
               end={{ x: 1, y: 0 }}
-              locations={[0.1, 0.2]} 
+              locations={[0.1, 0.2]}
               style={StyleSheet.absoluteFill}
             />
           ),
@@ -41,10 +41,10 @@ const Layout = () => {
         <Tabs.Screen
           name="index"
           options={{
-            tabBarLabel: 'Undsen Tses',
+            tabBarLabel: "Undsen Tses",
             tabBarIcon: ({ color, size }) => (
               <Image
-                source={require('../../assets/tab-icons/home.png')}
+                source={require("../../assets/tab-icons/home.png")}
                 style={{ width: 24, height: 24 }}
                 accessibilityLabel="Home Tab"
                 accessibilityHint="Navigates to the home screen"
@@ -55,10 +55,10 @@ const Layout = () => {
         <Tabs.Screen
           name="inbox"
           options={{
-            tabBarLabel: 'Hamtdaa',
+            tabBarLabel: "Hamtdaa",
             tabBarIcon: ({ color, size }) => (
               <Image
-                source={require('../../assets/tab-icons/teamwork.png')}
+                source={require("../../assets/tab-icons/teamwork.png")}
                 style={{ width: 26, height: 26 }}
                 accessibilityLabel="Inbox Tab"
                 accessibilityHint="Navigates to the inbox screen"
@@ -69,10 +69,10 @@ const Layout = () => {
         <Tabs.Screen
           name="explore"
           options={{
-            tabBarLabel: 'Zahialga',
+            tabBarLabel: "Zahialga",
             tabBarIcon: ({ color, size }) => (
               <Image
-                source={require('../../assets/tab-icons/order.png')}
+                source={require("../../assets/tab-icons/order.png")}
                 style={{ width: 24, height: 24 }}
                 accessibilityLabel="Explore Tab"
                 accessibilityHint="Navigates to the explore screen"
@@ -83,17 +83,16 @@ const Layout = () => {
         <Tabs.Screen
           name="profile"
           options={{
-            tabBarLabel: 'minii huudas',
-            tabBarIcon: ({ color, size ,}) => (
+            tabBarLabel: "minii huudas",
+            tabBarIcon: ({ color, size }) => (
               <Image
-                source={require('../../assets/tab-icons/athlete.png')}
+                source={require("../../assets/tab-icons/athlete.png")}
                 style={{ width: 24, height: 24 }}
                 accessibilityLabel="Profile Tab"
                 accessibilityHint="Navigates to the profile screen"
               />
             ),
             headerShown: false,
-
           }}
         />
       </Tabs>

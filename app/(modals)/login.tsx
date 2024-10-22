@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,13 +12,21 @@ import {
 } from "react-native";
 import { Ionicons, Zocial } from "@expo/vector-icons";
 import axios from "axios";
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import Colors from "@/constants/Colors";
+import { AccessToken, Settings, LoginManager } from "react-native-fbsdk-next";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 const Page = () => {
   // Access the API URL from the environment variables
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl;
+
+  const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
 
   if (!apiUrl) {
     throw new Error("API_URL is not defined in the environment variables");
@@ -40,7 +48,7 @@ const Page = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/auth/login`, // Use apiUrl from environment variable
+        `${apiUrl}/auth/login`,
         { email, password },
         { ...axiosConfig, withCredentials: true }
       );
@@ -101,6 +109,113 @@ const Page = () => {
       Alert.alert("Error", "Failed to verify the code");
     }
   };
+  useEffect(() => {
+    const requestTracking = async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+
+      Settings.initializeSDK();
+
+      if (status === "granted") {
+        await Settings.setAdvertiserTrackingEnabled(true);
+      }
+    };
+    requestTracking();
+  }, []);
+
+  const loginWithFacebook = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions([
+        "public_profile",
+        "email",
+      ]);
+      if (result.isCancelled) {
+        console.log("==> Login cancelled");
+        throw new Error("login cancelled");
+      } else {
+        console.log("Login success with permissions:", result);
+        const data = await AccessToken.getCurrentAccessToken();
+        if (data) {
+          const accessToken = data.accessToken;
+          try {
+            const res = await axios.post(
+              `${apiUrl}/auth/facebook`,
+              { accessToken },
+              { ...axiosConfig, withCredentials: true }
+            );
+            console.log("Facebook login result:", res);
+            if (res.status == 200) {
+              await SecureStore.setItemAsync(
+                "Tokens",
+                JSON.stringify({
+                  accessToken: res.data.accessToken,
+                  refreshToken: res.data.refreshToken,
+                })
+              );
+              Alert.alert(`${accessToken}`);
+              Alert.alert("Facebook Login Success", "You are logged in!");
+            }
+          } catch (error) {
+            console.error("Error sending Facebook token:", error);
+            Alert.alert("Error", "Failed to log in with Facebook.");
+          }
+        } else {
+          Alert.alert("Error", "No Facebook access token found.");
+        }
+      }
+    } catch (error) {
+      console.error("Facebook login error:", error);
+      Alert.alert("Error", "Failed to log in with Facebook.");
+      throw new Error("facebook login zailaad oglo" + error);
+    }
+  };
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        "56931783205-g9s9glhtlpmjh6vktt3osnh44go1fo7k.apps.googleusercontent.com",
+      offlineAccess: true,
+      iosClientId:
+        "56931783205-78eeaknokj0nah74h5d53eis9ebj77r6.apps.googleusercontent.com",
+    });
+  }, []);
+
+  const signup_google = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const user_info = await GoogleSignin.signIn();
+      const { idToken, accessToken } = await GoogleSignin.getTokens();
+      console.log("Access Token:", accessToken);
+      if (accessToken) {
+        const response = await axios.post(
+          `${apiUrl}/auth/google`,
+          { accessToken },
+          { ...axiosConfig, withCredentials: true }
+        );
+        console.log("Facebook login result:", response);
+        if (response.status == 200) {
+          await SecureStore.setItemAsync(
+            "Tokens",
+            JSON.stringify({
+              accessToken: response.data.accessToken,
+              refreshToken: response.data.refreshToken,
+            })
+          );
+          Alert.alert(`${accessToken}`);
+          Alert.alert("Facebook Login Success", "You are logged in!");
+        }
+      }
+    } catch (err: any) {
+      console.log(err);
+      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
+        Alert.alert("canceled");
+      } else if (err.code == statusCodes.IN_PROGRESS) {
+        Alert.alert("progressing");
+      } else if (err.code == statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert("sdas");
+        console.log(err);
+      }
+    }
+  };
 
   return (
     <ImageBackground
@@ -146,10 +261,7 @@ const Page = () => {
             onChangeText={setPhoneNumber}
             style={styles.input}
           />
-          <TouchableOpacity
-            style={styles.verifyButton}
-            onPress={mobileVerify}
-          >
+          <TouchableOpacity style={styles.verifyButton} onPress={mobileVerify}>
             <Text style={styles.verifyButtonText}>Verify</Text>
           </TouchableOpacity>
         </View>
@@ -189,11 +301,14 @@ const Page = () => {
             <Zocial name="guest" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Login as Guest</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
+          <TouchableOpacity style={styles.btnOutline} onPress={signup_google}>
             <Ionicons name="logo-google" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Continue with Google</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
+          <TouchableOpacity
+            style={styles.btnOutline}
+            onPress={loginWithFacebook}
+          >
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Continue with Facebook</Text>
           </TouchableOpacity>
