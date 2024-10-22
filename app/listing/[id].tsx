@@ -120,9 +120,8 @@ const DetailsPage = () => {
             const timeString = `${timeSlot.start_time} ~ ${timeSlot.end_time}`;
             const isDisabled = unavailableTimes.includes(timeString);
             return (
-              <View style={styles.timeSlotView}>
+              <View style={styles.timeSlotView} key={index}>
                 <TouchableOpacity
-                  key={index}
                   onPress={() => handlePressTimeSlot(timeString)}
                   disabled={isDisabled}
                   style={{
