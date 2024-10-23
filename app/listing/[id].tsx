@@ -62,10 +62,17 @@ const DetailsPage = () => {
       console.log(err);
     }
   };
+
   const baseTimeSlots = [
+    { start_time: "06:00", end_time: "08:00" },
+    { start_time: "08:00", end_time: "10:00" },
     { start_time: "10:00", end_time: "12:00" },
     { start_time: "12:00", end_time: "14:00" },
     { start_time: "14:00", end_time: "16:00" },
+    { start_time: "16:00", end_time: "18:00" },
+    { start_time: "18:00", end_time: "20:00" },
+    { start_time: "20:00", end_time: "22:00" },
+    { start_time: "22:00", end_time: "24:00" },
   ];
   const [availableTimes, setAvailableTimes] = useState(baseTimeSlots); // Initialize with baseTimeSlots
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
@@ -98,6 +105,9 @@ const DetailsPage = () => {
     console.log(`Time slot pressed: ${timeSlot}`);
     setZahialgaBtn(true);
   };
+  useEffect(() => {
+    console.log(unavailableTimes);
+  });
   const OrderScreen = () => {
     return (
       <View style={styles.zahialgaView}>
@@ -105,37 +115,36 @@ const DetailsPage = () => {
           style={styles.calendars}
           scrollerPaging={true}
           daySelectionAnimation={{
-            type: "border",
+            type: "background",
             duration: 200,
-            borderWidth: 1,
-            borderHighlightColor: "black",
+            highlightColor: "gray",
           }}
           startingDate={new Date()}
           calendarAnimation={{ type: "sequence", duration: 5 }}
-          onDateSelected={(e) => dateSlotGiver(e)}
+          onDateSelected={(e) => {
+            dateSlotGiver(e);
+          }}
+          dateNumberStyle={{ fontSize: 18, fontWeight: 400 }}
+          dateNameStyle={{ fontSize: 10, fontWeight: 400 }}
+          calendarHeaderStyle={{ fontSize: 18, fontWeight: 500 }}
         />
-        <View>
+        <View style={styles.LLR_style}>
           {/* Render available and unavailable time slots */}
           {baseTimeSlots.map((timeSlot, index) => {
-            const timeString = `${timeSlot.start_time} ~ ${timeSlot.end_time}`;
+            const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
             const isDisabled = unavailableTimes.includes(timeString);
             return (
               <View style={styles.timeSlotView} key={index}>
                 <TouchableOpacity
                   onPress={() => handlePressTimeSlot(timeString)}
                   disabled={isDisabled}
-                  style={{
-                    padding: 10,
-                    marginVertical: 5,
-                    backgroundColor: isDisabled ? "grey" : "white",
-                    borderWidth: 0.5,
-                    borderRadius: 20,
-                    opacity: isDisabled ? 0.5 : 1,
-                    width: "40%",
-                    marginHorizontal: 10,
-                    alignItems: "center",
-                    flexDirection: "row",
-                  }}
+                  style={[
+                    styles.timeSlotButton,
+                    {
+                      backgroundColor: isDisabled ? "grey" : "white",
+                      opacity: isDisabled ? 0.5 : 1,
+                    },
+                  ]}
                 >
                   <Text>{timeString}</Text>
                 </TouchableOpacity>
@@ -150,10 +159,9 @@ const DetailsPage = () => {
               borderRadius: 20,
               width: "40%",
               alignItems: "center",
+              display: "none",
             }}
-          >
-            <Text>Zahialga sha</Text>
-          </TouchableOpacity>
+          ></TouchableOpacity>
         </View>
       </View>
     );
@@ -501,24 +509,34 @@ const styles = StyleSheet.create({
   },
 
   zahialgaView: {
-    width: "100%",
     height: "95%",
-    paddingBottom: 100,
+    paddingBottom: "30%",
     borderBottomWidth: 1,
+    width: "100%",
   },
   timeSlotView: {
-    width: "100%",
-    paddingTop: 5,
+    paddingTop: 10,
     flexDirection: "row",
-    flexWrap: "wrap",
-    backgroundColor: "black",
+    //backgroundColor: "black",
   },
-  timeSlotButton: {},
+  timeSlotButton: {
+    borderWidth: 0.5,
+    borderRadius: 20,
+    marginBottom: 10,
+    width: "50%",
+    padding: 10,
+    minWidth: "50%",
+    marginHorizontal: -2,
+    alignItems: "center",
+  },
   calendars: {
     height: "20%",
-    width: "100%",
-    borderBlockColor: "black",
     borderBottomWidth: 1,
+  },
+  LLR_style: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
 });
 
