@@ -11,6 +11,7 @@ import {
   Modal,
   StatusBar,
   SafeAreaView,
+  ImageBackground,
 } from "react-native";
 import listingsData from "@/assets/Data/airbnb-listings.json";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -26,10 +27,11 @@ import { defaultStyles } from "@/constants/Styles";
 import axios from "axios";
 import Constants from "expo-constants";
 import CalendarStrip from "react-native-calendar-strip";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
-
+const bottompadding = width * 0.1;
 const ScheduleScreen = () => (
   <View style={styles.modalContent}>
     <Text>This is the schedule screen!</Text>
@@ -39,6 +41,9 @@ const ScheduleScreen = () => (
 const DetailsPage = () => {
   const [isScheduleVisible, setIsScheduleVisible] = useState(false);
   const [isOrderScreenVisible, setIsOrderScreenVisible] = useState(false);
+  const [infoHeight, setInfoHeight] = useState(0);
+  const [iconsOverflow, setIconsOverflow] = useState(false);
+  const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const zaalFormData = {
     zaalId: "",
     date: "",
@@ -51,7 +56,15 @@ const DetailsPage = () => {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
-
+  
+  const handleScroll = (event: any) => {
+    const scrollY = event.nativeEvent.contentOffset.y; 
+  
+    // Change footer background color based on scroll position
+    const newColor = Math.max(0, Math.min(1, 1 - scrollY / 200)); // Adjust 200 as needed for effect
+    setFooterBgColor(`rgba(255, 255, 255, ${newColor})`); // Update the footer background color
+  };
+  
   const shareListing = async () => {
     try {
       await Share.share({
@@ -243,9 +256,10 @@ const DetailsPage = () => {
   return (
     <View style={styles.container}>
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: bottompadding}}
         ref={scrollRef}
         scrollEventThrottle={16}
+        onScroll={handleScroll}
       >
         <Animated.Image
           source={{ uri: listing.xl_picture_url }}
@@ -253,84 +267,145 @@ const DetailsPage = () => {
           resizeMode="cover"
         />
         <Text>{listing.id}</Text>
-        <View style={styles.infoContainer}>
-          <Text style={styles.name}>{listing.name}</Text>
-          <TouchableOpacity>
-            <Text style={styles.location}>
-              <Image
-                source={require("@/assets/images/placeholder.png")}
-                style={styles.placeholderImage}
-              />
-              {listing.smart_location}
-            </Text>
+        <View 
+         onLayout={(event) => {
+          const { height } = event.nativeEvent.layout;
+          setInfoHeight(height); // Update state with calculated height
+        }}
+        style={styles.infoContainer}>
+          <LinearGradient
+            colors={["#f8f9fa", Colors.primary]}
+            start={[0, 0]}
+            end={[0, 2]}
+            style={{
+              position: "absolute", 
+              top: 0, 
+              left: 0,
+               right: 0,
+               height: infoHeight+60, 
+               borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+
+            }}
+          />
+          <View 
+           onLayout={(event) => {
+            const { width } = event.nativeEvent.layout;
+            setIconsOverflow( width > 120); // Adjust threshold based on icon count
+          }}
+          style ={{flexDirection: "row" ,justifyContent: "space-between" , alignItems:"center"}}>
+              <Text style={styles.name}>{listing.name}</Text>
+              <TouchableOpacity style={styles.hostView}>
+                <ImageBackground
+                  source={require("@/assets/images/listingicons/map.png")}
+                  style={styles.host}
+                  imageStyle={{ borderRadius: 20,
+                    borderBottomRightRadius: 0,
+                    borderTopRightRadius: 0,
+                  }}
+                >
+                  <Ionicons name="location" size={24} color="white" />
+                  <Text style={{ color: "white", fontSize: 12 }}>
+                    Zvg chig
+                  </Text>
+                </ImageBackground>
           </TouchableOpacity>
-          <Text style={styles.rooms}>
-            {listing.guests_included} guests · {listing.bedrooms} bedrooms ·{" "}
-            {listing.beds} bed · {listing.bathrooms} bathrooms
-          </Text>
-          <View style={{ flexDirection: "row", gap: 4 }}>
-            <MaterialIcons name="sports-score" size={24} color="red" />
-            <Text style={{ fontSize: 16 }}>
-              {listing.review_scores_rating / 20} -
-            </Text>
-            <TouchableOpacity>
-              <Text style={styles.ratings}>
-                {listing.number_of_reviews} reviews
-              </Text>
-            </TouchableOpacity>
           </View>
-          <View style={styles.divider} />
+          <View style={{ flexDirection: "row", justifyContent: 'space-between', padding: 5, marginTop: 5}}>
+  {/* Location container */}
+  <View style={{
+      flex: iconsOverflow ? 0.25 : 0.3, // Shrinks width if icons overflow
+      alignItems: 'center',
+      borderColor: Colors.grey,
+      borderWidth: 1,
+      borderRadius: 20,
+      padding: 10,
+      marginRight: 5
+  }}>
+    <Image source={require("@/assets/images/placeholder.png")} style={styles.placeholderImage} />
+    <Text style={{fontSize: 12 , }}>{listing.smart_location}</Text>
+  </View>
+  
+  {/* Rating container */}
+  <View style={{
+      flex: iconsOverflow ? 0.25 : 0.3, // Shrinks width if icons overflow
+      alignItems: 'center',
+      borderColor: Colors.grey,
+      borderWidth: 1,
+      borderRadius: 20,
+      padding: 10,
+      marginLeft: 5,
+  }}>
+     <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'center', marginTop: 5}}>
+    <MaterialIcons name="sports-score" size={18} color="red" />
+    <Text style={{ fontSize: 12}}>{listing.review_scores_rating / 20}</Text>
+    <TouchableOpacity>
+      <Text style={styles.ratings}>{listing.number_of_reviews} reviews</Text>
+    </TouchableOpacity>
+    </View>
+  </View>
+  
+  {/* Facilities container */}
+  <View
+    style={{
+      flex: iconsOverflow ? 0.5 : 0.4, // Expands if icons overflow
+      alignItems: 'center',
+      borderColor: Colors.grey,
+      borderWidth: 1,
+      borderRadius: 20,
+      padding: 10,
+      marginLeft: 5,
+    }}
+  >
+    <Text style={styles.rooms}>Facilities</Text>
+    <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'center' }}>
+      {/* Icons */}
+      <MaterialIcons name="sports-soccer" size={18} color="black" />
+      <MaterialIcons name="sports-tennis" size={18} color="black" />
+      <MaterialIcons name="sports-volleyball" size={18} color="black" />
+      <MaterialIcons name="sports-basketball" size={18} color="black" />
+      <MaterialIcons name="sports-golf" size={18} color="black" />
+     
+    </View>
+  </View>
+</View>
 
-          <View style={styles.hostView}>
-            <Image
-              source={{ uri: listing.host_picture_url }}
-              style={styles.host}
-            />
-
-            <View>
-              <Text style={{ fontWeight: "500", fontSize: 16 }}>
-                Hosted by {listing.host_name}
-              </Text>
-              <Text>Host since {listing.host_since}</Text>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
 
           <Text style={styles.description}>{listing.description}</Text>
         </View>
       </Animated.ScrollView>
 
-      <Animated.View style={styles.footer} entering={SlideInDown.delay(200)}>
+      <Animated.View style={[styles.footer, { backgroundColor: footerBgColor }]} entering={SlideInDown.delay(200)}>
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
+            flex: 1,
           }}
         >
           <TouchableOpacity style={styles.footerText}>
             <Text style={styles.footerPrice}>€{listing.price}</Text>
-            <Text>night</Text>
+            <Text>/1 tsag</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
               setIsScheduleVisible(true);
             }}
-            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 ,}]}
           >
-            <Text style={defaultStyles.btnText}>tsagiin huvaari </Text>
+            <Text style={defaultStyles.btnText}>tsagiin huvaari</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setIsOrderScreenVisible(true)}
-            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 ,}]}
           >
             <Text style={defaultStyles.btnText}>zahialga</Text>
           </TouchableOpacity>
         </View>
-      </Animated.View>
+    </Animated.View>
 
       {/* Modal for Schedule Screen */}
       <Modal
@@ -371,15 +446,18 @@ const DetailsPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#fff",
   },
   image: {
-    height: IMG_HEIGHT,
+    height: IMG_HEIGHT+100,
     width: width,
+    marginBottom: 0,
   },
   infoContainer: {
     padding: 24,
-    backgroundColor: "#fff",
+    marginTop: -40,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   text: {
     fontFamily: "mon",
@@ -388,7 +466,10 @@ const styles = StyleSheet.create({
     fontFamily: "mon-sb",
   },
   name: {
-    fontSize: 26,
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    fontSize: 24,
     fontWeight: "bold",
     fontFamily: "mon-sb",
   },
@@ -400,13 +481,13 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   rooms: {
-    fontSize: 16,
-    color: Colors.grey,
+    fontSize: 12,
+    color: Colors.dark,
     marginVertical: 4,
   },
   ratings: {
     color: Colors.primary,
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "mon-sb",
   },
   divider: {
@@ -419,34 +500,35 @@ const styles = StyleSheet.create({
     height: 20,
   },
   host: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    backgroundColor: Colors.grey,
+    width: 120, // Adjust as needed for image size
+    height: 70, // Adjust height to fit the host profile image // Circular image
+    justifyContent: "center",
+    alignItems: "center",
   },
+  
   hostView: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    left: 25,
+    height: 70,
+    width: "auto", // Dynamically adjusts based on content
   },
+  
   footer: {
     position: "absolute",
+    padding: 20,
     height: 60,
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderTopColor: Colors.primary,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   footerText: {
-    height: "100%",
+    height: 40,
     justifyContent: "center",
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    
   },
   footerPrice: {
     fontSize: 18,
@@ -485,11 +567,12 @@ const styles = StyleSheet.create({
     height: 40,
   },
   btn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-    padding: 10,
+    borderColor: Colors.dark,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 10,
+    height: 40,
   },
   modalOverlay: {
     flex: 1,

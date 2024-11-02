@@ -29,11 +29,14 @@ const Layout = () => {
           },
           tabBarBackground: () => (
             <LinearGradient
-              colors={["#559DDD", "#73B6E3"]}
-              start={{ x: 0, y: 1 }}
-              end={{ x: 1, y: 0 }}
-              locations={[0.1, 0.2]}
-              style={StyleSheet.absoluteFill}
+              colors={["#fff", "#61b3fa"]}
+              start={{ x: 0, y: 0.1 }}
+              end={{ x: 0, y: 1}}
+              locations={[0, 1]}
+              style={[
+                StyleSheet.absoluteFill,
+              ]
+              }
             />
           ),
         }}
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
   icon: {
     color: `#fff`,
     fontSize: 24,
-  },
+  }
 });
 
 export default Layout;

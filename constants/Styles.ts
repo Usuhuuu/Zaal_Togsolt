@@ -22,9 +22,9 @@ export const defaultStyles = StyleSheet.create({
     alignItems: 'center',
   },
   btnText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
-    fontFamily: 'mon-b',
+    fontWeight: 'bold',
   },
   btnIcon: {
     position: 'absolute',
