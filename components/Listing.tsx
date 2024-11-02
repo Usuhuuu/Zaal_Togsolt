@@ -8,15 +8,17 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ListRenderItem,
+  ImageBackground,
+  Dimensions,
 } from "react-native";
-import { useRouter } from "expo-router"; // Import useRouter from expo-router
+import { Link, useRouter } from "expo-router";
 import { Listing } from "@/interfaces/listing";
 import { MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetFlatListMethods,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetFlatList, BottomSheetFlatListMethods } from "@gorhom/bottom-sheet";
+import { LinearGradient } from "expo-linear-gradient";
+
+const { width } = Dimensions.get("window");
 
 interface Props {
   listings: Listing[];
@@ -25,16 +27,11 @@ interface Props {
 }
 
 const ListingComponent = ({ listings: items, category, refresh }: Props) => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
 
   useEffect(() => {
-    console.log("refresh listings");
-  }, [refresh]);
-
-  useEffect(() => {
-    console.log("Reloading items", items.length);
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -42,116 +39,177 @@ const ListingComponent = ({ listings: items, category, refresh }: Props) => {
   }, [category, items]);
 
   const handlePress = (id: string) => {
-    router.push(`/listing/${id}`); // Use router.push to navigate
+    router.push(`/listing/${id}`);
   };
 
-  const renderRow: ListRenderItem<any> = ({ item }) => (
-    <TouchableOpacity onPress={() => handlePress(item.id)}>
-      <View style={styles.itemContainer}>
-        <Image style={styles.thumbnail} source={{ uri: item.medium_url }} />
-        <View style={styles.filterButtonContainer}>
-          <TouchableOpacity>
-            <Image
-              source={require("../assets/sport-icons/olympic.png")}
-              style={styles.filterButton}
-            />
-          </TouchableOpacity>
-        </View>
+  const renderRow: ListRenderItem<Listing> = ({ item }) => (
+    <TouchableOpacity onPress={() => handlePress(item.id)} style={styles.itemContainer}>
+      <ImageBackground source={require("../assets/images/listingicons/1.png")} style={styles.backgroundImage}>
         <View style={styles.detailsContainer}>
-          <Text>{item.name}</Text>
+          <Text style={styles.text}>{item.name}</Text>
+  
           <View style={styles.ratingContainer}>
             <MaterialIcons name="sports-score" size={24} color="red" />
-            <Text>{item.review_scores_rating / 20}</Text>
+            <Text style={styles.text}>{item.review_scores_rating / 20}</Text>
           </View>
+  
+          <View style={styles.locationContainer}>
+            <Image source={require("../assets/images/placeholder.png")} style={styles.placeholderImage} />
+            <Text style={styles.text}>{item.city}</Text>
+            <Text style={styles.text}>{item.neighbourhood}</Text>
+          </View>
+          
+          <Text style={styles.text}>${item.price} tugrug</Text>
+  
+          <TouchableOpacity style={styles.viewButton}>
+            <Image
+              source={require("../assets/images/listingicons/right.png")} style={styles.icon} />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.title}>{item.room_type}</Text>
-        <View style={styles.locationContainer}>
-          <Image
-            source={require("../assets/images/placeholder.png")}
-            style={styles.placeholderImage}
-          />
-          <Text>{item.city}</Text>
-          <Text>{item.neighbourhood}</Text>
-          <Text> $ {item.price} tugrug</Text>
-        </View>
-      </View>
+      </ImageBackground>
+    </TouchableOpacity>
+  );
+
+  const CategoryButton = ({ label }: { label: string }) => (
+    <TouchableOpacity style={styles.categoryButton}>
+      <Text style={styles.categoryTitle}>{label}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <Text>{category}</Text>
+    <LinearGradient colors={['#f8f9fa', Colors.primary]} start={[0, 0]} end={[0, 1]} style={styles.container}>
+      <Link href={`/(modals)/sags`} asChild>
+        <TouchableOpacity style={styles.searchbtn}>
+          <Image source={require("../assets/images/ranking.png")} style={styles.icon} />
+          <Text style={styles.buttonText}>Search</Text>
+          <Image source={require("../assets/images/listingicons/adjust.png")} style={styles.icon} />
+        </TouchableOpacity>
+      </Link>
+
+      <View style={styles.categoryContainer}>
+        {['oirhon', 'shildeg', 'zovloh'].map(label => (
+          <CategoryButton key={label} label={label} />
+        ))}
+      </View>
+
       {loading ? (
         <ActivityIndicator size="large" color="#000" />
       ) : (
         <BottomSheetFlatList
-          renderItem={renderRow}
           ref={listRef}
           data={items}
+          renderItem={renderRow}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.flatListContent}
         />
       )}
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 5,
     paddingHorizontal: 16,
   },
   itemContainer: {
     marginBottom: 20,
-    backgroundColor: "#f8f8f8",
-    padding: 5,
-    position: "relative",
-  },
-  thumbnail: {
-    width: "100%",
-    height: 280,
-    borderRadius: 8,
-    borderColor: Colors.primary,
-    marginBottom: 8,
-  },
-  filterButtonContainer: {
-    position: "absolute",
-    right: 10,
-    bottom: 90,
-  },
-  filterButton: {
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "black",
-    width: 40,
-    height: 40,
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35, // Slightly increased for better depth
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  backgroundImage: {
+    width: '100%',
+    height: 200,
+    justifyContent: 'flex-end',
+    resizeMode: 'cover',
   },
   detailsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    padding: 20,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    width: '100%',
+  },
+  text: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
+  locationAndButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
   },
   locationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 10, // Padding for separation from button
   },
   placeholderImage: {
     width: 20,
     height: 20,
+    marginRight: 8,
   },
   flatListContent: {
     paddingBottom: 20,
   },
+  searchbtn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 45,
+    paddingHorizontal: '5%', // Adjusts padding for different screen sizes
+    backgroundColor: Colors.primary,
+    borderRadius: 20,
+  },
+  icon: {
+    width: 23,
+    height: 23,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: "black",
+    borderRadius: 20,
+    paddingVertical: 8, // Increased for better spacing
+    marginVertical: 10,
+  },
+  categoryButton: {
+    paddingHorizontal: 10,
+  },
+  categoryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: "white",
+  },
+  viewButton: {
+    backgroundColor: "rgba(97, 179, 250, 0)",
+    height: 200, // Matches background image height
+    width: 40, // Button width
+    position: 'absolute',
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
 });
+
 
 export default ListingComponent;

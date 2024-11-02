@@ -38,13 +38,13 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="#2a85d5" />
+      <StatusBar barStyle="light-content" backgroundColor="#61b3fa" />
       <View style={styles.container}>
         <LinearGradient
-          colors={['#2a85d5', '#559DDD']}
+          colors={['#61b3fa', '#fff']}
           start={[0, 0]}
-          end={[0, 1]}
-          locations={[0, 0.4]}
+          end={[0, 1.2]}
+          locations={[0, 1]}
           style={styles.background} 
         />
         <View style={styles.content}>
@@ -52,11 +52,19 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             <Link href={`/(modals)/sags`} asChild>
               <TouchableOpacity style={styles.searchbtn}>
                 <Image
-                  source={require("../assets/images/ranking.png")}
-                  style={{ width: 26, height: 26 }}
+                  source={require("../assets/sport-icons/notifications.png")}
+                  style={{ width: 23, height: 23 }}
                 />
               </TouchableOpacity>
             </Link>
+            <View style={styles.titleContainer}>
+              <Image
+                source={require("../assets/sport-icons/logo.png")}
+                style={{ width: 70, height: 70 }}
+              />
+              <Text style={{fontSize:18 , right:20}}>Sags</Text>
+            </View>
+
             <TouchableOpacity style={styles.filterButton}>
               <Image
                 source={require("../assets/images/category.png")}
@@ -80,7 +88,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 <View style={styles.iconContainer}>
                   <Image
                     source={item.source}
-                    style={{ width: 26, height: 26 }}
+                    style={{ width: 20, height: 20 }}
                   />
                 </View>
                 <Text style={styles.titleText}>{item.name}</Text>
@@ -96,7 +104,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 150,
+    height: 145,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     overflow: 'hidden', // Ensures the gradient does not overflow outside the container
@@ -118,31 +126,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: 6,
-    gap: 25,
   },
   filterButton: {
-    padding: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'black',
+    padding: 10,
   },
   searchbtn: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 40,
     height: 40,
-    borderRadius: 20,
-    borderColor: 'black',
-    borderWidth: 1,
   },
   titleContainer: {
     height: 50,
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   titleText: {
     color: '#000',
-    fontWeight: 'bold',
+    fontWeight: 'condensed',
   },
   scrollViewContent: {
     alignItems: 'center',
