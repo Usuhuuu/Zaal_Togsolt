@@ -17,6 +17,7 @@ import * as SecureStore from "expo-secure-store";
 import Colors from "@/constants/Colors";
 import { AccessToken, Settings, LoginManager } from "react-native-fbsdk-next";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 import {
   GoogleSignin,
@@ -53,7 +54,7 @@ const Page = () => {
         { ...axiosConfig, withCredentials: true }
       );
       if (response.status === 200) {
-        await SecureStore.setItemAsync(
+        const tokens = await SecureStore.setItemAsync(
           "Tokens",
           JSON.stringify({
             accessToken: response.data.accessToken,
@@ -144,15 +145,18 @@ const Page = () => {
             );
             console.log("Facebook login result:", res);
             if (res.status == 200) {
-              await SecureStore.setItemAsync(
+              const tokens = await SecureStore.setItemAsync(
                 "Tokens",
                 JSON.stringify({
                   accessToken: res.data.accessToken,
                   refreshToken: res.data.refreshToken,
                 })
               );
-              Alert.alert(`${accessToken}`);
+              Alert.alert(`${tokens}`);
               Alert.alert("Facebook Login Success", "You are logged in!");
+            } else {
+              Alert.alert("Error on fbLogin");
+              Alert.alert(`${res.status}`);
             }
           } catch (error) {
             console.error("Error sending Facebook token:", error);
@@ -193,15 +197,18 @@ const Page = () => {
         );
         console.log("Facebook login result:", response);
         if (response.status == 200) {
-          await SecureStore.setItemAsync(
+          const tokens = await SecureStore.setItemAsync(
             "Tokens",
             JSON.stringify({
               accessToken: response.data.accessToken,
               refreshToken: response.data.refreshToken,
             })
           );
-          Alert.alert(`${accessToken}`);
+          Alert.alert(`${tokens}`);
           Alert.alert("Facebook Login Success", "You are logged in!");
+        } else {
+          Alert.alert("error");
+          Alert.alert(`${response.status}`);
         }
       }
     } catch (err: any) {
@@ -216,6 +223,7 @@ const Page = () => {
       }
     }
   };
+  const handleAppleLogin = () => {};
 
   return (
     <ImageBackground
@@ -312,12 +320,55 @@ const Page = () => {
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Continue with Facebook</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
+          {/* <TouchableOpacity style={styles.btnOutline}>
             <Image
               source={require("../../assets/images/emongolia.png")}
               style={styles.imageIcon}
             />
             <Text style={styles.btnOutlineText}>Continue with E-Mongolia</Text>
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => handleAppleLogin()}
+            style={styles.btnOutline}
+          >
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={
+                AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+              }
+              buttonStyle={
+                AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+              }
+              cornerRadius={5}
+              style={styles.button}
+              onPress={async () => {
+                try {
+                  const credentials = await AppleAuthentication.signInAsync({
+                    requestedScopes: [
+                      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                    ],
+                  });
+                  console.log(credentials);
+                } catch (err: any) {
+                  if (err.code === "ERR_REQUEST_CANCELED") {
+                    console.log("User canceled Login");
+                    Alert.alert(`${err}`);
+                    Alert.alert("ERR_REQUEST_CANCELED");
+                  } else if (err.code === "ERR_INVALID_OPERATION") {
+                    Alert.alert(`${err}`);
+                    Alert.alert("ERR_INVALID_OPERATION");
+                  } else if (err.code === "ERR_REQUEST_FAILED") {
+                    Alert.alert("ERR_REQUEST_FAILED");
+                    Alert.alert(`${err}`);
+                  } else if (err.code === "ERR_REQUEST_NOT_HANDLED") {
+                    Alert.alert("ERR_REQUEST_NOT_HANDLED");
+                  } else {
+                    Alert.alert(`${err}`);
+                    Alert.alert(`${err.code}`);
+                  }
+                }
+              }}
+            />
           </TouchableOpacity>
         </View>
       </View>

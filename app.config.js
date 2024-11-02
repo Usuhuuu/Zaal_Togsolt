@@ -46,7 +46,7 @@ export default {
       "expo-router",
       "expo-secure-store",
       ["@react-native-google-signin/google-signin",{
-        iosUrlScheme:  `${process.env.GOOGLE_URL}`
+        iosUrlScheme:  'com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6' ||`${process.env.GOOGLE_URL}`
       }],
       ["react-native-fbsdk-next",{
           appID: process.env.FACEBOOK_APP_ID || "8534089993319728",

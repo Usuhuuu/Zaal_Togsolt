@@ -139,7 +139,7 @@ const DetailsPage = () => {
                   onPress={() => handlePressTimeSlot(timeString)}
                   disabled={isDisabled}
                   style={[
-                    styles.timeSlotButton,
+                    styles.lalarinSdaBtn,
                     {
                       backgroundColor: isDisabled ? "grey" : "white",
                       opacity: isDisabled ? 0.5 : 1,
@@ -179,10 +179,7 @@ const DetailsPage = () => {
       ),
       headerRight: () => (
         <View style={styles.bar}>
-          <TouchableOpacity
-            style={styles.timeSlotButton}
-            onPress={shareListing}
-          >
+          <TouchableOpacity onPress={shareListing}>
             <Image
               source={require("@/assets/images/listingicons/share.png")}
               style={styles.headerButton}
@@ -519,7 +516,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     //backgroundColor: "black",
   },
-  timeSlotButton: {
+  lalarinSdaBtn: {
     borderWidth: 0.5,
     borderRadius: 20,
     marginBottom: 10,
