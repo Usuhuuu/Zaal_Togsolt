@@ -56,15 +56,15 @@ const DetailsPage = () => {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
-  
+
   const handleScroll = (event: any) => {
-    const scrollY = event.nativeEvent.contentOffset.y; 
-  
+    const scrollY = event.nativeEvent.contentOffset.y;
+
     // Change footer background color based on scroll position
     const newColor = Math.max(0, Math.min(1, 1 - scrollY / 200)); // Adjust 200 as needed for effect
     setFooterBgColor(`rgba(255, 255, 255, ${newColor})`); // Update the footer background color
   };
-  
+
   const shareListing = async () => {
     try {
       await Share.share({
@@ -95,6 +95,7 @@ const DetailsPage = () => {
     try {
       const odor = date.toISOString().split("T")[0];
       const zaalniID = zaalFormData.zaalId;
+      console.log(odor);
       const response = await axios.get(`${apiUrl}/timeslotscheck`, {
         params: { zaalniID, odor },
       });
@@ -256,7 +257,7 @@ const DetailsPage = () => {
   return (
     <View style={styles.container}>
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: bottompadding}}
+        contentContainerStyle={{ paddingBottom: bottompadding }}
         ref={scrollRef}
         scrollEventThrottle={16}
         onScroll={handleScroll}
@@ -267,115 +268,159 @@ const DetailsPage = () => {
           resizeMode="cover"
         />
         <Text>{listing.id}</Text>
-        <View 
-         onLayout={(event) => {
-          const { height } = event.nativeEvent.layout;
-          setInfoHeight(height); // Update state with calculated height
-        }}
-        style={styles.infoContainer}>
+        <View
+          onLayout={(event) => {
+            const { height } = event.nativeEvent.layout;
+            setInfoHeight(height); // Update state with calculated height
+          }}
+          style={styles.infoContainer}
+        >
           <LinearGradient
             colors={["#f8f9fa", Colors.primary]}
             start={[0, 0]}
             end={[0, 2]}
             style={{
-              position: "absolute", 
-              top: 0, 
+              position: "absolute",
+              top: 0,
               left: 0,
-               right: 0,
-               height: infoHeight+60, 
-               borderTopLeftRadius: 24,
-                borderTopRightRadius: 24,
-
+              right: 0,
+              height: infoHeight + 60,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
             }}
           />
-          <View 
-           onLayout={(event) => {
-            const { width } = event.nativeEvent.layout;
-            setIconsOverflow( width > 120); // Adjust threshold based on icon count
-          }}
-          style ={{flexDirection: "row" ,justifyContent: "space-between" , alignItems:"center"}}>
-              <Text style={styles.name}>{listing.name}</Text>
-              <TouchableOpacity style={styles.hostView}>
-                <ImageBackground
-                  source={require("@/assets/images/listingicons/map.png")}
-                  style={styles.host}
-                  imageStyle={{ borderRadius: 20,
-                    borderBottomRightRadius: 0,
-                    borderTopRightRadius: 0,
-                  }}
-                >
-                  <Ionicons name="location" size={24} color="white" />
-                  <Text style={{ color: "white", fontSize: 12 }}>
-                    Zvg chig
-                  </Text>
-                </ImageBackground>
-          </TouchableOpacity>
+          <View
+            onLayout={(event) => {
+              const { width } = event.nativeEvent.layout;
+              setIconsOverflow(width > 120); // Adjust threshold based on icon count
+            }}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.name}>{listing.name}</Text>
+            <TouchableOpacity style={styles.hostView}>
+              <ImageBackground
+                source={require("@/assets/images/listingicons/map.png")}
+                style={styles.host}
+                imageStyle={{
+                  borderRadius: 20,
+                  borderBottomRightRadius: 0,
+                  borderTopRightRadius: 0,
+                }}
+              >
+                <Ionicons name="location" size={24} color="white" />
+                <Text style={{ color: "white", fontSize: 12 }}>Zvg chig</Text>
+              </ImageBackground>
+            </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: "row", justifyContent: 'space-between', padding: 5, marginTop: 5}}>
-  {/* Location container */}
-  <View style={{
-      flex: iconsOverflow ? 0.25 : 0.3, // Shrinks width if icons overflow
-      alignItems: 'center',
-      borderColor: Colors.grey,
-      borderWidth: 1,
-      borderRadius: 20,
-      padding: 10,
-      marginRight: 5
-  }}>
-    <Image source={require("@/assets/images/placeholder.png")} style={styles.placeholderImage} />
-    <Text style={{fontSize: 12 , }}>{listing.smart_location}</Text>
-  </View>
-  
-  {/* Rating container */}
-  <View style={{
-      flex: iconsOverflow ? 0.25 : 0.3, // Shrinks width if icons overflow
-      alignItems: 'center',
-      borderColor: Colors.grey,
-      borderWidth: 1,
-      borderRadius: 20,
-      padding: 10,
-      marginLeft: 5,
-  }}>
-     <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'center', marginTop: 5}}>
-    <MaterialIcons name="sports-score" size={18} color="red" />
-    <Text style={{ fontSize: 12}}>{listing.review_scores_rating / 20}</Text>
-    <TouchableOpacity>
-      <Text style={styles.ratings}>{listing.number_of_reviews} reviews</Text>
-    </TouchableOpacity>
-    </View>
-  </View>
-  
-  {/* Facilities container */}
-  <View
-    style={{
-      flex: iconsOverflow ? 0.5 : 0.4, // Expands if icons overflow
-      alignItems: 'center',
-      borderColor: Colors.grey,
-      borderWidth: 1,
-      borderRadius: 20,
-      padding: 10,
-      marginLeft: 5,
-    }}
-  >
-    <Text style={styles.rooms}>Facilities</Text>
-    <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'center' }}>
-      {/* Icons */}
-      <MaterialIcons name="sports-soccer" size={18} color="black" />
-      <MaterialIcons name="sports-tennis" size={18} color="black" />
-      <MaterialIcons name="sports-volleyball" size={18} color="black" />
-      <MaterialIcons name="sports-basketball" size={18} color="black" />
-      <MaterialIcons name="sports-golf" size={18} color="black" />
-     
-    </View>
-  </View>
-</View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 5,
+              marginTop: 5,
+            }}
+          >
+            {/* Location container */}
+            <View
+              style={{
+                flex: iconsOverflow ? 0.25 : 0.3, // Shrinks width if icons overflow
+                alignItems: "center",
+                borderColor: Colors.grey,
+                borderWidth: 1,
+                borderRadius: 20,
+                padding: 10,
+                marginRight: 5,
+              }}
+            >
+              <Image
+                source={require("@/assets/images/placeholder.png")}
+                style={styles.placeholderImage}
+              />
+              <Text style={{ fontSize: 12 }}>{listing.smart_location}</Text>
+            </View>
 
+            {/* Rating container */}
+            <View
+              style={{
+                flex: iconsOverflow ? 0.25 : 0.3, // Shrinks width if icons overflow
+                alignItems: "center",
+                borderColor: Colors.grey,
+                borderWidth: 1,
+                borderRadius: 20,
+                padding: 10,
+                marginLeft: 5,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  marginTop: 5,
+                }}
+              >
+                <MaterialIcons name="sports-score" size={18} color="red" />
+                <Text style={{ fontSize: 12 }}>
+                  {listing.review_scores_rating / 20}
+                </Text>
+                <TouchableOpacity>
+                  <Text style={styles.ratings}>
+                    {listing.number_of_reviews} reviews
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Facilities container */}
+            <View
+              style={{
+                flex: iconsOverflow ? 0.5 : 0.4, // Expands if icons overflow
+                alignItems: "center",
+                borderColor: Colors.grey,
+                borderWidth: 1,
+                borderRadius: 20,
+                padding: 10,
+                marginLeft: 5,
+              }}
+            >
+              <Text style={styles.rooms}>Facilities</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                }}
+              >
+                {/* Icons */}
+                <MaterialIcons name="sports-soccer" size={18} color="black" />
+                <MaterialIcons name="sports-tennis" size={18} color="black" />
+                <MaterialIcons
+                  name="sports-volleyball"
+                  size={18}
+                  color="black"
+                />
+                <MaterialIcons
+                  name="sports-basketball"
+                  size={18}
+                  color="black"
+                />
+                <MaterialIcons name="sports-golf" size={18} color="black" />
+              </View>
+            </View>
+          </View>
 
           <Text style={styles.description}>{listing.description}</Text>
         </View>
       </Animated.ScrollView>
 
-      <Animated.View style={[styles.footer, { backgroundColor: footerBgColor }]} entering={SlideInDown.delay(200)}>
+      <Animated.View
+        style={[styles.footer, { backgroundColor: footerBgColor }]}
+        entering={SlideInDown.delay(200)}
+      >
         <View
           style={{
             flexDirection: "row",
@@ -393,19 +438,19 @@ const DetailsPage = () => {
             onPress={() => {
               setIsScheduleVisible(true);
             }}
-            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 ,}]}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
           >
             <Text style={defaultStyles.btnText}>tsagiin huvaari</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setIsOrderScreenVisible(true)}
-            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 ,}]}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
           >
             <Text style={defaultStyles.btnText}>zahialga</Text>
           </TouchableOpacity>
         </View>
-    </Animated.View>
+      </Animated.View>
 
       {/* Modal for Schedule Screen */}
       <Modal
@@ -449,7 +494,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   image: {
-    height: IMG_HEIGHT+100,
+    height: IMG_HEIGHT + 100,
     width: width,
     marginBottom: 0,
   },
@@ -505,7 +550,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  
+
   hostView: {
     flexDirection: "row",
     alignItems: "center",
@@ -513,7 +558,7 @@ const styles = StyleSheet.create({
     height: 70,
     width: "auto", // Dynamically adjusts based on content
   },
-  
+
   footer: {
     position: "absolute",
     padding: 20,
@@ -528,7 +573,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    
   },
   footerPrice: {
     fontSize: 18,

@@ -10,6 +10,7 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
+    owner:"zaal_tugsult",
     update:{
       enabled: true,
       checkOnLaunch: "ALWAYS",
@@ -22,9 +23,21 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
       bundleIdentifier: "com.usuhbayr.zaalproject",
-      usesAppleSignIn: true
+      usesAppleSignIn: true,
+      config:{
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+      },
+      infoPlist:{
+        NSAppTransportSecurity:{
+          NSAllowsArbitraryLoads: true
+        }
+      },
+      config:{
+        googleMaps:{
+          apiKey: process.env.GOOGLE_MAPS_API_KEY
+        }
+      }
     },
     assetBundlePatterns: [
       "**/*"
@@ -67,7 +80,7 @@ export default {
     extra: {
        apiUrl: process.env.API_URL || "http://localhost:3001",
        eas: {
-        projectId: "4b0c6716-928b-4bce-a376-703b1fed5c6b"
+        projectId: "e5e4a4a7-63c8-4cfa-9371-763389edd149"
       }
     }
   }
