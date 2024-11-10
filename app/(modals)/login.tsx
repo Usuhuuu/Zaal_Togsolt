@@ -18,7 +18,7 @@ import Colors from "@/constants/Colors";
 import { AccessToken, Settings, LoginManager } from "react-native-fbsdk-next";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import * as AppleAuthentication from "expo-apple-authentication";
-
+import { Platform } from "react-native";
 import {
   GoogleSignin,
   statusCodes,
@@ -44,7 +44,12 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [passwordHide, setPasswordHide] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
-
+  const [isItApple, setIsITApple] = useState(false);
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      setIsITApple(true);
+    }
+  }, []);
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -68,8 +73,8 @@ const Page = () => {
       }
     } catch (err) {
       console.log(err);
-      setEr("An error occurred during login.");
       Alert.alert("Error", er);
+      throw new Error("login error");
     } finally {
       setLoading(false);
     }
@@ -155,20 +160,17 @@ const Page = () => {
               Alert.alert(`${tokens}`);
               Alert.alert("Facebook Login Success", "You are logged in!");
             } else {
-              Alert.alert("Error on fbLogin");
               Alert.alert(`${res.status}`);
+              throw new Error("Error on fbLogin");
             }
           } catch (error) {
-            console.error("Error sending Facebook token:", error);
-            Alert.alert("Error", "Failed to log in with Facebook.");
+            throw new Error("Failed to log in with Facebook.");
           }
         } else {
-          Alert.alert("Error", "No Facebook access token found.");
+          throw new Error("No Facebook access token found.");
         }
       }
     } catch (error) {
-      console.error("Facebook login error:", error);
-      Alert.alert("Error", "Failed to log in with Facebook.");
       throw new Error("facebook login zailaad oglo" + error);
     }
   };
@@ -331,44 +333,53 @@ const Page = () => {
             onPress={() => handleAppleLogin()}
             style={styles.btnOutline}
           >
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={
-                AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
-              }
-              buttonStyle={
-                AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
-              }
-              cornerRadius={5}
-              style={styles.button}
-              onPress={async () => {
-                try {
-                  const credentials = await AppleAuthentication.signInAsync({
-                    requestedScopes: [
-                      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                      AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                    ],
-                  });
-                  console.log(credentials);
-                } catch (err: any) {
-                  if (err.code === "ERR_REQUEST_CANCELED") {
-                    console.log("User canceled Login");
-                    Alert.alert(`${err}`);
-                    Alert.alert("ERR_REQUEST_CANCELED");
-                  } else if (err.code === "ERR_INVALID_OPERATION") {
-                    Alert.alert(`${err}`);
-                    Alert.alert("ERR_INVALID_OPERATION");
-                  } else if (err.code === "ERR_REQUEST_FAILED") {
-                    Alert.alert("ERR_REQUEST_FAILED");
-                    Alert.alert(`${err}`);
-                  } else if (err.code === "ERR_REQUEST_NOT_HANDLED") {
-                    Alert.alert("ERR_REQUEST_NOT_HANDLED");
-                  } else {
-                    Alert.alert(`${err}`);
-                    Alert.alert(`${err.code}`);
+            {isItApple ? (
+              <>
+                <AppleAuthentication.AppleAuthenticationButton
+                  buttonType={
+                    AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
                   }
-                }
-              }}
-            />
+                  buttonStyle={
+                    AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                  }
+                  cornerRadius={5}
+                  style={styles.button}
+                  onPress={async () => {
+                    try {
+                      const credentials = await AppleAuthentication.signInAsync(
+                        {
+                          requestedScopes: [
+                            AppleAuthentication.AppleAuthenticationScope
+                              .FULL_NAME,
+                            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                          ],
+                        }
+                      );
+                      console.log(credentials);
+                    } catch (err: any) {
+                      if (err.code === "ERR_REQUEST_CANCELED") {
+                        console.log("User canceled Login");
+                        Alert.alert(`${err}`);
+                        Alert.alert("ERR_REQUEST_CANCELED");
+                      } else if (err.code === "ERR_INVALID_OPERATION") {
+                        Alert.alert(`${err}`);
+                        Alert.alert("ERR_INVALID_OPERATION");
+                      } else if (err.code === "ERR_REQUEST_FAILED") {
+                        Alert.alert("ERR_REQUEST_FAILED");
+                        Alert.alert(`${err}`);
+                      } else if (err.code === "ERR_REQUEST_NOT_HANDLED") {
+                        Alert.alert("ERR_REQUEST_NOT_HANDLED");
+                      } else {
+                        Alert.alert(`${err}`);
+                        Alert.alert(`${err.code}`);
+                      }
+                    }
+                  }}
+                />
+              </>
+            ) : (
+              <></>
+            )}
           </TouchableOpacity>
         </View>
       </View>

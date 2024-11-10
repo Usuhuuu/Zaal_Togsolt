@@ -5,6 +5,14 @@
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
 
+
+    <!-- Google map configuration-->
+    <key>GMSApiKey</key>
+    <string>AIzaSyDezC8XCeVeRY1lh34mbxAjuhe1OWJhLRc</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Your app needs access to your location to show your position on the map</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Your app needs access to your location for continuous location updates</string>
     <!-- Facebook App Configuration -->
     <key>FacebookAppID</key>
     <string>8534089993319728</string>

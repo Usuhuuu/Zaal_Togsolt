@@ -3,31 +3,62 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useEffect, ReactNode } from "react";
+import { TouchableOpacity, View, Text } from "react-native";
 import "react-native-reanimated";
+import * as Sentry from "@sentry/react-native";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Initialize Sentry
+Sentry.init({
+  dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
+  tracesSampleRate: 1.0,
+});
+
+// Prevent splash screen auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
 };
 
-export default function RootLayout() {
+// Define a type for the error boundary props
+interface CustomErrorBoundaryProps {
+  error?: Error;
+  children: ReactNode;
+}
+
+function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
+  useEffect(() => {
+    if (error) {
+      Sentry.captureException(error); // Log boundary error to Sentry
+    }
+  }, [error]);
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Something went wrong. Please restart the app.</Text>
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      Sentry.captureException(error); // Log font load errors to Sentry
+      console.error("Error loading fonts:", error);
+      throw error;
+    }
   }, [error]);
 
   useEffect(() => {
@@ -81,3 +112,10 @@ function RootLayoutNav() {
     </Stack>
   );
 }
+
+// Wrap the entire app in Sentry and Error Boundary
+export default Sentry.wrap(() => (
+  <CustomErrorBoundary>
+    <RootLayout />
+  </CustomErrorBoundary>
+));

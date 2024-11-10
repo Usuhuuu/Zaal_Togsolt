@@ -6,10 +6,12 @@ import {
   Button,
   FlatList,
   StyleSheet,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
+import * as Sentry from "@sentry/react-native";
 
 interface Message {
   senderId: string;
@@ -30,32 +32,40 @@ const ChatComponent: React.FC = () => {
 
   useEffect(() => {
     const setupSocket = async () => {
-      const token = await SecureStore.getItemAsync("Tokens");
-      if (!token) {
-        console.error("No token found.");
-        return;
+      try {
+        const token = await SecureStore.getItemAsync("Tokens");
+        const signUpPls = "please login ";
+        if (!token) {
+          Alert.alert(`${signUpPls}`);
+        } else {
+          const { accessToken } = JSON.parse(token);
+
+          socket = io("http://localhost:3001", {
+            query: { token: accessToken },
+          });
+
+          socket.on("connect", () => {
+            console.log("Connected to socket server:", socket?.id);
+            Alert.alert("socket?.id");
+          });
+
+          socket.on("chatHistory", (chatHistory: Message[]) => {
+            setMessages(chatHistory);
+          });
+
+          socket.on("receiveMessage", (data: Message) => {
+            setMessages((prevMessages) => [...prevMessages, data]);
+          });
+
+          socket.on("disconnect", () => {
+            console.log("Disconnected from socket server");
+            Alert.alert("Disconnected from WebSocket.");
+          });
+        }
+      } catch (error) {
+        console.error("Error setting up socket:", error);
+        Sentry.captureException(error); // Log setupSocket error to Sentry
       }
-      const { accessToken } = JSON.parse(token);
-
-      socket = io("http://localhost:3001", {
-        query: { token: accessToken },
-      });
-
-      socket.on("connect", () => {
-        console.log("Connected to socket server:", socket?.id);
-      });
-
-      socket.on("chatHistory", (chatHistory: Message[]) => {
-        setMessages(chatHistory);
-      });
-
-      socket.on("receiveMessage", (data: Message) => {
-        setMessages((prevMessages) => [...prevMessages, data]);
-      });
-
-      socket.on("disconnect", () => {
-        console.log("Disconnected from socket server");
-      });
     };
 
     setupSocket();
@@ -69,8 +79,7 @@ const ChatComponent: React.FC = () => {
     try {
       const token = await SecureStore.getItemAsync("Tokens");
       if (!token) {
-        console.error("No token found.");
-        return;
+        throw new Error("No token found.");
       }
       const { accessToken } = JSON.parse(token);
 
@@ -87,6 +96,7 @@ const ChatComponent: React.FC = () => {
       setChatGroups(groups);
     } catch (error) {
       console.error("Error fetching chat groups:", error);
+      Sentry.captureException(error); // Log fetchChatGroups error to Sentry
     }
   };
 
@@ -95,16 +105,20 @@ const ChatComponent: React.FC = () => {
   }, []);
 
   const joinGroup = async (groupId: string) => {
-    setCurrentGroupId(groupId);
+    try {
+      setCurrentGroupId(groupId);
 
-    const token = await SecureStore.getItemAsync("Tokens");
-    if (!token) {
-      console.error("No token found.");
-      return;
+      const token = await SecureStore.getItemAsync("Tokens");
+      if (!token) {
+        throw new Error("Token not found while joining group.");
+      }
+      const { userId } = JSON.parse(token);
+
+      socket?.emit("joinGroup", { groupId, userId });
+    } catch (error) {
+      console.error("Error joining group:", error);
+      Sentry.captureException(error); // Log joinGroup error to Sentry
     }
-    const { userId } = JSON.parse(token);
-
-    socket?.emit("joinGroup", { groupId, userId });
   };
 
   const sendMessage = () => {
