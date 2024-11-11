@@ -10,11 +10,10 @@ interface GradientBackgroundProps {
 const GradientBackground: React.FC<GradientBackgroundProps> = ({ style }) => {
   return (
     <LinearGradient
-      colors={['#000046', '#EB5757', '#1CB5E0', 'transparent']} // Gradient colors
+      colors={['#61b3fa','#fff']} // Gradient colors
       start={[0, 0]} // Gradient starts from the top-left corner
-      end={[1, 1]} // Gradient ends at the bottom-right corner
-      locations={[0, 0.3, 0.6, 1]} // Adjust the position of each color
-      style={[styles.background, style]} // Merge passed style with default style
+      end={[0, 1.2]} // Gradient ends at the bottom-right corner // Adjust the position of each color
+      style={[styles.background]} // Merge passed style with default style
     />
   );
 };
@@ -25,7 +24,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    height: '100%', // Make it full height to cover the area needed
+    height: '100%', // Ensure gradient covers full height
   },
 });
 

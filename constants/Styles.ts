@@ -42,4 +42,9 @@ export const defaultStyles = StyleSheet.create({
     borderTopColor: Colors.grey,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 8,
+  },
 });

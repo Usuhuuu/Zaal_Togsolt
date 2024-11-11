@@ -22,9 +22,6 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "AsyncStorage": "^0.1.5",
-    "axios": "^1.7.2",
-    "body-parser": "^1.20.3",
-    "dotenv": "^16.4.5",
     "expo": "~51.0.38",
     "expo-apple-authentication": "~6.4.2",
     "expo-clipboard": "~6.0.3",
@@ -74,5 +71,17 @@
     "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"
   },
-  "private": true
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Usuhuuu/Zaal_Togsolt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Usuhuuu/Zaal_Togsolt/issues"
+  },
+  "homepage": "https://github.com/Usuhuuu/Zaal_Togsolt#readme",
+  "description": ""
 }
