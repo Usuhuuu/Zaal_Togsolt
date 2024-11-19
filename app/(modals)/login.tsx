@@ -21,13 +21,15 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { Platform } from "react-native";
 import {
   GoogleSignin,
+  isErrorWithCode,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import * as Sentry from "@sentry/react-native";
 
 const Page = () => {
   // Access the API URL from the environment variables
 
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
+  const apiUrl = "https://32f2-203-246-85-194.ngrok-free.app";
 
   if (!apiUrl) {
     throw new Error("API_URL is not defined in the environment variables");
@@ -160,18 +162,33 @@ const Page = () => {
               Alert.alert(`${tokens}`);
               Alert.alert("Facebook Login Success", "You are logged in!");
             } else {
-              Alert.alert(`${res.status}`);
+              //Sentry.captureException("Error On fbLogin")
               throw new Error("Error on fbLogin");
             }
-          } catch (error) {
+          } catch (error: any) {
+            //Sentry.captureEvent(error)
+
             throw new Error("Failed to log in with Facebook.");
           }
         } else {
           throw new Error("No Facebook access token found.");
         }
       }
-    } catch (error) {
-      throw new Error("facebook login zailaad oglo" + error);
+    } catch (error: any) {
+      if (error.code) {
+        switch (error.code) {
+          case 1:
+            Alert.alert("Network error");
+          case 190:
+            Alert.alert("invalid Access Token");
+          case 10:
+            Alert.alert("App not set up correctly");
+          case 429:
+            Alert.alert("Too Many Requests");
+          default:
+            Sentry.captureException("facebook Error", error.code);
+        }
+      }
     }
   };
 
@@ -190,14 +207,12 @@ const Page = () => {
       await GoogleSignin.hasPlayServices();
       const user_info = await GoogleSignin.signIn();
       const { idToken, accessToken } = await GoogleSignin.getTokens();
-      console.log("Access Token:", accessToken);
       if (accessToken) {
         const response = await axios.post(
           `${apiUrl}/auth/google`,
           { accessToken },
           { ...axiosConfig, withCredentials: true }
         );
-        console.log("Facebook login result:", response);
         if (response.status == 200) {
           const tokens = await SecureStore.setItemAsync(
             "Tokens",
@@ -206,22 +221,23 @@ const Page = () => {
               refreshToken: response.data.refreshToken,
             })
           );
-          Alert.alert(`${tokens}`);
-          Alert.alert("Facebook Login Success", "You are logged in!");
+          Alert.alert("Google Login Success", "You are logged in!");
         } else {
           Alert.alert("error");
-          Alert.alert(`${response.status}`);
         }
       }
     } catch (err: any) {
-      console.log(err);
-      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
-        Alert.alert("canceled");
-      } else if (err.code == statusCodes.IN_PROGRESS) {
-        Alert.alert("progressing");
-      } else if (err.code == statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        Alert.alert("sdas");
-        console.log(err);
+      if (isErrorWithCode(err)) {
+        switch (err.code) {
+          case statusCodes.IN_PROGRESS:
+            Alert.alert("progressing");
+          case statusCodes.SIGN_IN_CANCELLED:
+            Alert.alert("User canceled process");
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Alert.alert("service not available");
+        }
+      } else {
+        throw new Error("Server Has Problem Try Again Later ");
       }
     }
   };

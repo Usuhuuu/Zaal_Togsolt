@@ -26,6 +26,9 @@ export default {
         supportsTablet: true,
         bundleIdentifier: "com.usuhbayr.zaalproject",
         usesAppleSignIn: true,
+        config:{
+          usesNonExemptEncryption: false
+        }
       },
     },
     assetBundlePatterns: [
@@ -51,8 +54,8 @@ export default {
         iosUrlScheme: 'com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6' || `${process.env.GOOGLE_URL}`,
       }],
       ["react-native-fbsdk-next", {
-        appID: process.env.FACEBOOK_APP_ID || "8534089993319728",
-        clientToken: process.env.FACEBOOK_CLIENT_ID || "61512c22202b566ea162d58871409595",
+        appID: process.env.FACEBOOK_APP_ID,
+        clientToken: process.env.FACEBOOK_CLIENT_ID,
         displayName: "Login with Facebook",
         scheme: `fb${process.env.FACEBOOK_APP_ID}`,
         advertiserIDCollectionEnabled: false,
@@ -75,11 +78,11 @@ export default {
         },
         ios: {
           infoPlist: {
-            GMSApiKey: process.env.GOOGLE_MAPS_API_KEY || "AIzaSyDezC8XCeVeRY1lh34mbxAjuhe1OWJhLRc",
+            GMSApiKey: process.env.GOOGLE_MAPS_API_KEY ,
             NSLocationWhenInUseUsageDescription: "Your app needs access to your location to show your position on the map",
             NSLocationAlwaysUsageDescription: "Your app needs access to your location for continuous location updates",
-            FacebookAppID: process.env.FACEBOOK_APP_ID || "8534089993319728",
-            FacebookClientToken: process.env.FACEBOOK_CLIENT_ID || "61512c22202b566ea162d58871409595",
+            FacebookAppID: process.env.FACEBOOK_APP_ID ,
+            FacebookClientToken: process.env.FACEBOOK_CLIENT_ID ,
             FacebookDisplayName: "Login with Facebook",
             NSUserTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you.",
             CFBundleURLTypes: [
@@ -104,7 +107,7 @@ export default {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.API_URL || "http://localhost:3001",
+      apiUrl: process.env.API_URL,
       eas: {
         projectId: "e5e4a4a7-63c8-4cfa-9371-763389edd149"
       }
