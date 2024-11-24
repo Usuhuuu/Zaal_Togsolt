@@ -1,11 +1,15 @@
 {
-    "build": {
-      "preview": {
-        "ios": {
-          "simulator": true
-        }
+  "build": {
+    "preview": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
       },
-      "production": {}
-    }
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {}
   }
-  
+}
