@@ -28,6 +28,7 @@ import axios from "axios";
 import Constants from "expo-constants";
 import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSavedHalls } from "../(modals)/functions/savedhalls";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -50,6 +51,20 @@ const DetailsPage = () => {
     startTime: "",
     endTime: "",
   };
+
+  const { addHall } = useSavedHalls();
+
+  const handleSave = () => {
+    if (!listing) {
+      alert("Listing data is unavailable");
+      return;
+    }
+  
+    const hall = { id: listing.id, name: listing.name };
+    addHall(hall);
+    alert("Hall saved!");
+  };
+  
   const { id } = useLocalSearchParams();
   const listing = (listingsData as any[]).find((item) => item.id === id);
   const navigation = useNavigation();
@@ -199,8 +214,11 @@ const DetailsPage = () => {
               style={styles.headerButton}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.roundButton}>
-            <Ionicons name="heart" size={30} color={"red"} />
+          <TouchableOpacity onPress={handleSave} style={styles.roundButton}>
+            <Image
+              source={require("@/assets/images/saved.png")}
+              style={styles.headerButton}
+            />
           </TouchableOpacity>
         </View>
       ),

@@ -1,294 +1,121 @@
-import React, { useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import * as Clipboard from "expo-clipboard";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { MaterialIcons } from "@expo/vector-icons";
-import Colors from "@/constants/Colors";
+import React, { useState } from "react";
+import { SafeAreaView, ScrollView, StyleSheet, View, TouchableOpacity, Text, Modal, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import ProfileHeader from "@/components/ProfileHeader";
+import UserProfile from "@/app/(modals)/functions/UserProfile";
 import ProfileData from "@/components/profileData";
-import axios from "axios";
-import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
-import { auth_Refresh_Function } from "../(modals)/functions/refresh";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Colors from "@/constants/Colors";
+import * as Clipboard from "expo-clipboard";
 
-export default async function App() {
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
-  const userId = "12345678"; // User ID to copy to clipboard
-  const copyToClipboard = () => {
-    Clipboard.setStringAsync(userId); // Copy user ID to clipboard
+// Import SavedHalls component
+import SavedHalls from "@/app/(modals)/SavedHalls"; 
+
+const Profile: React.FC = () => {
+  const [userId] = useState<string>("12345678"); 
+  const [modalVisible, setModalVisible] = useState<boolean>(false); 
+
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(userId);
   };
-  const token: any = SecureStore.getItemAsync("Tokens");
-  if (!token) {
-    throw new Error("User must login");
-  }
 
-  const user_data_fetching_function = async () => {
-    const { accessToken, refreshToken } = JSON.parse(token);
-    try {
-      //get user Data with accessToken
-      const fetchProfileData = await axios.get<{
-        formData: string[];
-        auth: boolean;
-      }>(`${apiUrl}/auth/profile`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        timeout: 5000,
-        withCredentials: true,
-      });
-      // if accessToken expired it will get new token
-      if (!fetchProfileData.data.auth) {
-        const newAccessToken = await auth_Refresh_Function(
-          refreshToken,
-          apiUrl
-        );
-        if (newAccessToken) {
-          await SecureStore.setItemAsync(
-            "Tokens",
-            JSON.stringify({ accessToken: newAccessToken, refreshToken })
-          );
-          //get data again
-          const retryFetchProfile = await axios.get<{
-            formData: string[];
-            auth: boolean;
-          }>(`${apiUrl}/auth/profile`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-            timeout: 5000,
-            withCredentials: true,
-          });
-
-          if (retryFetchProfile.data.auth) {
-            Alert.alert(
-              `successfully get User data Profile ${fetchProfileData.data.formData}`
-            );
-          }
-        }
-      } else {
-        Alert.alert(
-          `successfully get User data Profile ${fetchProfileData.data.formData}`
-        );
-      }
-    } catch (err) {
-      throw err;
-    }
+  const handleBackPress = () => {
+    console.log("Back button pressed");
   };
-  useEffect(() => {
-    user_data_fetching_function;
-  }, []);
+
+  const handleSharePress = () => {
+    console.log("Share button pressed");
+  };
+
+  const handleSettingsPress = () => {
+    console.log("Settings button pressed");
+  };
+
+  const openModal = () => {
+    setModalVisible(true); // Open the modal
+  };
+
+  const closeModal = () => {
+    setModalVisible(false); // Close the modal
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={[Colors.primary, Colors.light]}
+        start={[0, 0]}
+        end={[0, 1.2]}
+        locations={[0, 1]}
+        style={styles.background}
+      />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <LinearGradient
-          colors={["#021645", "#559DDD"]}
-          start={[0, 1]}
-          end={[0.4, 0]}
-          locations={[0, 0.8]}
-          style={styles.background}
-        />
         <View style={styles.titleBar}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-          <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
-        </View>
-        <View style={styles.profileContainer}>
-          <View style={styles.nameContainer}>
-            <Text style={{ color: "#fff" }}>Sainuu</Text>
-            <Text style={styles.profileName}>DASHNYAM</Text>
-            <View style={styles.userIdContainer}>
-              <Text style={{ color: Colors.dark }}> User ID: {userId} </Text>
-              <TouchableOpacity
-                onPress={copyToClipboard}
-                style={{ justifyContent: "space-around" }}
-              >
-                <Ionicons name="copy" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Friends section */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statsBox}>
-              <Text style={styles.statsText}>Naiz</Text>
-              <Text style={styles.statsNumber}>1000</Text>
-            </View>
-            <View style={styles.statsBox}>
-              <Text style={styles.statsText}>Games</Text>
-              <Text style={styles.statsNumber}>500</Text>
-            </View>
-            <View style={styles.statsBox}>
-              <Text style={styles.statsText}>tokens</Text>
-              <Text style={styles.statsNumber}>500</Text>
-            </View>
-          </View>
-
-          <View>
-            <Image
-              source={require("@/assets/images/profileIcons/profile.png")}
-              style={styles.profileImage}
-            />
-          </View>
-
-          <View style={styles.dm}>
-            <MaterialIcons name="settings" size={24} color="#DFD8C8" />
-          </View>
-          <View style={styles.active}></View>
-          <View style={styles.add}>
-            <Ionicons
-              name="add"
-              size={30}
-              color="#DFD8C8"
-              style={{ marginTop: 4 }}
-            />
-          </View>
+          <TouchableOpacity onPress={handleBackPress}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSharePress}>
+            <Ionicons name="share-social" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSettingsPress}>
+            <Ionicons name="settings" size={24} color="#fff" />
+          </TouchableOpacity>
         </View>
 
-        {/* Horizontal ScrollView for Cards */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.cardContainer}>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Naiz sagsnii bag</Text>
-            </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Naiz</Text>
-              <Text style={styles.cardValue}>1000</Text>
-            </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Naiz</Text>
-              <Text style={styles.cardValue}>1000</Text>
-            </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Naiz</Text>
-              <Text style={styles.cardValue}>1000</Text>
-            </View>
-          </View>
-        </ScrollView>
-        <ProfileData></ProfileData>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Naiz sagsnii bag</Text>
+        <ProfileHeader
+          userId={userId}
+          copyToClipboard={copyToClipboard}
+          profileImageUri="https://example.com/profile.jpg"
+        />
+        <UserProfile />
+        <ProfileData />
+
+        {/* Button to open modal */}
+        <View style={styles.saved}>
+          <TouchableOpacity style={styles.savedBackground} onPress={openModal}>
+            <ImageBackground
+              source={require('@/assets/images/zurag1.jpg')} // Replace with your image path
+              resizeMode="cover"
+              borderRadius={20} // Rounded corners
+              style={styles.savedBackground}
+            >
+              <Text style={styles.savedText}>hadgalsan tuuhuud</Text>
+              <ImageBackground
+                source={require('@/assets/images/saved.png')} // Replace with your image path
+                style={styles.savedicon}
+              />
+            </ImageBackground>
+          </TouchableOpacity>
         </View>
+
       </ScrollView>
+
+      {/* Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <SavedHalls /> 
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.primary,
   },
   scrollContainer: {
-    paddingVertical: 0,
-  },
-  text: {
-    color: "#52575D",
-  },
-  titleBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 40,
-    marginHorizontal: 10,
-  },
-  profileContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 15,
-    paddingHorizontal: 20,
-  },
-  nameContainer: {
-    flex: 1,
-    marginLeft: 10,
-    justifyContent: "center",
-    marginBottom: 60,
-    height: 100,
-    overflow: "hidden",
-  },
-  profileName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    left: 20,
-  },
-  profileImage: {
-    left: 20,
-    width: 150,
-    height: 150,
-    borderRadius: 100,
-    overflow: "hidden",
-  },
-  dm: {
-    backgroundColor: "#41444B",
-    position: "absolute",
-    top: 8,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "flex-end",
-    right: 100,
-  },
-  active: {
-    backgroundColor: "#34FFB9",
-    position: "absolute",
-    bottom: 10,
-    padding: 4,
-    height: 20,
-    right: 110,
-    width: 20,
-    borderRadius: 10,
-    borderColor: "#1aba0b",
-    borderWidth: 2,
-  },
-  add: {
-    backgroundColor: "#41444B",
-    position: "absolute",
-    bottom: 0,
-    right: 10,
-    width: 40,
-    height: 40,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statsContainer: {
-    position: "absolute",
-    top: 110,
-    left: 20,
-    right: 145,
-    flexDirection: "row",
-    marginBottom: 20,
-    justifyContent: "space-between",
-    borderColor: "#fff",
-    borderWidth: 0,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    borderBottomWidth: 1,
-    borderRightWidth: 0.5,
-    borderLeftWidth: 0.5,
-  },
-  statsBox: {
-    flex: 1,
-  },
-  statsText: {
-    fontSize: 11,
-    color: "#fff",
-    textTransform: "uppercase",
-    fontWeight: "500",
-    left: 15,
-  },
-  statsNumber: {
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "bold",
-    marginTop: 4,
-    left: 15,
+    flexGrow: 1,
+    paddingVertical: 20,
   },
   background: {
     position: "absolute",
@@ -297,40 +124,75 @@ const styles = StyleSheet.create({
     top: 0,
     height: "100%",
   },
-  cardContainer: {
-    flexDirection: "row", // Align cards horizontally
-    marginVertical: 20, // Vertical margin around the cards
+  titleBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+    marginHorizontal: 15,
   },
-  card: {
-    backgroundColor: "#fff", // Card background
-    padding: 30, // Padding inside the card
-    borderRadius: 50, // Rounded corners
-    shadowColor: "#fff", // Shadow for depth
-    shadowOffset: { width: 0, height: 2 }, // Shadow positioning
-    shadowOpacity: 1,
-    shadowRadius: 3,
-    elevation: 5, // Android shadow
-    alignItems: "center", // Center content
-    width: 110, // Set width of the card
-    marginRight: 10, // Add space between cards
-    left: 10,
-    height: 110, // Set height of the card
-    borderColor: "#0d7c85", // Border color
-    borderWidth: 3, // Border width
+  saved: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    margin: 10,
+    height: 200,  // Fixed height, adjust as needed
+    borderRadius: 20,
+    position: 'relative', // Ensures that children are positioned correctly
+    elevation: 4,
   },
-  cardTitle: {
+  savedText: {
+    color: '#333',
+    fontSize: 18,
+    fontWeight: 'bold',
+    zIndex: 1, 
+    position: 'absolute', // Ensures that the text is positioned correctly
+    bottom: 10, // Adjust as needed
+    left: 15, // Adjust as needed
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark background overlay
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: "100%",
+    height: "90%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.primary,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "white",
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#888",
   },
-  cardValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 5,
+  savedBackground: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '80%',
+    flex: 1,  // Ensures the background image fills the parent container
+    borderRadius: 20,
+    backgroundColor: '#e5f0ff', // Dark background overlay
   },
-  userIdContainer: {
-    flexDirection: "row", // Align user ID and icon horizontally
-    alignItems: "center", // Center the icon vertically with the text
+  savedicon: {
+    zIndex: 1,
+    position: 'relative', // Ensures that the icon is positioned correctly
+    justifyContent:"center",// Adjust as needed
+    alignItems:"center",// Adjust as needed
+    width: 80,
+    height: 80,
   },
 });
+
+export default Profile;

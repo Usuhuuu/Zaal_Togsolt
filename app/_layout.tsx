@@ -109,7 +109,7 @@ function RootLayoutNav() {
           ),
         }}
       />
-    </Stack>
+      </Stack>
   );
 }
 

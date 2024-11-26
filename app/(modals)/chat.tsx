@@ -1,18 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
-import Constants from "expo-constants";
 import { auth_Refresh_Function } from "./functions/refresh";
 import { throttle } from "lodash";
 
@@ -93,6 +84,7 @@ const ChatComponent: React.FC = () => {
     }, 5000),
     [isItLoading]
   );
+  
   useEffect(() => {
     if (shouldFetch) {
       fetchChatGroups();
@@ -107,9 +99,7 @@ const ChatComponent: React.FC = () => {
         throw new Error("Token not found while joining group.");
       }
       const { accessToken } = JSON.parse(token);
-      // Check if the socket is already connected
       if (!socketRef.current || socketRef.current.disconnected) {
-        console.log("Connected group:", groupId);
         socketRef.current = io(`${apiUrl}`, {
           auth: { token: accessToken },
           query: { groupId },
@@ -121,115 +111,91 @@ const ChatComponent: React.FC = () => {
           reconnectionDelayMax: 5000,
         });
         socketRef.current.on("connect", () => {
-          // Handle chat history
           socketRef.current?.on("chatHistory", (sortedMessages: Message[]) => {
-            console.log("Received chat history:", sortedMessages);
             setMessages(sortedMessages);
           });
           socketRef.current?.emit("chatHistory");
-          // Handle incoming messages
           socketRef.current?.on("receiveMessage", (data: Message) => {
-            console.log("Received message:", data);
             setMessages((prevMessages) => [...prevMessages, data]);
           });
-
-          // Handle socket disconnection
-          socketRef.current?.on("disconnect", () => {
-            console.log("Disconnected from socket server");
-          });
-
-          // Handle reconnection attempts
-          socketRef.current?.on("reconnect", () => {
-            console.log("Reconnected to the socket server");
-          });
-
-          socketRef.current?.on("reconnect_failed", () => {
-            console.log("Reconnection failed");
-          });
-
-          socketRef.current?.on("connect_error", (error) => {
-            console.error("Socket connection error:", error);
-            Sentry.captureException(error);
-          });
         });
-        // Handle successful connection
       }
     } catch (error) {
       console.error("Error joining group:", error);
       Sentry.captureException(error);
     }
   };
+
   useEffect(() => {
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
-        console.log("Socket disconnected on cleanup");
       }
     };
   }, [currentGroupId]);
 
   const sendMessage = async (messageText: string) => {
-    try {
-      if (!messageText.trim()) {
-        console.error("Message cannot be empty");
-        return;
-      }
-      const groupId = currentGroupId;
-      if (!groupId) {
-        console.error("Group ID is missing");
-        return;
-      }
-      if (!socketRef.current) {
-        console.error("Socket is not initialized");
-        return;
-      }
-      const newMessage = {
-        groupId: groupId,
-        message: messageText,
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      socketRef.current?.emit("sendMessage", newMessage);
-      console.log("Sending message:", newMessage);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+    if (!messageText.trim()) return;
+    const groupId = currentGroupId;
+    if (!groupId || !socketRef.current) return;
+
+    const newMessage = {
+      groupId,
+      message: messageText,
+      timestamp: new Date(),
+    };
+
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    socketRef.current.emit("sendMessage", newMessage);
   };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       <Text style={styles.title}>Chat Groups</Text>
       <FlatList
         data={chatGroups}
         renderItem={({ item }) => (
-          <Text style={styles.groupItem} onPress={() => chatInit(item.groupId)}>
-            {item.groupId}
-          </Text>
+          <TouchableOpacity
+            style={styles.groupItem}
+            onPress={() => chatInit(item.groupId)}
+          >
+            <Text style={styles.groupText}>{item.groupId}</Text>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.groupId}
       />
 
       {currentGroupId && (
-        <View>
+        <View style={styles.chatContainer}>
           <Text style={styles.subtitle}>Chat Messages</Text>
           <FlatList
             data={messages}
             renderItem={({ item }) => (
-              <Text key={item.timestamp.toString()}>{item.message}</Text>
+              <View style={styles.messageContainer}>
+                <Text style={styles.messageText}>{item.message}</Text>
+              </View>
             )}
             keyExtractor={(item) => item.timestamp.toString()}
+            style={styles.messagesList}
           />
-          <TextInput
-            style={styles.input}
-            value={newMessage}
-            onChangeText={setNewMessage}
-            placeholder="Type your message"
-          />
-          <Button title="Send" onPress={() => sendMessage(newMessage)} />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={newMessage}
+              onChangeText={setNewMessage}
+              placeholder="Type your message"
+            />
+            <Button title="Send" onPress={() => sendMessage(newMessage)} />
+          </View>
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -238,23 +204,55 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    marginBottom: 8,
+    marginBottom: 10,
+    fontWeight: "bold",
   },
   subtitle: {
     fontSize: 20,
-    marginVertical: 8,
+    marginVertical: 10,
+    fontWeight: "bold",
   },
   groupItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    padding: 12,
+    backgroundColor: "#f0f0f0",
+    marginBottom: 8,
+    borderRadius: 8,
+  },
+  groupText: {
+    fontSize: 18,
+    color: "#333",
+  },
+  chatContainer: {
+    flex: 1,
+    marginTop: 20,
+  },
+  messageContainer: {
+    marginBottom: 10,
+    padding: 12,
+    backgroundColor: "#e1f7d5",
+    borderRadius: 8,
+    maxWidth: "80%",
+    alignSelf: "flex-start",
+  },
+  messageText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  messagesList: {
+    flex: 1,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
   },
   input: {
+    flex: 1,
     borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 8,
-    marginVertical: 8,
+    borderRadius: 8,
+    padding: 10,
+    marginRight: 8,
   },
 });
 
