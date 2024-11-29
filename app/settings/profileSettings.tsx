@@ -39,13 +39,6 @@ const Sections = [
       { id: 'instagram', icon: 'logo-instagram', label: 'Instagram', type: 'link' },
     ],
   },
-  {
-    header: 'Legal',
-    items: [
-      { id: 'terms', icon: 'document', label: 'Terms & Conditions', type: 'link' },
-      { id: 'privacy', icon: 'lock-closed', label: 'Privacy Policy', type: 'link' },
-    ],
-  },
 ];
 
 const ProfileSettings: React.FC = () => {
