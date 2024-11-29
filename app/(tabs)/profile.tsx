@@ -7,6 +7,7 @@ import ProfileData from "@/components/profileData";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
+import Team from "@/components/clans";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls"; 
@@ -66,6 +67,7 @@ const Profile: React.FC = () => {
           copyToClipboard={copyToClipboard}
           profileImageUri="https://example.com/profile.jpg"
         />
+        <Team />
         <UserProfile />
         <ProfileData />
 

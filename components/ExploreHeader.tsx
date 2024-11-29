@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient'; 
+import Colors from "@/constants/Colors";
 
 const categories = [
   { name: 'Sags', source: require("../assets/sport-icons/basketball.png") },
@@ -104,17 +105,16 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 145,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    overflow: 'hidden', // Ensures the gradient does not overflow outside the container
+    height: 140,
+    overflow: 'hidden', 
+    // Ensures the gradient does not overflow outside the container
   },
   background: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
-    height: '100%', // Ensure gradient covers full height
+    height: '40%', // Ensure gradient covers full height
   },
   content: {
     flex: 1,
@@ -147,9 +147,10 @@ const styles = StyleSheet.create({
     fontWeight: 'condensed',
   },
   scrollViewContent: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     gap: 20,
-    paddingHorizontal: 16,
   },
   categoriesBtn: {
     flex: 1,
@@ -158,18 +159,18 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
   },
   categoriesBtnActive: {
-    flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 10,
+    backgroundColor: Colors.primary, // Replace with the actual color value
+    borderRadius: 8,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 8,
-    borderBottomColor: '#fff',
-    borderBottomWidth: 1,
   },
   iconContainer: {
-    padding: 10,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 30,
+    marginBottom: 5,
   },
 });
 
