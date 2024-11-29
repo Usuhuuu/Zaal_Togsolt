@@ -109,9 +109,23 @@ function RootLayoutNav() {
           ),
         }}
       />
-      </Stack>
+      {/* Add Settings Screen */}
+      <Stack.Screen
+        name="profileSettings"
+        options={{
+          title: "Settings",
+          presentation: 'transparentModal',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={28} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+    </Stack>
   );
 }
+
 
 // Wrap the entire app in Sentry and Error Boundary
 export default Sentry.wrap(() => (

@@ -19,8 +19,8 @@ import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
-import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 import Team from "@/components/clans";
+import { useRouter} from "expo-router";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
@@ -33,7 +33,7 @@ const Profile: React.FC = () => {
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const apiUrl = "https://1627-118-176-174-110.ngrok-free.app"; //Constants.expoConfig?.extra?.apiUrl ??
-
+  const router = useRouter();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -64,7 +64,7 @@ const Profile: React.FC = () => {
 
   const handleSettingsPress = () => {
     console.log("Settings button pressed");
-  };
+  }
 
   const openModal = () => {
     setModalVisible(true); // Open the modal
@@ -91,7 +91,7 @@ const Profile: React.FC = () => {
           <TouchableOpacity onPress={handleSharePress}>
             <Ionicons name="share-social" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSettingsPress}>
+          <TouchableOpacity onPress={() => router.push("/settings/profileSettings")}>
             <Ionicons name="settings" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
