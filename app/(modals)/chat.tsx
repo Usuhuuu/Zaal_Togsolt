@@ -1,5 +1,16 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  FlatList,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
@@ -7,7 +18,7 @@ import * as Sentry from "@sentry/react-native";
 import { auth_Refresh_Function } from "./functions/refresh";
 import { throttle } from "lodash";
 
-const apiUrl = "https://32f2-203-246-85-194.ngrok-free.app"; // Define apiUrl properly
+const apiUrl = "https://1627-118-176-174-110.ngrok-free.app"; // Define apiUrl properly
 
 interface Message {
   groupId: string;
@@ -30,7 +41,7 @@ const ChatComponent: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
 
   const fetchChatGroups = useCallback(
-    throttle(async () => {
+    throttle(async (retries = 3) => {
       if (isItLoading) return;
       setIsItLoading(true);
       try {
@@ -77,14 +88,17 @@ const ChatComponent: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error("Error retrieving token:", error);
-        Sentry.captureException(error);
-        setIsItLoading(false);
+        if (retries > 0) {
+          fetchChatGroups(retries - 1);
+        } else {
+          console.error("Error fetching chat groups:", error);
+          Sentry.captureException(error);
+        }
       }
     }, 5000),
     [isItLoading]
   );
-  
+
   useEffect(() => {
     if (shouldFetch) {
       fetchChatGroups();
@@ -187,6 +201,7 @@ const ChatComponent: React.FC = () => {
               value={newMessage}
               onChangeText={setNewMessage}
               placeholder="Type your message"
+              maxLength={2000}
             />
             <Button title="Send" onPress={() => sendMessage(newMessage)} />
           </View>

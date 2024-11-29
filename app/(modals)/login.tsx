@@ -29,7 +29,7 @@ import * as Sentry from "@sentry/react-native";
 const Page = () => {
   // Access the API URL from the environment variables
 
-  const apiUrl = "https://32f2-203-246-85-194.ngrok-free.app";
+  const apiUrl = "https://d56c-118-176-174-110.ngrok-free.app";
 
   if (!apiUrl) {
     throw new Error("API_URL is not defined in the environment variables");
@@ -162,7 +162,6 @@ const Page = () => {
               Alert.alert(`${tokens}`);
               Alert.alert("Facebook Login Success", "You are logged in!");
             } else {
-              //Sentry.captureException("Error On fbLogin")
               throw new Error("Error on fbLogin");
             }
           } catch (error: any) {

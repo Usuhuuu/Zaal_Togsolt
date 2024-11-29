@@ -17,10 +17,12 @@ import Constants from "expo-constants";
 import Colors from "@/constants/Colors";
 import { defaultStyles } from "@/constants/Styles";
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl ?? 'http://localhost:3001';
+const API_URL = "https://1627-118-176-174-110.ngrok-free.app";
+//Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
 
 const Page = () => {
   const [formData, setFormData] = useState({
+    user_id: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -35,7 +37,7 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [passwordHide, setPasswordHide] = useState(true);
   const [verificationCompleted, setVerificationCompleted] = useState(false);
-
+  const [isItPossible, setIsItPossible] = useState(false);
   const axiosConfig = {
     timeout: 5000,
   };
@@ -66,15 +68,11 @@ const Page = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/signup`,
-        formData,
-        {
-          ...axiosConfig,
-          withCredentials: true,
-          validateStatus: (status) => status < 500,
-        }
-      );
+      const response = await axios.post(`${API_URL}/auth/signup`, formData, {
+        ...axiosConfig,
+        withCredentials: true,
+        validateStatus: (status) => status < 500,
+      });
       if (response.status === 200) {
         Alert.alert("Success", response.data.message);
       } else if (response.status === 401) {
@@ -111,9 +109,29 @@ const Page = () => {
       }
     } catch (err) {
       console.log(err);
-      Alert.alert("Error", "An error occurred while sending verification code.");
+      Alert.alert(
+        "Error",
+        "An error occurred while sending verification code."
+      );
     } finally {
       setLoading(false);
+    }
+  };
+  const handleUserID = async () => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/checkunique`,
+        { unique_user_ID: formData.user_id },
+        { timeout: 5000, withCredentials: true }
+      );
+      if (response.data.user_id_available) {
+        console.log(response.data);
+        setIsItPossible(true);
+      } else if (!response.data.user_id_available) {
+        Alert.alert("User already exists.");
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -124,6 +142,25 @@ const Page = () => {
       resizeMode="cover"
     >
       <View style={styles.container}>
+        <View style={styles.container_Vieww}>
+          <TextInput
+            autoCapitalize="none"
+            placeholder="ID"
+            value={formData.user_id}
+            onChangeText={(value) => handleInputChange("user_id", value)}
+            clearTextOnFocus={true}
+            //eniig hiiseneer button dahij darj bolno
+            onPressIn={() => setIsItPossible(false)}
+            style={[styles.input_field_user_id, { marginBottom: 10 }]}
+          />
+          <TouchableOpacity
+            onPress={handleUserID}
+            style={styles.user_id_button}
+            disabled={isItPossible}
+          >
+            <Text>Check ID</Text>
+          </TouchableOpacity>
+        </View>
         <TextInput
           autoCapitalize="none"
           placeholder="Last Name"
@@ -162,7 +199,9 @@ const Page = () => {
             autoCapitalize="none"
             placeholder="Verification Code"
             value={formData.verificationCode}
-            onChangeText={(value) => handleInputChange("verificationCode", value)}
+            onChangeText={(value) =>
+              handleInputChange("verificationCode", value)
+            }
             style={styles.input}
           />
           <TouchableOpacity
@@ -198,7 +237,9 @@ const Page = () => {
             placeholder="Confirm Password"
             secureTextEntry={passwordHide}
             value={formData.confirm_password}
-            onChangeText={(value) => handleInputChange("confirm_password", value)}
+            onChangeText={(value) =>
+              handleInputChange("confirm_password", value)
+            }
             style={styles.input}
           />
           <TouchableOpacity
@@ -214,7 +255,9 @@ const Page = () => {
         </View>
         <View style={styles.checkboxContainer}>
           <TouchableOpacity
-            onPress={() => handleInputChange("agree_terms", !formData.agree_terms)}
+            onPress={() =>
+              handleInputChange("agree_terms", !formData.agree_terms)
+            }
             style={styles.termsContainer}
           >
             <Ionicons
@@ -228,7 +271,8 @@ const Page = () => {
                 style={styles.link}
                 onPress={() =>
                   Linking.openURL("https://your-terms-and-conditions-url.com")
-                }>
+                }
+              >
                 Terms and Conditions
               </Text>
             </Text>
@@ -258,8 +302,16 @@ const Page = () => {
             </Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={defaultStyles.btn} onPress={handleSubmit} disabled={loading}>
-          {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={defaultStyles.btnText}>Submit</Text>}
+        <TouchableOpacity
+          style={defaultStyles.btn}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={defaultStyles.btnText}>Submit</Text>
+          )}
         </TouchableOpacity>
         <View style={styles.separatorView}>
           <View style={styles.separatorLine} />
@@ -289,6 +341,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 26,
+  },
+  container_Vieww: {
+    flexDirection: "row",
+    width: "100%",
+    height: 50,
+  },
+  user_id_button: {
+    backgroundColor: Colors.primary,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  input_field_user_id: {
+    backgroundColor: "white",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    paddingHorizontal: "30%",
   },
   separatorView: {
     flexDirection: "row",

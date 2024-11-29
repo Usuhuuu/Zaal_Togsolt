@@ -1,19 +1,52 @@
-import React, { useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, View, TouchableOpacity, Text, Modal, ImageBackground } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Modal,
+  ImageBackground,
+  Alert,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfileHeader from "@/components/ProfileHeader";
-import UserProfile from "@/app/(modals)/functions/UserProfile";
+import { user_data_fetching_function } from "@/app/(modals)/functions/UserProfile";
 import ProfileData from "@/components/profileData";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
-
+import Constants from "expo-constants";
+import * as SecureStore from "expo-secure-store";
+import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 // Import SavedHalls component
-import SavedHalls from "@/app/(modals)/SavedHalls"; 
+import SavedHalls from "@/app/(modals)/SavedHalls";
+import axios from "axios";
 
 const Profile: React.FC = () => {
-  const [userId] = useState<string>("12345678"); 
-  const [modalVisible, setModalVisible] = useState<boolean>(false); 
+  const [userId] = useState<string>("12345678");
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [formData, setFormData] = useState<any>({});
+  const [path, setPath] = useState<string>("main");
+  const [loading, setLoading] = useState<boolean>(false);
+  const apiUrl = "https://1627-118-176-174-110.ngrok-free.app"; //Constants.expoConfig?.extra?.apiUrl ??
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const fetchedData = await user_data_fetching_function(path, apiUrl);
+        setFormData(fetchedData);
+      } catch (err) {
+        setLoading(true);
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [path, apiUrl]); // Re-run effect if path or apiUrl changes
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(userId);
@@ -66,27 +99,25 @@ const Profile: React.FC = () => {
           copyToClipboard={copyToClipboard}
           profileImageUri="https://example.com/profile.jpg"
         />
-        <UserProfile />
         <ProfileData />
 
         {/* Button to open modal */}
         <View style={styles.saved}>
           <TouchableOpacity style={styles.savedBackground} onPress={openModal}>
             <ImageBackground
-              source={require('@/assets/images/zurag1.jpg')} // Replace with your image path
+              source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
               resizeMode="cover"
               borderRadius={20} // Rounded corners
               style={styles.savedBackground}
             >
               <Text style={styles.savedText}>hadgalsan tuuhuud</Text>
               <ImageBackground
-                source={require('@/assets/images/saved.png')} // Replace with your image path
+                source={require("@/assets/images/saved.png")} // Replace with your image path
                 style={styles.savedicon}
               />
             </ImageBackground>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
 
       {/* Modal */}
@@ -98,7 +129,7 @@ const Profile: React.FC = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <SavedHalls /> 
+            <SavedHalls />
             <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
@@ -132,21 +163,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   saved: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 10,
     margin: 10,
-    height: 200,  // Fixed height, adjust as needed
+    height: 200, // Fixed height, adjust as needed
     borderRadius: 20,
-    position: 'relative', // Ensures that children are positioned correctly
+    position: "relative", // Ensures that children are positioned correctly
     elevation: 4,
   },
   savedText: {
-    color: '#333',
+    color: "#333",
     fontSize: 18,
-    fontWeight: 'bold',
-    zIndex: 1, 
-    position: 'absolute', // Ensures that the text is positioned correctly
+    fontWeight: "bold",
+    zIndex: 1,
+    position: "absolute", // Ensures that the text is positioned correctly
     bottom: 10, // Adjust as needed
     left: 15, // Adjust as needed
   },
@@ -177,19 +208,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   savedBackground: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '80%',
-    flex: 1,  // Ensures the background image fills the parent container
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "80%",
+    flex: 1, // Ensures the background image fills the parent container
     borderRadius: 20,
-    backgroundColor: '#e5f0ff', // Dark background overlay
+    backgroundColor: "#e5f0ff", // Dark background overlay
   },
   savedicon: {
     zIndex: 1,
-    position: 'relative', // Ensures that the icon is positioned correctly
-    justifyContent:"center",// Adjust as needed
-    alignItems:"center",// Adjust as needed
+    position: "relative", // Ensures that the icon is positioned correctly
+    justifyContent: "center", // Adjust as needed
+    alignItems: "center", // Adjust as needed
     width: 80,
     height: 80,
   },

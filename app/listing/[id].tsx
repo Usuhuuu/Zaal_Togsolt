@@ -59,18 +59,19 @@ const DetailsPage = () => {
       alert("Listing data is unavailable");
       return;
     }
-  
+
     const hall = { id: listing.id, name: listing.name };
     addHall(hall);
     alert("Hall saved!");
   };
-  
+
   const { id } = useLocalSearchParams();
   const listing = (listingsData as any[]).find((item) => item.id === id);
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
+  const apiUrl = "https://localhost:443";
+  Constants.expoConfig?.extra?.apiUrl;
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -385,7 +386,7 @@ const DetailsPage = () => {
                 <Text style={{ fontSize: 12 }}>
                   {listing.review_scores_rating / 20}
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
                   <Text style={styles.ratings}>
                     {listing.number_of_reviews} reviews
                   </Text>

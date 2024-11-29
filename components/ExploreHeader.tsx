@@ -1,17 +1,28 @@
 import React, { useRef, useState } from "react";
-import { StatusBar, View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native";
+import {
+  StatusBar,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient'; 
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 
 const categories = [
-  { name: 'Sags', source: require("../assets/sport-icons/basketball.png") },
-  { name: 'Volley-ball', source: require("../assets/sport-icons/volleyball.png") },
-  { name: 'Hol-Bombog', source: require("../assets/sport-icons/football.png") },
-  { name: 'Tennis', source: require("../assets/sport-icons/table-tennis.png") },
-  { name: 'Bowling', source: require("../assets/sport-icons/lanes.png") },
-  { name: 'Golf', source: require("../assets/sport-icons/golf.png") },
+  { name: "Sags", source: require("../assets/sport-icons/basketball.png") },
+  {
+    name: "Volley-ball",
+    source: require("../assets/sport-icons/volleyball.png"),
+  },
+  { name: "Hol-Bombog", source: require("../assets/sport-icons/football.png") },
+  { name: "Tennis", source: require("../assets/sport-icons/table-tennis.png") },
+  { name: "Bowling", source: require("../assets/sport-icons/lanes.png") },
+  { name: "Golf", source: require("../assets/sport-icons/golf.png") },
 ];
 
 interface Props {
@@ -20,7 +31,7 @@ interface Props {
 
 const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
-  const itemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
+  const itemsRef = useRef<(TouchableOpacity | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
   const selectCategory = (index: number) => {
@@ -28,9 +39,11 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
     setActiveIndex(index);
 
     if (selected) {
-      (selected as unknown as View).measure((_fx, fy, width, height, px, py) => {
-        scrollRef.current?.scrollTo({ x: px - 16, animated: true });
-      });
+      (selected as unknown as View).measure(
+        (_fx, fy, width, height, px, py) => {
+          scrollRef.current?.scrollTo({ x: px - 16, animated: true });
+        }
+      );
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onCategoryChanged(categories[index].name);
@@ -41,11 +54,11 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
       <StatusBar barStyle="light-content" backgroundColor="#61b3fa" />
       <View style={styles.container}>
         <LinearGradient
-          colors={['#61b3fa', '#fff']}
+          colors={["#61b3fa", "#fff"]}
           start={[0, 0]}
           end={[0, 1.2]}
           locations={[0, 1]}
-          style={styles.background} 
+          style={styles.background}
         />
         <View style={styles.content}>
           <View style={styles.actionRow}>
@@ -62,7 +75,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 source={require("../assets/sport-icons/logo.png")}
                 style={{ width: 70, height: 70 }}
               />
-              <Text style={{fontSize:18 , right:20}}>Sags</Text>
+              <Text style={{ fontSize: 18, right: 20 }}>Sags</Text>
             </View>
 
             <TouchableOpacity style={styles.filterButton}>
@@ -82,7 +95,11 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
               <TouchableOpacity
                 key={index}
                 ref={(el) => (itemsRef.current[index] = el)}
-                style={activeIndex === index ? styles.categoriesBtnActive : styles.categoriesBtn}
+                style={
+                  activeIndex === index
+                    ? styles.categoriesBtnActive
+                    : styles.categoriesBtn
+                }
                 onPress={() => selectCategory(index)}
               >
                 <View style={styles.iconContainer}>
@@ -101,75 +118,74 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     height: 145,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    overflow: 'hidden', // Ensures the gradient does not overflow outside the container
+    overflow: "hidden", // Ensures the gradient does not overflow outside the container
   },
   background: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     top: 0,
-    height: '100%', // Ensure gradient covers full height
+    height: "100%", // Ensure gradient covers full height
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     padding: 8,
   },
   actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingBottom: 6,
   },
   filterButton: {
     padding: 10,
   },
   searchbtn: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     width: 40,
     height: 40,
   },
   titleContainer: {
     height: 50,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    flexDirection: 'row',
+    justifyContent: "space-around",
+    alignItems: "center",
+    flexDirection: "row",
   },
   titleText: {
-    color: '#000',
-    fontWeight: 'condensed',
+    color: "#000",
+    fontWeight: "condensed",
   },
   scrollViewContent: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 20,
     paddingHorizontal: 16,
   },
   categoriesBtn: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingBottom: 6,
   },
   categoriesBtnActive: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingBottom: 8,
-    borderBottomColor: '#fff',
+    borderBottomColor: "#fff",
     borderBottomWidth: 1,
   },
   iconContainer: {
     padding: 10,
     borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

@@ -49,7 +49,11 @@
       <string>com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6</string>
     </array>
 
-
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
 
     <!-- Other necessary keys -->
     <key>CFBundleDevelopmentRegion</key>
