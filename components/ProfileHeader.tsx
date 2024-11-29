@@ -10,30 +10,54 @@ interface ProfileHeaderProps {
   profileImageUri: string; 
 }
 
-
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userId, copyToClipboard }) => {
   return (
-    <View style={styles.profileContainer}>
-      <View style={styles.nameContainer}>
-        <Text style={{ color: "#fff" }}>Sainuu</Text>
-        <Text style={styles.profileName}>DASHNYAM</Text>
-        <View style={styles.userIdContainer}>
-          <Text style={{ color: Colors.dark }}> ID: {userId} </Text>
-          <TouchableOpacity onPress={copyToClipboard}>
-            <Ionicons name="copy" size={24} color="#fff" />
+    <View>
+      {/* Profile Header */}
+      <View style={styles.profileContainer}>
+        <View style={styles.nameContainer}>
+          <Text style={styles.profileName}>DASHNYAM</Text>
+          <View style={styles.userIdContainer}>
+            <Text style={{ color: Colors.dark }}> ID: {userId} </Text>
+            <TouchableOpacity onPress={copyToClipboard}>
+              <Ionicons name="copy" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.friend}>
+            <Image
+              source={require('@/assets/tab-icons/teamwork.png')}
+              style={{ width: 20, height: 20 }}
+            />
+            <Text style={styles.socialCount}> Naiz</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {/* Profile Image */}
+        <View style={styles.profileImageContainer}>
+          <Image
+            source={require('@/assets/images/profileIcons/profile.png')} 
+            style={styles.profileImage}
+          />
+          <TouchableOpacity style={styles.useredit}>
+            <FontAwesome5 name="user-edit" size={24} color={Colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
-      
-      {/* Profile Image */}
-      <View style={styles.profileImageContainer}>
-        <Image
-          source={require('@/assets/images/profileIcons/profile.png')} 
-          style={styles.profileImage}
-        />
-        <TouchableOpacity style={styles.useredit}>
-        <FontAwesome5 name="user-edit" size={24} color={Colors.primary} />
-        </TouchableOpacity>
+
+      {/* Friends and Followers Section */}
+      <View style={styles.socialContainer}>
+        <View style={styles.socialItem}>
+          <Text style={styles.socialCount}>150</Text>
+          <Text style={styles.socialLabel}>Naiz</Text>
+        </View>
+        <View style={styles.socialItem}>
+          <Text style={styles.socialCount}>250</Text>
+          <Text style={styles.socialLabel}>Teams</Text>
+        </View>
+        <View style={styles.socialItem}>
+          <Text style={styles.socialCount}>180</Text>
+          <Text style={styles.socialLabel}>toglolt</Text>
+        </View>
       </View>
     </View>
   );
@@ -58,6 +82,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  friend: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: Colors.primary,
+    borderRadius: 15,
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   userIdContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -77,7 +111,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 15,
     padding: 5,
-  }
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  socialItem: {
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+
+
+  },
+  socialCount: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.light,
+  },
+  socialLabel: {
+    fontSize: 16,
+    color: Colors.dark,
+  },
 });
 
 export default ProfileHeader;

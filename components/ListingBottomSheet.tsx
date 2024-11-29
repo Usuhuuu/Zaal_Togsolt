@@ -20,13 +20,18 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
     setrefresh(refresh + 1);
 }
 
-  const snapPoints = useMemo(() => ['11%', '90%'], []);
+  const snapPoints = useMemo(() => ['9%', '90%'], []);
 
   return (
     <BottomSheet 
     ref={bottomSheetRef} 
     snapPoints={snapPoints}
-     handleIndicatorStyle={{backgroundColor:Colors.primary}}
+     handleIndicatorStyle={{
+      backgroundColor: Colors.primary, // Change color
+        width: 60,                         
+        borderRadius: 2,
+
+    }}
         style={styles.sheetContainer}>
       <View style={styles.contentContainer}>
         <Listings listings={listing} category={category} refresh={refresh}/>
@@ -47,14 +52,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   absoluteBtn: {
-    position: 'absolute',
-    bottom: 30,
+    bottom: 50,
     width: '100%',
     alignItems: 'center',   
   },
   btn:{
     backgroundColor: Colors.primary,
-    borderRadius: 30,
+    borderRadius: 10,
     height: 50,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -64,19 +68,15 @@ const styles = StyleSheet.create({
 
   },
   btnText:{
-    color: 'white',
-    padding: 10,
+    color: '#fff',
   },
-  sheetContainer:{
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    elevation: 4, 
-    shadowColor: 'black',
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    shadowOffset: { width: 1, height: 1 },
-  }
+  sheetContainer: {
+    borderTopLeftRadius: 0, // Updated radius
+    borderTopRightRadius: 0, // Updated radius
+    backgroundColor: "black",
+    borderTopStartRadius: 20,
+    borderTopEndRadius: 20,
+  },
 });
 
 export default ListingBottomSheet;

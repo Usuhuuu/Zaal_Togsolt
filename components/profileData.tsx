@@ -22,6 +22,7 @@ const ProfileData = () => {
   const [selectedDetails, setSelectedDetails] = useState<null | { timesPlayed: number, goal: number }>(null);
   const [showDetails, setShowDetails] = useState(false);
   const animatedHeight = useRef(new Animated.Value(0)).current;  // Animated value for details height
+  const [modalVisible, setModalVisible] = useState<boolean>(false); 
 
   const selectCategory = (index: number) => {
     const selected = itemsRef.current[index];
@@ -60,7 +61,7 @@ const ProfileData = () => {
       name: 'Remaining',
     },
   ];
-
+  
   return (
     <View style={styles.container}>
       <LinearGradient

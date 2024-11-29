@@ -20,6 +20,8 @@ import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import { auth_Refresh_Function } from "../(modals)/functions/refresh";
+import Team from "@/components/clans";
+
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
 import axios from "axios";
@@ -99,6 +101,7 @@ const Profile: React.FC = () => {
           copyToClipboard={copyToClipboard}
           profileImageUri="https://example.com/profile.jpg"
         />
+        <Team />
         <ProfileData />
 
         {/* Button to open modal */}

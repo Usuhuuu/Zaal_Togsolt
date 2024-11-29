@@ -163,7 +163,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   flatListContent: {
-    paddingBottom: 20,
   },
   searchbtn: {
     flexDirection: 'row',
