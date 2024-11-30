@@ -29,7 +29,7 @@ import * as Sentry from "@sentry/react-native";
 const Page = () => {
   // Access the API URL from the environment variables
 
-  const apiUrl = "https://d56c-118-176-174-110.ngrok-free.app";
+  const apiUrl = "https://1627-118-176-174-110.ngrok-free.app";
 
   if (!apiUrl) {
     throw new Error("API_URL is not defined in the environment variables");
@@ -56,8 +56,8 @@ const Page = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiUrl}/auth/login`,
-        { email, password },
+        `${apiUrl}/login`,
+        { email, userPassword: password },
         { ...axiosConfig, withCredentials: true }
       );
       if (response.status === 200) {
