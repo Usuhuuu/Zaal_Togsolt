@@ -19,27 +19,26 @@ import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
+import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 import Team from "@/components/clans";
-import { useRouter} from "expo-router";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
 import axios from "axios";
 
 const Profile: React.FC = () => {
-  const [userId] = useState<string>("12345678");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({});
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const apiUrl = "https://1627-118-176-174-110.ngrok-free.app"; //Constants.expoConfig?.extra?.apiUrl ??
-  const router = useRouter();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const fetchedData = await user_data_fetching_function(path, apiUrl);
-        setFormData(fetchedData);
+        setFormData(JSON.parse(fetchedData));
       } catch (err) {
         setLoading(true);
         console.error(err);
@@ -51,7 +50,7 @@ const Profile: React.FC = () => {
   }, [path, apiUrl]); // Re-run effect if path or apiUrl changes
 
   const copyToClipboard = async () => {
-    await Clipboard.setStringAsync(userId);
+    await Clipboard.setStringAsync(formData);
   };
 
   const handleBackPress = () => {
@@ -64,7 +63,7 @@ const Profile: React.FC = () => {
 
   const handleSettingsPress = () => {
     console.log("Settings button pressed");
-  }
+  };
 
   const openModal = () => {
     setModalVisible(true); // Open the modal
@@ -91,15 +90,16 @@ const Profile: React.FC = () => {
           <TouchableOpacity onPress={handleSharePress}>
             <Ionicons name="share-social" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/settings/profileSettings")}>
+          <TouchableOpacity onPress={handleSettingsPress}>
             <Ionicons name="settings" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
         <ProfileHeader
-          userId={userId}
           copyToClipboard={copyToClipboard}
           profileImageUri="https://example.com/profile.jpg"
+          firstName={formData.firstName}
+          unique_user_ID={formData.unique_user_ID}
         />
         <Team />
         <ProfileData />

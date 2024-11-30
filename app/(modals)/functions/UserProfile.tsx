@@ -12,7 +12,8 @@ export const user_data_fetching_function = throttle(
   async (path: string, url: string, retries = 3) => {
     const cached_data = await AsyncStorage.getItem(`user_${path}`);
     if (cached_data) {
-      return JSON.parse(cached_data);
+      const formData = JSON.parse(cached_data);
+      return formData;
     } else {
       const token = await SecureStore.getItemAsync("Tokens");
       if (!token) {
