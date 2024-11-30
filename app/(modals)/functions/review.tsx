@@ -1,16 +1,13 @@
-import Constants from "expo-constants";
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
-import { Alert } from "react-native";
 
 export const zaal_review_update = async (
   accessToken: string,
   message: string,
   zaal_ID: string,
   rating: number,
-  url: String,
+  url: string,
   retries = 3
-) => {
+): Promise<string | boolean> => {
   try {
     const response = await axios.post(
       `${url}/auth/zaal_review_update`,
@@ -21,16 +18,22 @@ export const zaal_review_update = async (
         withCredentials: true,
       }
     );
+
     if (!response.data.auth) {
-      return (response.data.auth = false);
-    } else if (response.status == 200) {
-      return "Review updated successfully";
+      return false; 
+    } else if (response.status === 200) {
+      return "Review updated successfully"; // Success response
     } else {
-      return "Failed to update review";
+      return "Failed to update review"; // Unexpected response
     }
   } catch (err) {
     if (retries > 0) {
-      zaal_review_update(
+      if (err instanceof Error) {
+        console.warn(`Retrying... (${3 - retries} attempts left)`, err.message);
+      } else {
+        console.warn(`Retrying... (${3 - retries} attempts left)`, err);
+      }
+      return zaal_review_update(
         accessToken,
         message,
         zaal_ID,
@@ -44,5 +47,3 @@ export const zaal_review_update = async (
     }
   }
 };
-
-module.exports = { zaal_review_update };
