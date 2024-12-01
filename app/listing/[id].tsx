@@ -29,7 +29,7 @@ import Constants from "expo-constants";
 import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/functions/savedhalls";
-import { useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -94,9 +94,11 @@ const DetailsPage = () => {
     }
   };
 
- const handleViewReviews = () => {
+  const handleViewReviews = () => {
     // Pass the listing id to the reviews page as a dynamic route
-    router.push(`/listing/ZaalReview?reviews=${listing.number_of_reviews}&rating=${listing.review_scores_rating}`);
+    router.push(
+      `/listing/ZaalReview?reviews=${listing.number_of_reviews}&rating=${listing.review_scores_rating}`
+    );
   };
 
   const baseTimeSlots = [

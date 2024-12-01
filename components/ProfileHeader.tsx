@@ -17,12 +17,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   unique_user_ID,
   profileImageUri,
 }) => {
-  console.log(
-    "ProfileHeader Props: ",
-    firstName,
-    unique_user_ID,
-    profileImageUri
-  );
   return (
     <View>
       {/* Profile Header */}

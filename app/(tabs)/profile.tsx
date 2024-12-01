@@ -21,6 +21,8 @@ import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 import Team from "@/components/clans";
+import { useRouter, Href } from "expo-router";
+import ProfileSettings from "../settings/profileSettings";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
@@ -48,6 +50,7 @@ const Profile: React.FC = () => {
     };
     fetchData();
   }, [path, apiUrl]); // Re-run effect if path or apiUrl changes
+  const router = useRouter();
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(formData);
@@ -90,7 +93,13 @@ const Profile: React.FC = () => {
           <TouchableOpacity onPress={handleSharePress}>
             <Ionicons name="share-social" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSettingsPress}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push(
+                "/settings/profileSettings" as Href<"/settings/profileSettings">
+              )
+            }
+          >
             <Ionicons name="settings" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
