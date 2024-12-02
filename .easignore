@@ -1,0 +1,21 @@
+# Node modules (not needed for build)
+node_modules/
+
+# Build directories
+build/
+dist/
+.expo/
+
+# Environment files
+.env
+.env.local
+
+# Temporary files
+*.tmp
+temp/
+
+# Log files
+*.log
+
+# Coverage reports
+coverage/

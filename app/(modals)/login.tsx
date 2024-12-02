@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,10 +12,29 @@ import {
 } from "react-native";
 import { Ionicons, Zocial } from "@expo/vector-icons";
 import axios from "axios";
-import { API_URL } from "@env";
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
+import Colors from "@/constants/Colors";
+import { AccessToken, Settings, LoginManager } from "react-native-fbsdk-next";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+import * as AppleAuthentication from "expo-apple-authentication";
+import { Platform } from "react-native";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import * as Sentry from "@sentry/react-native";
 
 const Page = () => {
+  // Access the API URL from the environment variables
+
+  const apiUrl = "https://1627-118-176-174-110.ngrok-free.app";
+
+  if (!apiUrl) {
+    throw new Error("API_URL is not defined in the environment variables");
+  }
+
   const axiosConfig = {
     timeout: 5000,
   };
@@ -27,17 +46,22 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [passwordHide, setPasswordHide] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
-
+  const [isItApple, setIsITApple] = useState(false);
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      setIsITApple(true);
+    }
+  }, []);
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${API_URL}/auth/login`,
-        { email, password },
+        `${apiUrl}/login`,
+        { email, userPassword: password },
         { ...axiosConfig, withCredentials: true }
       );
       if (response.status === 200) {
-        await SecureStore.setItemAsync(
+        const tokens = await SecureStore.setItemAsync(
           "Tokens",
           JSON.stringify({
             accessToken: response.data.accessToken,
@@ -51,8 +75,8 @@ const Page = () => {
       }
     } catch (err) {
       console.log(err);
-      setEr("An error occurred during login.");
       Alert.alert("Error", er);
+      throw new Error("login error");
     } finally {
       setLoading(false);
     }
@@ -65,7 +89,7 @@ const Page = () => {
   const mobileVerify = async () => {
     try {
       const response = await axios.post(
-        `${API_URL}/auth/phoneVerification`,
+        `${apiUrl}/auth/phoneVerification`, // Use apiUrl from environment variable
         { phoneNumber },
         { ...axiosConfig, withCredentials: true }
       );
@@ -81,7 +105,7 @@ const Page = () => {
   const mobileVerifyCheck = async () => {
     try {
       const response = await axios.post(
-        `${API_URL}/auth/verifyCode`,
+        `${apiUrl}/auth/verifyCode`, // Use apiUrl from environment variable
         { verifyCode },
         { ...axiosConfig, withCredentials: true }
       );
@@ -93,6 +117,130 @@ const Page = () => {
       Alert.alert("Error", "Failed to verify the code");
     }
   };
+  useEffect(() => {
+    const requestTracking = async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+
+      Settings.initializeSDK();
+
+      if (status === "granted") {
+        await Settings.setAdvertiserTrackingEnabled(true);
+      }
+    };
+    requestTracking();
+  }, []);
+
+  const loginWithFacebook = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions([
+        "public_profile",
+        "email",
+      ]);
+      if (result.isCancelled) {
+        console.log("==> Login cancelled");
+        throw new Error("login cancelled");
+      } else {
+        console.log("Login success with permissions:", result);
+        const data = await AccessToken.getCurrentAccessToken();
+        if (data) {
+          const accessToken = data.accessToken;
+          try {
+            const res = await axios.post(
+              `${apiUrl}/auth/facebook`,
+              { accessToken },
+              { ...axiosConfig, withCredentials: true }
+            );
+            console.log("Facebook login result:", res);
+            if (res.status == 200) {
+              const tokens = await SecureStore.setItemAsync(
+                "Tokens",
+                JSON.stringify({
+                  accessToken: res.data.accessToken,
+                  refreshToken: res.data.refreshToken,
+                })
+              );
+              Alert.alert(`${tokens}`);
+              Alert.alert("Facebook Login Success", "You are logged in!");
+            } else {
+              throw new Error("Error on fbLogin");
+            }
+          } catch (error: any) {
+            //Sentry.captureEvent(error)
+
+            throw new Error("Failed to log in with Facebook.");
+          }
+        } else {
+          throw new Error("No Facebook access token found.");
+        }
+      }
+    } catch (error: any) {
+      if (error.code) {
+        switch (error.code) {
+          case 1:
+            Alert.alert("Network error");
+          case 190:
+            Alert.alert("invalid Access Token");
+          case 10:
+            Alert.alert("App not set up correctly");
+          case 429:
+            Alert.alert("Too Many Requests");
+          default:
+            Sentry.captureException("facebook Error", error.code);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        "56931783205-g9s9glhtlpmjh6vktt3osnh44go1fo7k.apps.googleusercontent.com",
+      offlineAccess: true,
+      iosClientId:
+        "56931783205-78eeaknokj0nah74h5d53eis9ebj77r6.apps.googleusercontent.com",
+    });
+  }, []);
+
+  const signup_google = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const user_info = await GoogleSignin.signIn();
+      const { idToken, accessToken } = await GoogleSignin.getTokens();
+      if (accessToken) {
+        const response = await axios.post(
+          `${apiUrl}/auth/google`,
+          { accessToken },
+          { ...axiosConfig, withCredentials: true }
+        );
+        if (response.status == 200) {
+          const tokens = await SecureStore.setItemAsync(
+            "Tokens",
+            JSON.stringify({
+              accessToken: response.data.accessToken,
+              refreshToken: response.data.refreshToken,
+            })
+          );
+          Alert.alert("Google Login Success", "You are logged in!");
+        } else {
+          Alert.alert("error");
+        }
+      }
+    } catch (err: any) {
+      if (isErrorWithCode(err)) {
+        switch (err.code) {
+          case statusCodes.IN_PROGRESS:
+            Alert.alert("progressing");
+          case statusCodes.SIGN_IN_CANCELLED:
+            Alert.alert("User canceled process");
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Alert.alert("service not available");
+        }
+      } else {
+        throw new Error("Server Has Problem Try Again Later ");
+      }
+    }
+  };
+  const handleAppleLogin = () => {};
 
   return (
     <ImageBackground
@@ -138,10 +286,7 @@ const Page = () => {
             onChangeText={setPhoneNumber}
             style={styles.input}
           />
-          <TouchableOpacity
-            style={styles.verifyButton}
-            onPress={mobileVerify}
-          >
+          <TouchableOpacity style={styles.verifyButton} onPress={mobileVerify}>
             <Text style={styles.verifyButtonText}>Verify</Text>
           </TouchableOpacity>
         </View>
@@ -181,20 +326,75 @@ const Page = () => {
             <Zocial name="guest" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Login as Guest</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
+          <TouchableOpacity style={styles.btnOutline} onPress={signup_google}>
             <Ionicons name="logo-google" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Continue with Google</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
+          <TouchableOpacity
+            style={styles.btnOutline}
+            onPress={loginWithFacebook}
+          >
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Continue with Facebook</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
+          {/* <TouchableOpacity style={styles.btnOutline}>
             <Image
               source={require("../../assets/images/emongolia.png")}
               style={styles.imageIcon}
             />
             <Text style={styles.btnOutlineText}>Continue with E-Mongolia</Text>
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => handleAppleLogin()}
+            style={styles.btnOutline}
+          >
+            {isItApple ? (
+              <>
+                <AppleAuthentication.AppleAuthenticationButton
+                  buttonType={
+                    AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+                  }
+                  buttonStyle={
+                    AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                  }
+                  cornerRadius={5}
+                  style={styles.button}
+                  onPress={async () => {
+                    try {
+                      const credentials = await AppleAuthentication.signInAsync(
+                        {
+                          requestedScopes: [
+                            AppleAuthentication.AppleAuthenticationScope
+                              .FULL_NAME,
+                            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                          ],
+                        }
+                      );
+                      console.log(credentials);
+                    } catch (err: any) {
+                      if (err.code === "ERR_REQUEST_CANCELED") {
+                        console.log("User canceled Login");
+                        Alert.alert(`${err}`);
+                        Alert.alert("ERR_REQUEST_CANCELED");
+                      } else if (err.code === "ERR_INVALID_OPERATION") {
+                        Alert.alert(`${err}`);
+                        Alert.alert("ERR_INVALID_OPERATION");
+                      } else if (err.code === "ERR_REQUEST_FAILED") {
+                        Alert.alert("ERR_REQUEST_FAILED");
+                        Alert.alert(`${err}`);
+                      } else if (err.code === "ERR_REQUEST_NOT_HANDLED") {
+                        Alert.alert("ERR_REQUEST_NOT_HANDLED");
+                      } else {
+                        Alert.alert(`${err}`);
+                        Alert.alert(`${err.code}`);
+                      }
+                    }
+                  }}
+                />
+              </>
+            ) : (
+              <></>
+            )}
           </TouchableOpacity>
         </View>
       </View>

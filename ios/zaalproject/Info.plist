@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+
+
+    <!-- Google map configuration-->
+    <key>GMSApiKey</key>
+    <string>AIzaSyDezC8XCeVeRY1lh34mbxAjuhe1OWJhLRc</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Your app needs access to your location to show your position on the map</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Your app needs access to your location for continuous location updates</string>
+    <!-- Facebook App Configuration -->
+    <key>FacebookAppID</key>
+    <string>8534089993319728</string>
+    <key>FacebookClientToken</key>
+    <string>61512c22202b566ea162d58871409595</string>
+    <key>FacebookDisplayName</key>
+    <string>Login with Facebook</string>
+
+    <key>NSUserTrackingUsageDescription</key>
+    <string>This identifier will be used to deliver personalized ads to you.</string>
+
+    <!-- URL schemes for Google Sign-In, Facebook Login, and app-specific URL schemes -->
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <!-- Google Sign-In URL scheme -->
+          <string>com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6</string>
+          <!-- Facebook login scheme -->
+          <string>fb8534089993319728</string>
+          <!-- Your app's bundle identifier -->
+          <string>com.usuhbayr.zaalproject</string>
+          <!-- Expo-specific URL scheme -->
+          <string>exp+zaalproject</string>
+        </array>
+      </dict>
+    </array>
+
+    <!-- LSApplicationQueriesSchemes allows queries to specific URL schemes -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>google</string>
+      <string>com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6</string>
+    </array>
+
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
+    <!-- Other necessary keys -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>zaalproject</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+
+    <!-- App Transport Security -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+      <key>NSAllowsArbitraryLoads</key>
+      <false/>
+      <key>NSAllowsLocalNetworking</key>
+      <true/>
+    </dict>
+
+    <!-- Location usage descriptions -->
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
+
+    <!-- Launch screen -->
+    <key>UILaunchStoryboardName</key>
+    <string>SplashScreen</string>
+
+    <!-- Supported device capabilities -->
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+      <string>arm64</string>
+    </array>
+
+    <!-- Full-screen requirement -->
+    <key>UIRequiresFullScreen</key>
+    <false/>
+
+    <!-- Status bar and interface orientation -->
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleDefault</string>
+
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+      <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationPortraitUpsideDown</string>
+      <string>UIInterfaceOrientationLandscapeLeft</string>
+      <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- iPad orientations -->
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+      <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationPortraitUpsideDown</string>
+      <string>UIInterfaceOrientationLandscapeLeft</string>
+      <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- User interface style -->
+    <key>UIUserInterfaceStyle</key>
+    <string>Light</string>
+
+    <!-- Status bar appearance configuration -->
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+  </dict>
+</plist>

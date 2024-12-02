@@ -22,9 +22,9 @@ export const defaultStyles = StyleSheet.create({
     alignItems: 'center',
   },
   btnText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
-    fontFamily: 'mon-b',
+    fontWeight: 'bold',
   },
   btnIcon: {
     position: 'absolute',
@@ -32,7 +32,7 @@ export const defaultStyles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    height: 100,
+    height: 80,
     bottom: 0,
     left: 0,
     right: 0,

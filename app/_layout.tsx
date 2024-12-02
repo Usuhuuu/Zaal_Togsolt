@@ -3,31 +3,62 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React from "react";
-import { useEffect } from "react";
-import { ImageBackground, Touchable, TouchableOpacity } from "react-native";
+import React, { useEffect, ReactNode } from "react";
+import { TouchableOpacity, View, Text } from "react-native";
 import "react-native-reanimated";
+import * as Sentry from "@sentry/react-native";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+// Initialize Sentry
+Sentry.init({
+  dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
+  tracesSampleRate: 1.0,
+});
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
-};
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Prevent splash screen auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export { ErrorBoundary } from "expo-router";
+
+export const unstable_settings = {
+  initialRouteName: "(tabs)",
+};
+
+// Define a type for the error boundary props
+interface CustomErrorBoundaryProps {
+  error?: Error;
+  children: ReactNode;
+}
+
+function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
+  useEffect(() => {
+    if (error) {
+      Sentry.captureException(error); // Log boundary error to Sentry
+    }
+  }, [error]);
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Something went wrong. Please restart the app.</Text>
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      Sentry.captureException(error); // Log font load errors to Sentry
+      console.error("Error loading fonts:", error);
+      throw error;
+    }
   }, [error]);
 
   useEffect(() => {
@@ -39,30 +70,23 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+
   return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
   const router = useRouter();
+
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="(modals)/login"
         options={{
-          title: `burtgel uusgeh esvel burtgeltei haygaar nevtreh`,
+          title: `Log in or Sign up`,
           headerTitleStyle: {
             fontWeight: `bold`,
-            fontSize: 14,
           },
-          headerTitleAlign: `center`,
-          headerBackground: () => <ImageBackground style={{ flex: 1 }} />,
-          headerTintColor: `#ffffff`,
-          headerStyle: {
-            backgroundColor: `#EB5757`,
-          },
-
-
           presentation: `modal`,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
@@ -85,6 +109,27 @@ function RootLayoutNav() {
           ),
         }}
       />
+      {/* Add Settings Screen */}
+      <Stack.Screen
+        name="profileSettings"
+        options={{
+          title: "Settings",
+          presentation: 'transparentModal',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={28} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Stack>
   );
 }
+
+
+// Wrap the entire app in Sentry and Error Boundary
+export default Sentry.wrap(() => (
+  <CustomErrorBoundary>
+    <RootLayout />
+  </CustomErrorBoundary>
+));
