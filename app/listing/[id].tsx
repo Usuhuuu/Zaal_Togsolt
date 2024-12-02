@@ -48,7 +48,7 @@ const DetailsPage = () => {
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const router = useRouter();
   const zaalFormData = {
-    zaalId: "",
+    zaalId: "674c9367f5b8455cd83d70c2",
     date: "",
     startTime: "",
     endTime: "",
@@ -72,7 +72,7 @@ const DetailsPage = () => {
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-  const apiUrl = "https://localhost:443";
+  const apiUrl = "https://1627-118-176-174-110.ngrok-free.app";
   Constants.expoConfig?.extra?.apiUrl;
 
   const handleScroll = (event: any) => {
@@ -116,11 +116,11 @@ const DetailsPage = () => {
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
   const [isAvailable, setIsAvailable] = useState(true);
   const [zahialgaBtn, setZahialgaBtn] = useState(false);
+
   const dateSlotGiver = async (date: any) => {
     try {
       const odor = date.toISOString().split("T")[0];
       const zaalniID = zaalFormData.zaalId;
-      console.log(odor);
       const response = await axios.get(`${apiUrl}/timeslotscheck`, {
         params: { zaalniID, odor },
       });
