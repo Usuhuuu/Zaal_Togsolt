@@ -30,6 +30,7 @@ import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/functions/savedhalls";
 import { useRouter } from "expo-router";
+import moment from "moment";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -46,6 +47,8 @@ const DetailsPage = () => {
   const [infoHeight, setInfoHeight] = useState(0);
   const [iconsOverflow, setIconsOverflow] = useState(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
+  const [today, setToday] = useState(moment());
+  const [pendingTime, setPendingTime] = useState([]);
   const router = useRouter();
   const zaalFormData = {
     zaalId: "674c9367f5b8455cd83d70c2",
@@ -121,16 +124,21 @@ const DetailsPage = () => {
     try {
       const odor = date.toISOString().split("T")[0];
       const zaalniID = zaalFormData.zaalId;
+      console.log(zaalniID, odor);
       const response = await axios.get(`${apiUrl}/timeslotscheck`, {
         params: { zaalniID, odor },
       });
       if (!response.data.available && response.data.not_possible_time != "") {
         //mean theres not avaible time and that times are saved on not_possible_time
-        const notPossibleTime: string[] =
-          response.data.not_possible_time.orderedTime.map(
-            (time: any) => `${time.start_time} ~ ${time.end_time}`
-          );
-        setUnavailableTimes(notPossibleTime); // Update the unavailable times as strings
+        const notPossibleTime = response.data.not_possible_time.orderedTime.map(
+          (result: any) => {
+            return {
+              time: result.time,
+              status: result.status, // This will be an array of statuses, e.g., ['Completed', 'Pending']
+            };
+          }
+        );
+        setUnavailableTimes(notPossibleTime);
         setIsAvailable(false);
       } else {
         setUnavailableTimes([]);
@@ -140,13 +148,12 @@ const DetailsPage = () => {
       console.log(err);
     }
   };
+
   const handlePressTimeSlot = (timeSlot: any) => {
     console.log(`Time slot pressed: ${timeSlot}`);
     setZahialgaBtn(true);
   };
-  useEffect(() => {
-    console.log(unavailableTimes);
-  });
+
   const OrderScreen = () => {
     return (
       <View style={styles.zahialgaView}>
@@ -158,7 +165,8 @@ const DetailsPage = () => {
             duration: 200,
             highlightColor: "gray",
           }}
-          startingDate={new Date()}
+          startingDate={today.toDate()}
+          selectedDate={today.toDate()}
           calendarAnimation={{ type: "sequence", duration: 5 }}
           onDateSelected={(e) => {
             dateSlotGiver(e);
@@ -171,7 +179,14 @@ const DetailsPage = () => {
           {/* Render available and unavailable time slots */}
           {baseTimeSlots.map((timeSlot, index) => {
             const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
-            const isDisabled = unavailableTimes.includes(timeString);
+            const isDisabled = unavailableTimes.some(
+              (time: any) =>
+                time.time == timeString && time.status == "Completed"
+            );
+            const isPending = unavailableTimes.some(
+              (time: any) => time.time == timeString && time.status == "Pending"
+            );
+
             return (
               <View style={styles.timeSlotView} key={index}>
                 <TouchableOpacity
@@ -277,6 +292,9 @@ const DetailsPage = () => {
 
   const handleZaalId = (input: any) => {
     zaalFormData.zaalId = input;
+    if (today) {
+      dateSlotGiver(today.toDate());
+    }
   };
   useEffect(() => {
     handleZaalId(id);
