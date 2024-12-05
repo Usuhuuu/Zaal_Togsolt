@@ -193,7 +193,7 @@ const DetailsPage = () => {
               styles.lalarinSdaBtn,
               {
                 backgroundColor: isDisabled
-                  ? "grey"
+                  ? "red"
                   : isPending
                   ? "yellow"
                   : "white",
@@ -232,7 +232,7 @@ const DetailsPage = () => {
               daySelectionAnimation={{
                 type: "background",
                 duration: 200,
-                highlightColor: "gray",
+                highlightColor: Colors.primary,
               }}
               selectedDate={today}
               onDateSelected={(date: any) => dateSlotGiver(date)}
@@ -718,9 +718,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+    borderColor: "black",
+    borderWidth: 1,
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     padding: 20,
     borderRadius: 10,
     width: "90%",
@@ -734,6 +736,7 @@ const styles = StyleSheet.create({
     height: "95%",
     paddingBottom: "30%",
     borderBottomWidth: 1,
+    borderColor: Colors.primary,
     width: "100%",
   },
   timeSlotView: {
@@ -754,6 +757,7 @@ const styles = StyleSheet.create({
   calendars: {
     height: "20%",
     borderBottomWidth: 1,
+    borderColor: Colors.primary,
   },
   LLR_style: {
     flexDirection: "row",
