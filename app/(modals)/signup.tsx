@@ -17,7 +17,7 @@ import Constants from "expo-constants";
 import Colors from "@/constants/Colors";
 import { defaultStyles } from "@/constants/Styles";
 
-const API_URL = "https://1627-118-176-174-110.ngrok-free.app";
+const API_URL = "https://8f9e-118-176-174-110.ngrok-free.app";
 //Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
 
 const Page = () => {
