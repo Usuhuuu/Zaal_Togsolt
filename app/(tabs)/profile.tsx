@@ -23,6 +23,7 @@ import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 import Team from "@/components/clans";
 import { useRouter, Href } from "expo-router";
 import ProfileSettings from "../settings/profileSettings";
+import { throttle } from "lodash";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
@@ -33,23 +34,46 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState<any>({});
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
-  const apiUrl = "https://1627-118-176-174-110.ngrok-free.app"; //Constants.expoConfig?.extra?.apiUrl ??
+  const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app"; //Constants.expoConfig?.extra?.apiUrl ??
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = throttle(async () => {
       try {
+        const tokens: any = await SecureStore.getItemAsync("Tokens");
+        if (!tokens) {
+          console.warn("No tokens found. Data fetch skipped.");
+          return; // Exit early if tokens are not found
+        }
+
+        const { accessToken, refreshToken } = JSON.parse(tokens);
+        if (!accessToken) {
+          console.warn("Access token is missing. Data fetch skipped.");
+          return; // Exit early if accessToken is missing
+        }
+
         setLoading(true);
-        const fetchedData = await user_data_fetching_function(path, apiUrl);
+        let retries = 3;
+        const fetchedData = await user_data_fetching_function(
+          path,
+          apiUrl,
+          accessToken,
+          refreshToken,
+          retries
+        );
         setFormData(JSON.parse(fetchedData));
       } catch (err) {
-        setLoading(true);
-        console.error(err);
+        console.error("Error while fetching data:", err);
       } finally {
         setLoading(false);
       }
-    };
+    });
+
     fetchData();
-  }, [path, apiUrl]); // Re-run effect if path or apiUrl changes
+
+    return () => {
+      fetchData.cancel();
+    };
+  }, [path, apiUrl]); // Add any other dependencies as needed
   const router = useRouter();
 
   const copyToClipboard = async () => {

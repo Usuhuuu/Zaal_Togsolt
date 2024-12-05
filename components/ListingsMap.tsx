@@ -1,13 +1,23 @@
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import React, { memo, useEffect, useState, useCallback } from 'react';
-import MapView, { Marker, PROVIDER_GOOGLE, MapViewProps } from 'react-native-maps';
-import * as Location from 'expo-location';
-import { ListingGeo } from '@/interfaces/listingGeo';
-import { useRouter } from 'expo-router';
-import MapViewClustering from 'react-native-map-clustering';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { Ionicons } from '@expo/vector-icons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
+import React, { memo, useEffect, useState, useCallback } from "react";
+import MapView, {
+  Marker,
+  PROVIDER_GOOGLE,
+  MapViewProps,
+} from "react-native-maps";
+import * as Location from "expo-location";
+import { ListingGeo } from "@/interfaces/listingGeo";
+import { useRouter } from "expo-router";
+import MapViewClustering from "react-native-map-clustering";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Ionicons } from "@expo/vector-icons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 interface ListingsMapProps {
   listings: {
@@ -50,7 +60,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
     const requestLocationPermission = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
+        if (status === "granted") {
           setHasLocationPermission(true);
           const location = await Location.getCurrentPositionAsync();
           setUserLocation({
@@ -61,7 +71,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
           setHasLocationPermission(false);
         }
       } catch (error) {
-        console.error('Error fetching location:', error);
+        console.error("Error fetching location:", error);
       }
     };
 
@@ -96,6 +106,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       <MapViewClustering
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
+        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
         showsUserLocation={hasLocationPermission}
         showsMyLocationButton={false} // Disable default button
         initialRegion={
@@ -108,7 +119,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
               }
             : INITIAL_REGION
         }
-        clusterColor={""}
+        clusterColor=""
         renderCluster={renderCluster}
       >
         {listings.features.map((item: ListingGeo) => (
@@ -125,11 +136,14 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
         ))}
       </MapViewClustering>
       <TouchableOpacity style={styles.change} onPress={goToUserLocation}>
-      <Ionicons name="swap-horizontal" size={24} color="#000" />
+        <Ionicons name="swap-horizontal" size={24} color="#000" />
       </TouchableOpacity>
       {/* Custom Location Button */}
-      <TouchableOpacity style={styles.locationButton} onPress={goToUserLocation}>
-      <FontAwesome name="location-arrow" size={24} color="#000" />
+      <TouchableOpacity
+        style={styles.locationButton}
+        onPress={goToUserLocation}
+      >
+        <FontAwesome name="location-arrow" size={24} color="#000" />
       </TouchableOpacity>
     </View>
   );
@@ -143,50 +157,50 @@ const styles = StyleSheet.create({
   clusterMarker: {
     borderRadius: 20,
     backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     width: 40,
     height: 40,
   },
   clusterText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
   },
   locationButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 40,
     right: 10,
-    backgroundColor: '#90c9fb',
+    backgroundColor: "#90c9fb",
     borderRadius: 25,
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5, // For Android shadow
-    shadowColor: '#000', // For iOS shadow
+    shadowColor: "#000", // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
-  change:{
-    position: 'absolute',
+  change: {
+    position: "absolute",
     bottom: 100,
     right: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     borderRadius: 25,
-    borderColor: '#b0d9fc',
+    borderColor: "#b0d9fc",
     borderWidth: 2,
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5, // For Android shadow
-    shadowColor: '#000', // For iOS shadow
+    shadowColor: "#000", // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-  }
+  },
 });
 
 export default ListingsMap;

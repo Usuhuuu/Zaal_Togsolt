@@ -18,7 +18,7 @@ import * as Sentry from "@sentry/react-native";
 import { auth_Refresh_Function } from "./functions/refresh";
 import { throttle } from "lodash";
 
-const apiUrl = "https://1627-118-176-174-110.ngrok-free.app"; // Define apiUrl properly
+const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app"; // Define apiUrl properly
 
 interface Message {
   groupId: string;

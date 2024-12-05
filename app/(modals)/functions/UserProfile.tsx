@@ -9,7 +9,14 @@ import { throttle } from "lodash";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const user_data_fetching_function = throttle(
-  async (path: string, url: string, retries = 3) => {
+  async (
+    path: string,
+    url: string,
+    accessToken: String | undefined,
+    refreshToken: String | undefined,
+    retries: number
+  ) => {
+    await AsyncStorage.removeItem(`user_${path}`);
     const cached_data = await AsyncStorage.getItem(`user_${path}`);
     if (cached_data) {
       const formData = JSON.parse(cached_data);
@@ -51,7 +58,6 @@ export const user_data_fetching_function = throttle(
 
             if (retryFetchProfile.data.auth) {
               const formData = retryFetchProfile.data.formData;
-              console.log(formData);
               await AsyncStorage.setItem(
                 `user_${path}`,
                 JSON.stringify(formData)
@@ -63,12 +69,19 @@ export const user_data_fetching_function = throttle(
           }
         } else {
           const formData = fetchProfileData.data.formData;
+          console.log(formData);
           await AsyncStorage.setItem(`user_${path}`, JSON.stringify(formData));
           return formData;
         }
       } catch (err) {
         if (retries > 0) {
-          user_data_fetching_function(path, url, retries - 1);
+          user_data_fetching_function(
+            path,
+            url,
+            accessToken,
+            refreshToken,
+            retries - 1
+          );
         } else {
           console.error("Error fetching user data:", err);
           throw new Error("Failed to fetch user data. Please try again later.");

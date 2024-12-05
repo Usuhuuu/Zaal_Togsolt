@@ -17,7 +17,8 @@ import Constants from "expo-constants";
 import Colors from "@/constants/Colors";  // Assuming Colors is defined properly
 import { defaultStyles } from "@/constants/Styles";  // Assuming Styles is defined
 
-const API_URL = "https://1627-118-176-174-110.ngrok-free.app";
+const API_URL = "https://8f9e-118-176-174-110.ngrok-free.app";
+//Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
 
 const Page = () => {
   const [formData, setFormData] = useState({

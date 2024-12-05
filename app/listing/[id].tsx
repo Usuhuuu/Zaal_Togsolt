@@ -1,4 +1,10 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import {
   View,
@@ -12,6 +18,7 @@ import {
   StatusBar,
   SafeAreaView,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import listingsData from "@/assets/Data/airbnb-listings.json";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -31,6 +38,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/functions/savedhalls";
 import { useRouter } from "expo-router";
 import moment from "moment";
+import { throttle } from "lodash";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -47,15 +55,18 @@ const DetailsPage = () => {
   const [infoHeight, setInfoHeight] = useState(0);
   const [iconsOverflow, setIconsOverflow] = useState(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
-  const [today, setToday] = useState(moment());
+  const [today, setToday] = useState<moment.Moment>(moment());
   const [pendingTime, setPendingTime] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
   const zaalFormData = {
-    zaalId: "674c9367f5b8455cd83d70c2",
+    zaalId: "",
     date: "",
     startTime: "",
     endTime: "",
   };
+  const tempZaal = "674c9367f5b8455cd83d70c2";
 
   const { addHall } = useSavedHalls();
 
@@ -75,7 +86,7 @@ const DetailsPage = () => {
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-  const apiUrl = "https://1627-118-176-174-110.ngrok-free.app";
+  const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app";
   Constants.expoConfig?.extra?.apiUrl;
 
   const handleScroll = (event: any) => {
@@ -119,104 +130,144 @@ const DetailsPage = () => {
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
   const [isAvailable, setIsAvailable] = useState(true);
   const [zahialgaBtn, setZahialgaBtn] = useState(false);
+  const [fetchCount, setFetchCount] = useState(0);
 
-  const dateSlotGiver = async (date: any) => {
+  const dateSlotGiver = throttle(async (date: any) => {
+    setIsLoading(true); // Show loading indicator
     try {
       const odor = date.toISOString().split("T")[0];
+      setToday(odor);
       const zaalniID = zaalFormData.zaalId;
-      console.log(zaalniID, odor);
+      if (fetchCount > 5) return;
+      console.log(zaalniID);
+
+      // Simulating a data fetch
       const response = await axios.get(`${apiUrl}/timeslotscheck`, {
-        params: { zaalniID, odor },
+        params: { zaalniID: tempZaal, odor },
+        timeout: 1000,
+        withCredentials: true,
       });
-      if (!response.data.available && response.data.not_possible_time != "") {
-        //mean theres not avaible time and that times are saved on not_possible_time
+
+      if (!response.data.available && response.data.not_possible_time !== "") {
         const notPossibleTime = response.data.not_possible_time.orderedTime.map(
-          (result: any) => {
-            return {
-              time: result.time,
-              status: result.status, // This will be an array of statuses, e.g., ['Completed', 'Pending']
-            };
-          }
+          (result: any) => ({
+            time: result.time,
+            status: result.status,
+          })
         );
+        setFetchCount((prev) => prev + 1);
         setUnavailableTimes(notPossibleTime);
-        setIsAvailable(false);
       } else {
         setUnavailableTimes([]);
-        setIsAvailable(true);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
+    } finally {
+      setIsLoading(false); // Hide loading indicator after data is fetched
     }
-  };
+  }, 1000);
+  useEffect(() => {
+    dateSlotGiver(moment());
+  }, []);
 
   const handlePressTimeSlot = (timeSlot: any) => {
     console.log(`Time slot pressed: ${timeSlot}`);
     setZahialgaBtn(true);
   };
+  // Define the TimeSlot component outside of the OrderScreen to avoid redefinition
+  type TimeSlotProps = {
+    timeString: string;
+    isDisabled: boolean;
+    isPending: boolean;
+    handlePressTimeSlot: (timeSlot: string) => void;
+  };
+
+  const TimeSlot: React.FC<TimeSlotProps> = React.memo(
+    ({ timeString, isDisabled, isPending, handlePressTimeSlot }) => {
+      return (
+        <View style={styles.timeSlotView}>
+          <TouchableOpacity
+            onPress={() => handlePressTimeSlot(timeString)}
+            disabled={isDisabled}
+            style={[
+              styles.lalarinSdaBtn,
+              {
+                backgroundColor: isDisabled
+                  ? "grey"
+                  : isPending
+                  ? "yellow"
+                  : "white",
+                opacity: isDisabled || isPending ? 0.5 : 1,
+              },
+            ]}
+          >
+            <Text>{timeString}</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+  );
 
   const OrderScreen = () => {
     return (
       <View style={styles.zahialgaView}>
-        <CalendarStrip
-          style={styles.calendars}
-          scrollerPaging={true}
-          daySelectionAnimation={{
-            type: "background",
-            duration: 200,
-            highlightColor: "gray",
-          }}
-          startingDate={today.toDate()}
-          selectedDate={today.toDate()}
-          calendarAnimation={{ type: "sequence", duration: 5 }}
-          onDateSelected={(e) => {
-            dateSlotGiver(e);
-          }}
-          dateNumberStyle={{ fontSize: 18, fontWeight: 400 }}
-          dateNameStyle={{ fontSize: 10, fontWeight: 400 }}
-          calendarHeaderStyle={{ fontSize: 18, fontWeight: 500 }}
-        />
-        <View style={styles.LLR_style}>
-          {/* Render available and unavailable time slots */}
-          {baseTimeSlots.map((timeSlot, index) => {
-            const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
-            const isDisabled = unavailableTimes.some(
-              (time: any) =>
-                time.time == timeString && time.status == "Completed"
-            );
-            const isPending = unavailableTimes.some(
-              (time: any) => time.time == timeString && time.status == "Pending"
-            );
-
-            return (
-              <View style={styles.timeSlotView} key={index}>
-                <TouchableOpacity
-                  onPress={() => handlePressTimeSlot(timeString)}
-                  disabled={isDisabled}
-                  style={[
-                    styles.lalarinSdaBtn,
-                    {
-                      backgroundColor: isDisabled ? "grey" : "white",
-                      opacity: isDisabled ? 0.5 : 1,
-                    },
-                  ]}
-                >
-                  <Text>{timeString}</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-          <TouchableOpacity
+        {isLoading ? (
+          <View
             style={{
-              padding: 10,
-              marginVertical: 5,
-              borderWidth: 0.5,
-              borderRadius: 20,
-              width: "40%",
-              alignItems: "center",
-              display: "none",
+              width: "100%",
+              height: "100%",
             }}
-          ></TouchableOpacity>
-        </View>
+          >
+            <ActivityIndicator
+              size="large"
+              color="blue"
+              style={styles.loader}
+            />
+          </View>
+        ) : (
+          <>
+            <CalendarStrip
+              style={styles.calendars}
+              scrollerPaging={true}
+              daySelectionAnimation={{
+                type: "background",
+                duration: 200,
+                highlightColor: "gray",
+              }}
+              selectedDate={today}
+              onDateSelected={(date: any) => dateSlotGiver(date)}
+              calendarAnimation={{ type: "sequence", duration: 5 }}
+              dateNumberStyle={{ fontSize: 18, fontWeight: "400" }}
+              dateNameStyle={{ fontSize: 10, fontWeight: "400" }}
+              calendarHeaderStyle={{ fontSize: 18, fontWeight: "500" }}
+            />
+            <View style={styles.LLR_style}>
+              {/* Render available and unavailable time slots */}
+              {baseTimeSlots.map((timeSlot, index) => {
+                const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
+                const isDisabled = unavailableTimes.some(
+                  (time: any) =>
+                    time.time === timeString &&
+                    time.status.includes("Completed")
+                );
+                const isPending = unavailableTimes.some(
+                  (time: any) =>
+                    time.time === timeString && time.status.includes("Pending")
+                );
+
+                return (
+                  <TimeSlot
+                    key={index}
+                    timeString={timeString}
+                    isDisabled={isDisabled}
+                    isPending={isPending}
+                    handlePressTimeSlot={handlePressTimeSlot}
+                  />
+                );
+              })}
+            </View>
+          </>
+        )}
       </View>
     );
   };
@@ -292,13 +343,11 @@ const DetailsPage = () => {
 
   const handleZaalId = (input: any) => {
     zaalFormData.zaalId = input;
-    if (today) {
-      dateSlotGiver(today.toDate());
-    }
   };
+
   useEffect(() => {
     handleZaalId(id);
-  }, [zaalFormData]);
+  }, [id]);
 
   return (
     <View style={styles.container}>
@@ -677,7 +726,10 @@ const styles = StyleSheet.create({
     width: "90%",
     height: "90%",
   },
-
+  loader: {
+    height: "100%",
+    color: "black",
+  },
   zahialgaView: {
     height: "95%",
     paddingBottom: "30%",
