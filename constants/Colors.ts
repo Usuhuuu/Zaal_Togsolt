@@ -5,6 +5,7 @@ export default {
   white: `#ffffff`,
   lightGrey: `#F4F4F4`,
   light: `#F9F9F9`,
+  secondary: `#b0d9fc`,
 
   
 };

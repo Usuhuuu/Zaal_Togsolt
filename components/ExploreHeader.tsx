@@ -32,7 +32,7 @@ interface Props {
 
 const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
-  const itemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
+  const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
   const selectCategory = (index: number) => {
@@ -55,31 +55,35 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
       <StatusBar barStyle="light-content" backgroundColor="#61b3fa" />
       <View style={styles.container}>
         <LinearGradient
-          colors={["#61b3fa", "#fff"]}
-          start={[0, 0]}
-          end={[0, 1.2]}
-          locations={[0, 1]}
+          colors={["transparent", "#61b3fa"]}
+          start={{ x: 0, y: 0.8 }}
+          end={{ x: 0, y: 1.3 }}
           style={styles.background}
         />
         <View style={styles.content}>
           <View style={styles.actionRow}>
+            <View style={styles.titleContainer}>
+              <TouchableOpacity style={styles.search}>
+                <Image
+                  source={require("../assets/images/ranking.png")}
+                  style={{ width: 30, height: 30 , right: 100}}
+                />
+              </TouchableOpacity>
+
+              </View> 
+            
+
+
             <Link href={`/(modals)/sags`} asChild>
-              <TouchableOpacity style={styles.searchbtn}>
+              <TouchableOpacity style={styles.notification}>
                 <Image
                   source={require("../assets/sport-icons/notifications.png")}
-                  style={{ width: 23, height: 23 }}
+                  style={{ width: 23, height: 23  }}
                 />
               </TouchableOpacity>
             </Link>
-            <View style={styles.titleContainer}>
-              <Image
-                source={require("../assets/sport-icons/logo.png")}
-                style={{ width: 70, height: 70 }}
-              />
-              <Text style={{ fontSize: 18, right: 20 }}>Sags</Text>
-            </View>
 
-            <TouchableOpacity style={styles.filterButton}>
+            <TouchableOpacity style={styles.notification}>
               <Image
                 source={require("../assets/images/category.png")}
                 style={{ width: 20, height: 20 }}
@@ -121,8 +125,9 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 140,
+    height: 150,
     overflow: "hidden",
+    backgroundColor: "transparent",
     // Ensures the gradient does not overflow outside the container
   },
   background: {
@@ -130,27 +135,52 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    height: "40%", // Ensure gradient covers full height
+    height: "90%",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+
   },
   content: {
     flex: 1,
     justifyContent: "space-between",
-    padding: 8,
+    padding: 10,
   },
   actionRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
     paddingBottom: 6,
+    backgroundColor: "transparent",
+    
   },
-  filterButton: {
-    padding: 10,
+ 
+  search:{
+    justifyContent: "center",
+    alignItems: "center",
+    width: 250,
+    height: 40,
+    backgroundColor: "#fafafa",
+    borderColor: '#b0d9fc',
+    borderWidth: 2,
+    borderRadius: 20,
+    elevation: 10, // For Android shadow
+    shadowColor: '#000', // For iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
-  searchbtn: {
+  notification: {
     justifyContent: "center",
     alignItems: "center",
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    elevation: 10, // For Android shadow
+    shadowColor: '#000', // For iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   titleContainer: {
     height: 50,
@@ -166,27 +196,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-    gap: 20,
+    gap: 15,
   },
   categoriesBtn: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 6,
+    
   },
   categoriesBtnActive: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 10,
-    backgroundColor: Colors.primary, // Replace with the actual color value
-    borderRadius: 8,
+    flex: 1,
     alignItems: "center",
+    borderBottomColor: Colors.primary,
+    borderBottomWidth: 2,
   },
   iconContainer: {
-    backgroundColor: "white",
+    backgroundColor: "#fafafa",
     padding: 8,
-    borderRadius: 30,
+    borderRadius: 10,
+    borderColor: '#b0d9fc',
+    borderWidth: 1,
     marginBottom: 5,
+    elevation: 10, // For Android shadow
+    shadowColor: '#000', // For iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
 });
 

@@ -17,16 +17,15 @@ const Layout = () => {
               height: 50,
               paddingBottom: 5,
               paddingTop: 5,
-              borderColor: Colors.dark,
+              borderColor: Colors.primary,
               position: "absolute",
               overflow: "hidden",
             },
             tabBarBackground: () => (
               <LinearGradient
-                colors={["#fff", "#61b3fa"]}
-                start={{ x: 0, y: 0.1 }}
-                end={{ x: 0, y: 1 }}
-                locations={[0, 1]}
+                colors={[Colors.secondary, Colors.primary]}
+                start={{ x: 0, y: 0.2 }}
+                end={{ x: 0, y: 1}}
                 style={[StyleSheet.absoluteFill]}
               />
             ),
@@ -36,7 +35,7 @@ const Layout = () => {
             name="index"
             options={{
               tabBarLabel: "Undsen Tses", // Home Tab
-              tabBarIcon: ({ color, size }) => (
+              tabBarIcon: () => (
                 <Image
                   source={require("../../assets/tab-icons/home.png")}
                   style={{ width: 24, height: 24 }}
@@ -50,7 +49,7 @@ const Layout = () => {
             name="inbox"
             options={{
               tabBarLabel: "Hamtdaa", // Inbox Tab
-              tabBarIcon: ({ color, size }) => (
+              tabBarIcon: () => (
                 <Image
                   source={require("../../assets/tab-icons/teamwork.png")}
                   style={{ width: 26, height: 26 }}
@@ -64,7 +63,7 @@ const Layout = () => {
             name="explore"
             options={{
               tabBarLabel: "Zahialga", // Explore Tab
-              tabBarIcon: ({ color, size }) => (
+              tabBarIcon: () => (
                 <Image
                   source={require("../../assets/tab-icons/order.png")}
                   style={{ width: 24, height: 24 }}
@@ -78,7 +77,7 @@ const Layout = () => {
             name="profile"
             options={{
               tabBarLabel: "minii huudas", // Profile Tab
-              tabBarIcon: ({ color, size }) => (
+              tabBarIcon: () => (
                 <Image
                   source={require("../../assets/tab-icons/athlete.png")}
                   style={{ width: 24, height: 24 }}
@@ -95,11 +94,5 @@ const Layout = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  icon: {
-    color: `#fff`,
-    fontSize: 24,
-  }
-});
 
 export default Layout;
