@@ -50,13 +50,17 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     backgroundColor: Colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
   },
   absoluteBtn: {
-    bottom: 50,
-    width: '100%',
-    alignItems: 'center',   
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    width: '90%',
   },
-  btn:{
+  btn: {
     backgroundColor: Colors.primary,
     borderRadius: 10,
     height: 50,
@@ -65,17 +69,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     gap: 8,
-
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
   },
-  btnText:{
+  btnText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   sheetContainer: {
-    borderTopLeftRadius: 0, // Updated radius
-    borderTopRightRadius: 0, // Updated radius
-    backgroundColor: "black",
-    borderTopStartRadius: 20,
-    borderTopEndRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: Colors.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+  },
+  handleIndicator: {
+    backgroundColor: Colors.primary,
+    width: 60,
+    height: 6,
+    borderRadius: 3,
+    marginTop: 8,
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3, // For Android shadow
   },
 });
 

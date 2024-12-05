@@ -7,6 +7,7 @@ import React, { useEffect, ReactNode } from "react";
 import { TouchableOpacity, View, Text } from "react-native";
 import "react-native-reanimated";
 import * as Sentry from "@sentry/react-native";
+import Colors from "@/constants/Colors";
 
 // Initialize Sentry
 Sentry.init({
@@ -83,16 +84,19 @@ function RootLayoutNav() {
       <Stack.Screen
         name="(modals)/login"
         options={{
-          title: `Log in or Sign up`,
-          headerTitleStyle: {
-            fontWeight: `bold`,
-          },
+          title: `Burtguuleh`,
           presentation: `modal`,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="close-outline" size={28} />
+            <TouchableOpacity onPress={() => router.replace("/(tabs)/profile")}>
+              <Ionicons name="arrow-back" size={28} />
             </TouchableOpacity>
           ),
+          headerStyle: {
+            backgroundColor: Colors.primary, // Background color of the header
+          },
+          headerTitleStyle: {},
+          headerTintColor: Colors.light, // Text color of the header
+  
         }}
       />
       <Stack.Screen name="listing/[id]" options={{ headerTitle: ` ` }} />
@@ -109,23 +113,16 @@ function RootLayoutNav() {
           ),
         }}
       />
-      {/* Add Settings Screen */}
+      {/* Add Notification Screen */}
       <Stack.Screen
-        name="profileSettings"
+        name="listing/notification"
         options={{
-          title: "Settings",
-          presentation: 'transparentModal',
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={28} />
-            </TouchableOpacity>
-          ),
+          headerShown: false, // Hide the header for the notification screen
         }}
       />
     </Stack>
   );
 }
-
 
 // Wrap the entire app in Sentry and Error Boundary
 export default Sentry.wrap(() => (

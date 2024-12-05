@@ -9,7 +9,8 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { Href, Link, router, useNavigation } from "expo-router";  // Import useNavigation
+import { DrawerActions } from "@react-navigation/native";  // Import DrawerActions
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/Colors";
@@ -34,6 +35,8 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
   const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  
+  const navigation = useNavigation();  // Initialize navigation hook
 
   const selectCategory = (index: number) => {
     const selected = itemsRef.current[index];
@@ -48,6 +51,11 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onCategoryChanged(categories[index].name);
+  };
+
+  // Function to open the drawer
+  const openDrawer = () => {
+    navigation.dispatch(DrawerActions.openDrawer());  // Dispatch the openDrawer action
   };
 
   return (
@@ -69,21 +77,23 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                   style={{ width: 30, height: 30 , right: 100}}
                 />
               </TouchableOpacity>
+            </View>
 
-              </View> 
-            
-
-
-            <Link href={`/(modals)/sags`} asChild>
-              <TouchableOpacity style={styles.notification}>
+              <TouchableOpacity style={styles.notification}
+              onPress={() =>
+                router.push(
+                  "/listing/notification" as Href<"/listing/notification">
+                )
+              }
+              >
                 <Image
                   source={require("../assets/sport-icons/notifications.png")}
-                  style={{ width: 23, height: 23  }}
+                  style={{ width: 23, height: 23 }}
                 />
               </TouchableOpacity>
-            </Link>
 
-            <TouchableOpacity style={styles.notification}>
+            {/* The button to open the drawer */}
+            <TouchableOpacity style={styles.notification} onPress={openDrawer}>
               <Image
                 source={require("../assets/images/category.png")}
                 style={{ width: 20, height: 20 }}
@@ -128,7 +138,6 @@ const styles = StyleSheet.create({
     height: 150,
     overflow: "hidden",
     backgroundColor: "transparent",
-    // Ensures the gradient does not overflow outside the container
   },
   background: {
     position: "absolute",
@@ -138,7 +147,6 @@ const styles = StyleSheet.create({
     height: "90%",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-
   },
   content: {
     flex: 1,
@@ -151,20 +159,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 6,
     backgroundColor: "transparent",
-    
   },
- 
-  search:{
+  search: {
     justifyContent: "center",
     alignItems: "center",
     width: 250,
     height: 40,
     backgroundColor: "#fafafa",
-    borderColor: '#b0d9fc',
+    borderColor: "#b0d9fc",
     borderWidth: 2,
     borderRadius: 20,
-    elevation: 10, // For Android shadow
-    shadowColor: '#000', // For iOS shadow
+    elevation: 10,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -176,8 +182,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: Colors.primary,
-    elevation: 10, // For Android shadow
-    shadowColor: '#000', // For iOS shadow
+    elevation: 10,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -203,7 +209,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 6,
-    
   },
   categoriesBtnActive: {
     flex: 1,
@@ -215,11 +220,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
     padding: 8,
     borderRadius: 10,
-    borderColor: '#b0d9fc',
+    borderColor: Colors.primary,
     borderWidth: 1,
     marginBottom: 5,
-    elevation: 10, // For Android shadow
-    shadowColor: '#000', // For iOS shadow
+    elevation: 10,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,

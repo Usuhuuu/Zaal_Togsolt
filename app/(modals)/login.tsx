@@ -337,13 +337,6 @@ const Page = () => {
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>Continue with Facebook</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity style={styles.btnOutline}>
-            <Image
-              source={require("../../assets/images/emongolia.png")}
-              style={styles.imageIcon}
-            />
-            <Text style={styles.btnOutlineText}>Continue with E-Mongolia</Text>
-          </TouchableOpacity> */}
           <TouchableOpacity
             onPress={() => handleAppleLogin()}
             style={styles.btnOutline}
@@ -405,10 +398,22 @@ const Page = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    justifyContent: "center",  // Center content
+    alignItems: "center",
+    padding: 20,
   },
   container: {
     flex: 1,
-    padding: 26,
+    width: "100%",
+    maxWidth: 400,
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",  // Semi-transparent background
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 5,
+    elevation: 10,  // For Android shadow
   },
   inputContainer: {
     marginBottom: 15,
@@ -417,13 +422,15 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1,
     borderColor: "#ccc",
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    paddingHorizontal: 15,
+    borderRadius: 30,  // Rounded edges
     backgroundColor: "#fff",
+    fontSize: 16,
+    color: "#333",
   },
   eyeIcon: {
     position: "absolute",
-    right: 10,
+    right: 15,
     top: 15,
   },
   verificationContainer: {
@@ -434,31 +441,34 @@ const styles = StyleSheet.create({
   verifyButton: {
     marginLeft: 10,
     backgroundColor: Colors.primary,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,  // Rounded edges for the button
+    elevation: 3,  // For Android button elevation
   },
   verifyButtonText: {
     color: "#fff",
+    fontSize: 16,
   },
   button: {
     backgroundColor: Colors.primary,
-    padding: 15,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 30,  // Rounded button
     alignItems: "center",
+    justifyContent: "center",
   },
   loginBtn: {
-    marginTop: 10,
+    marginTop: 15,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,  // Increased font size for readability
   },
   separatorView: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 20,
+    marginVertical: 25,
   },
   separatorLine: {
     flex: 1,
@@ -466,35 +476,37 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   separatorText: {
-    marginHorizontal: 10,
+    marginHorizontal: 12,
     color: "#666",
+    fontSize: 14,  // Slightly smaller text for separation
   },
   socialButtons: {
-    marginTop: 20,
+    marginTop: 25,
   },
   btnOutline: {
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ccc",
     height: 50,
-    borderRadius: 5,
+    borderRadius: 30,  // Rounded edges
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    paddingHorizontal: 15,
+    marginBottom: 12,  // Spacing between social buttons
+    elevation: 2,  // Button elevation
   },
   btnOutlineText: {
-    color: "#000",
+    color: "#333",
     fontSize: 16,
   },
   btnIcon: {
-    marginRight: 10,
+    marginRight: 15,
   },
   imageIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
+    width: 28,
+    height: 28,
+    marginRight: 15,
   },
 });
 

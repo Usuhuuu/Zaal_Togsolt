@@ -6,19 +6,18 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
-  Image,
   ImageBackground,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import Constants from "expo-constants";
-import Colors from "@/constants/Colors";
-import { defaultStyles } from "@/constants/Styles";
+import Colors from "@/constants/Colors";  // Assuming Colors is defined properly
+import { defaultStyles } from "@/constants/Styles";  // Assuming Styles is defined
 
 const API_URL = "https://1627-118-176-174-110.ngrok-free.app";
-//Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -38,6 +37,7 @@ const Page = () => {
   const [passwordHide, setPasswordHide] = useState(true);
   const [verificationCompleted, setVerificationCompleted] = useState(false);
   const [isItPossible, setIsItPossible] = useState(false);
+
   const axiosConfig = {
     timeout: 5000,
   };
@@ -79,7 +79,6 @@ const Page = () => {
         Alert.alert("Error", "User already exists.");
       }
     } catch (err) {
-      console.log(err);
       Alert.alert("Error", "An error occurred during registration.");
     } finally {
       setLoading(false);
@@ -108,7 +107,6 @@ const Page = () => {
         Alert.alert("Error", "Failed to send verification code.");
       }
     } catch (err) {
-      console.log(err);
       Alert.alert(
         "Error",
         "An error occurred while sending verification code."
@@ -117,6 +115,7 @@ const Page = () => {
       setLoading(false);
     }
   };
+
   const handleUserID = async () => {
     try {
       const response = await axios.post(
@@ -125,214 +124,189 @@ const Page = () => {
         { timeout: 5000, withCredentials: true }
       );
       if (response.data.user_id_available) {
-        console.log(response.data);
         setIsItPossible(true);
-      } else if (!response.data.user_id_available) {
-        Alert.alert("User already exists.");
+      } else {
+        Alert.alert("Error", "User ID is already taken.");
       }
     } catch (err) {
       console.log(err);
+      Alert.alert("Error", "Failed to check user ID.");
     }
   };
 
   return (
     <ImageBackground
-      source={require("../../assets/images/zurag2.jpg")}
-      style={{ flex: 1 }}
+      source={require("@/assets/images/zurag2.jpg")}
+      style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <View style={styles.container_Vieww}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder="ID"
-            value={formData.user_id}
-            onChangeText={(value) => handleInputChange("user_id", value)}
-            clearTextOnFocus={true}
-            //eniig hiiseneer button dahij darj bolno
-            onPressIn={() => setIsItPossible(false)}
-            style={[styles.input_field_user_id, { marginBottom: 10 }]}
-          />
-          <TouchableOpacity
-            onPress={handleUserID}
-            style={styles.user_id_button}
-            disabled={isItPossible}
-          >
-            <Text>Check ID</Text>
-          </TouchableOpacity>
-        </View>
-        <TextInput
-          autoCapitalize="none"
-          placeholder="Last Name"
-          value={formData.lastName}
-          onChangeText={(value) => handleInputChange("lastName", value)}
-          style={[defaultStyles.inputField, { marginBottom: 10 }]}
-        />
-        <TextInput
-          autoCapitalize="none"
-          placeholder="First Name"
-          value={formData.firstName}
-          onChangeText={(value) => handleInputChange("firstName", value)}
-          style={[defaultStyles.inputField, { marginBottom: 10 }]}
-        />
-        <TextInput
-          autoCapitalize="none"
-          placeholder="Email"
-          value={formData.email}
-          onChangeText={(value) => handleInputChange("email", value)}
-          style={[defaultStyles.inputField, { marginBottom: 10 }]}
-        />
-        <View style={styles.verificationContainer}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder="Phone Number"
-            value={formData.phoneNumber}
-            onChangeText={(value) => handleInputChange("phoneNumber", value)}
-            style={styles.input}
-          />
-          <TouchableOpacity onPress={handleSendMSJ} style={styles.verifyButton}>
-            <Text style={styles.verifyButtonText}>Send Verification Code</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.verificationContainer}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder="Verification Code"
-            value={formData.verificationCode}
-            onChangeText={(value) =>
-              handleInputChange("verificationCode", value)
-            }
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.verifyButton}
-            onPress={() => setVerificationCompleted(true)}
-          >
-            <Text style={styles.verifyButtonText}>Verify</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder="Password"
-            secureTextEntry={passwordHide}
-            value={formData.password}
-            onChangeText={(value) => handleInputChange("password", value)}
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={handlePasswordToggle}
-          >
-            <Ionicons
-              name={passwordHide ? "eye-off" : "eye"}
-              size={24}
-              color="#666"
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.formContainer}>
+          {/* User ID Section */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              autoCapitalize="none"
+              placeholder="User ID"
+              value={formData.user_id}
+              onChangeText={(value) => handleInputChange("user_id", value)}
+              clearTextOnFocus={true}
+              onFocus={() => setIsItPossible(false)}
+              style={[styles.inputField]}
             />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder="Confirm Password"
-            secureTextEntry={passwordHide}
-            value={formData.confirm_password}
-            onChangeText={(value) =>
-              handleInputChange("confirm_password", value)
-            }
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={handlePasswordToggle}
-          >
-            <Ionicons
-              name={passwordHide ? "eye-off" : "eye"}
-              size={24}
-              color="#666"
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.checkboxContainer}>
-          <TouchableOpacity
-            onPress={() =>
-              handleInputChange("agree_terms", !formData.agree_terms)
-            }
-            style={styles.termsContainer}
-          >
-            <Ionicons
-              name={formData.agree_terms ? "checkbox" : "square-outline"}
-              size={24}
-              color={formData.agree_terms ? Colors.primary : "#fff"}
-            />
-            <Text style={styles.termsText}>
-              I agree to the{" "}
-              <Text
-                style={styles.link}
-                onPress={() =>
-                  Linking.openURL("https://your-terms-and-conditions-url.com")
-                }
-              >
-                Terms and Conditions
-              </Text>
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleUserID}
+              style={styles.button}
+              disabled={isItPossible}
+            >
+              <Text style={styles.buttonText}>Check ID</Text>
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            onPress={() =>
-              handleInputChange("agree_privacy", !formData.agree_privacy)
-            }
-            style={styles.termsContainer}
-          >
-            <Ionicons
-              name={formData.agree_privacy ? "checkbox" : "square-outline"}
-              size={24}
-              color={formData.agree_privacy ? Colors.primary : "#fff"}
+          {/* Name, Email Section */}
+          <TextInput
+            placeholder="Last Name"
+            value={formData.lastName}
+            onChangeText={(value) => handleInputChange("lastName", value)}
+            style={styles.inputField}
+          />
+          <TextInput
+            placeholder="First Name"
+            value={formData.firstName}
+            onChangeText={(value) => handleInputChange("firstName", value)}
+            style={styles.inputField}
+          />
+          <TextInput
+            placeholder="Email"
+            value={formData.email}
+            onChangeText={(value) => handleInputChange("email", value)}
+            style={styles.inputField}
+          />
+
+          {/* Phone Verification Section */}
+          <View style={styles.verificationContainer}>
+            <TextInput
+              placeholder="Phone Number"
+              value={formData.phoneNumber}
+              onChangeText={(value) => handleInputChange("phoneNumber", value)}
+              style={styles.inputField}
             />
-            <Text style={styles.termsText}>
-              I agree to the{" "}
-              <Text
-                style={styles.link}
-                onPress={() =>
-                  Linking.openURL("https://your-privacy-policy-url.com")
-                }
-              >
-                Privacy Policy
+            <TouchableOpacity onPress={handleSendMSJ} style={styles.button}>
+              <Text style={styles.buttonText}>Send Verification Code</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Verification Code Section */}
+          <View style={styles.verificationContainer}>
+            <TextInput
+              placeholder="Verification Code"
+              value={formData.verificationCode}
+              onChangeText={(value) => handleInputChange("verificationCode", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity
+              onPress={() => setVerificationCompleted(true)}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Verify</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Password and Confirm Password */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={passwordHide}
+              value={formData.password}
+              onChangeText={(value) => handleInputChange("password", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity onPress={handlePasswordToggle} style={styles.eyeIcon}>
+              <Ionicons
+                name={passwordHide ? "eye-off" : "eye"}
+                size={24}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Confirm Password"
+              secureTextEntry={passwordHide}
+              value={formData.confirm_password}
+              onChangeText={(value) => handleInputChange("confirm_password", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity onPress={handlePasswordToggle} style={styles.eyeIcon}>
+              <Ionicons
+                name={passwordHide ? "eye-off" : "eye"}
+                size={24}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Terms and Privacy Agreement */}
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              onPress={() => handleInputChange("agree_terms", !formData.agree_terms)}
+              style={styles.checkbox}
+            >
+              <Ionicons
+                name={formData.agree_terms ? "checkbox" : "square-outline"}
+                size={24}
+                color={formData.agree_terms ? Colors.primary : "red"}
+              />
+              <Text style={styles.checkboxText}>
+                I agree to the{" "}
+                <Text
+                  style={styles.link}
+                  onPress={() =>
+                    Linking.openURL("https://your-terms-and-conditions-url.com")
+                  }
+                >
+                  Terms and Conditions
+                </Text>
               </Text>
-            </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => handleInputChange("agree_privacy", !formData.agree_privacy)}
+              style={styles.checkbox}
+            >
+              <Ionicons
+                name={formData.agree_privacy ? "checkbox" : "square-outline"}
+                size={24}
+                color={formData.agree_privacy ? Colors.primary : "red"}
+              />
+              <Text style={styles.checkboxText}>
+                I agree to the{" "}
+                <Text
+                  style={styles.link}
+                  onPress={() =>
+                    Linking.openURL("https://your-privacy-policy-url.com")
+                  }
+                >
+                  Privacy Policy
+                </Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Submit Button */}
+          <TouchableOpacity
+            onPress={handleSubmit}
+            style={styles.submitButton}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Register</Text>
+            )}
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={defaultStyles.btn}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={defaultStyles.btnText}>Submit</Text>
-          )}
-        </TouchableOpacity>
-        <View style={styles.separatorView}>
-          <View style={styles.separatorLine} />
-          <Text style={styles.separatorText}>Or sign up with</Text>
-          <View style={styles.separatorLine} />
-        </View>
-        <View style={[styles.socialContainer, { gap: 20 }]}>
-          <TouchableOpacity style={styles.btnOutline}>
-            <Ionicons name="logo-google" size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
-            <Ionicons name="logo-facebook" size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnOutline}>
-            <Image
-              source={require("../../assets/images/emongolia.png")}
-              style={styles.imageIcon}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
     </ImageBackground>
   );
 };
@@ -340,111 +314,77 @@ const Page = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 26,
-  },
-  container_Vieww: {
-    flexDirection: "row",
-    width: "100%",
-    height: 50,
-  },
-  user_id_button: {
-    backgroundColor: Colors.primary,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  input_field_user_id: {
-    backgroundColor: "white",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    paddingHorizontal: "30%",
-  },
-  separatorView: {
-    flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
-    marginVertical: 20,
+  },
+  scrollViewContainer: {
+    padding: 20,
+  },
+  formContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 10,
+    padding: 20,
+  },
+  inputField: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primary,
+    marginVertical: 10,
+    paddingLeft: 10,
+    paddingVertical: 8,
+    justifyContent: "space-between",
     gap: 10,
   },
-  separatorLine: {
-    flex: 1,
-    borderBottomColor: "#000",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  separatorText: {
-    marginHorizontal: 10,
-    color: Colors.grey,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    marginBottom: 5,
-  },
-  verifyButton: {
-    marginLeft: 10,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 5,
-    alignContent: "center",
-    borderColor: "#000",
-    borderWidth: 1,
-  },
-  verifyButtonText: {
-    color: "#fff",
-  },
-  btnOutline: {
-    backgroundColor: `#FFC857`,
-    borderWidth: 1,
-    borderRadius: 24,
-    padding: 15,
-  },
-  verificationContainer: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-  },
-  inputContainer: {
-    marginBottom: 10,
+    justifyContent: "space-between",
   },
   eyeIcon: {
     position: "absolute",
     right: 10,
-    top: 15,
+    top: 10,
   },
-  termsContainer: {
-    flexDirection: "row",
+  button: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    marginTop: 10,
     alignItems: "center",
-    marginBottom: 20,
   },
-  termsText: {
-    marginLeft: 10,
-    fontSize: 16,
+  buttonText: {
     color: "#fff",
-  },
-  link: {
-    color: "#000",
-    textDecorationLine: "underline",
+    fontSize: 16,
   },
   checkboxContainer: {
-    marginBottom: 20,
+    marginTop: 20,
   },
-  socialContainer: {
+  checkbox: {
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
   },
-  imageIcon: {
-    width: 24,
-    height: 24,
+  checkboxText: {
+    marginLeft: 10,
+    color: "#333",
+  },
+  link: {
+    color: "red",
+    textDecorationLine: "underline",
+  },
+  submitButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
+  },
+  verificationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
   },
 });
 

@@ -96,7 +96,6 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       <MapViewClustering
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
-        provider={PROVIDER_GOOGLE}
         showsUserLocation={hasLocationPermission}
         showsMyLocationButton={false} // Disable default button
         initialRegion={

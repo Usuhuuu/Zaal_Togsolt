@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: "black",
+    backgroundColor: Colors.light,
     borderRadius: 20,
     paddingVertical: 8, // Increased for better spacing
     marginVertical: 10,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: "white",
+    color: Colors.primary,
   },
   viewButton: {
     backgroundColor: "rgba(97, 179, 250, 0)",
