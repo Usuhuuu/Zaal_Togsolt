@@ -1,0 +1,392 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Linking,
+  ImageBackground,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import Constants from "expo-constants";
+import Colors from "@/constants/Colors";  // Assuming Colors is defined properly
+import { defaultStyles } from "@/constants/Styles";  // Assuming Styles is defined
+
+const API_URL = "https://8f9e-118-176-174-110.ngrok-free.app";
+//Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
+
+const Page = () => {
+  const [formData, setFormData] = useState({
+    user_id: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+    phoneNumber: "",
+    verificationCode: "",
+    agree_terms: false,
+    agree_privacy: false,
+    is_adult: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [passwordHide, setPasswordHide] = useState(true);
+  const [verificationCompleted, setVerificationCompleted] = useState(false);
+  const [isItPossible, setIsItPossible] = useState(false);
+
+  const axiosConfig = {
+    timeout: 5000,
+  };
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (formData.password !== formData.confirm_password) {
+      Alert.alert("Error", "Passwords must match.");
+      return;
+    }
+
+    if (!formData.agree_terms || !formData.agree_privacy) {
+      Alert.alert("Error", "Please agree to the terms and privacy policy.");
+      return;
+    }
+
+    if (!verificationCompleted) {
+      Alert.alert("Error", "Phone number verification required.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/signup`, formData, {
+        ...axiosConfig,
+        withCredentials: true,
+        validateStatus: (status) => status < 500,
+      });
+      if (response.status === 200) {
+        Alert.alert("Success", response.data.message);
+      } else if (response.status === 401) {
+        Alert.alert("Error", "User already exists.");
+      }
+    } catch (err) {
+      Alert.alert("Error", "An error occurred during registration.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordToggle = () => {
+    setPasswordHide(!passwordHide);
+  };
+
+  const handleSendMSJ = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/verification`,
+        { phoneNumber: formData.phoneNumber },
+        {
+          ...axiosConfig,
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        setVerificationCompleted(true);
+        Alert.alert("Success", "Verification code sent.");
+      } else {
+        Alert.alert("Error", "Failed to send verification code.");
+      }
+    } catch (err) {
+      Alert.alert(
+        "Error",
+        "An error occurred while sending verification code."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserID = async () => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/checkunique`,
+        { unique_user_ID: formData.user_id },
+        { timeout: 5000, withCredentials: true }
+      );
+      if (response.data.user_id_available) {
+        setIsItPossible(true);
+      } else {
+        Alert.alert("Error", "User ID is already taken.");
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Failed to check user ID.");
+    }
+  };
+
+  return (
+    <ImageBackground
+      source={require("@/assets/images/zurag2.jpg")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.formContainer}>
+          {/* User ID Section */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              autoCapitalize="none"
+              placeholder="User ID"
+              value={formData.user_id}
+              onChangeText={(value) => handleInputChange("user_id", value)}
+              clearTextOnFocus={true}
+              onFocus={() => setIsItPossible(false)}
+              style={[styles.inputField]}
+            />
+            <TouchableOpacity
+              onPress={handleUserID}
+              style={styles.button}
+              disabled={isItPossible}
+            >
+              <Text style={styles.buttonText}>Check ID</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Name, Email Section */}
+          <TextInput
+            placeholder="Last Name"
+            value={formData.lastName}
+            onChangeText={(value) => handleInputChange("lastName", value)}
+            style={styles.inputField}
+          />
+          <TextInput
+            placeholder="First Name"
+            value={formData.firstName}
+            onChangeText={(value) => handleInputChange("firstName", value)}
+            style={styles.inputField}
+          />
+          <TextInput
+            placeholder="Email"
+            value={formData.email}
+            onChangeText={(value) => handleInputChange("email", value)}
+            style={styles.inputField}
+          />
+
+          {/* Phone Verification Section */}
+          <View style={styles.verificationContainer}>
+            <TextInput
+              placeholder="Phone Number"
+              value={formData.phoneNumber}
+              onChangeText={(value) => handleInputChange("phoneNumber", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity onPress={handleSendMSJ} style={styles.button}>
+              <Text style={styles.buttonText}>Send Verification Code</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Verification Code Section */}
+          <View style={styles.verificationContainer}>
+            <TextInput
+              placeholder="Verification Code"
+              value={formData.verificationCode}
+              onChangeText={(value) => handleInputChange("verificationCode", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity
+              onPress={() => setVerificationCompleted(true)}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Verify</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Password and Confirm Password */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={passwordHide}
+              value={formData.password}
+              onChangeText={(value) => handleInputChange("password", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity onPress={handlePasswordToggle} style={styles.eyeIcon}>
+              <Ionicons
+                name={passwordHide ? "eye-off" : "eye"}
+                size={24}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Confirm Password"
+              secureTextEntry={passwordHide}
+              value={formData.confirm_password}
+              onChangeText={(value) => handleInputChange("confirm_password", value)}
+              style={styles.inputField}
+            />
+            <TouchableOpacity onPress={handlePasswordToggle} style={styles.eyeIcon}>
+              <Ionicons
+                name={passwordHide ? "eye-off" : "eye"}
+                size={24}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Terms and Privacy Agreement */}
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              onPress={() => handleInputChange("agree_terms", !formData.agree_terms)}
+              style={styles.checkbox}
+            >
+              <Ionicons
+                name={formData.agree_terms ? "checkbox" : "square-outline"}
+                size={24}
+                color={formData.agree_terms ? Colors.primary : "red"}
+              />
+              <Text style={styles.checkboxText}>
+                I agree to the{" "}
+                <Text
+                  style={styles.link}
+                  onPress={() =>
+                    Linking.openURL("https://your-terms-and-conditions-url.com")
+                  }
+                >
+                  Terms and Conditions
+                </Text>
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => handleInputChange("agree_privacy", !formData.agree_privacy)}
+              style={styles.checkbox}
+            >
+              <Ionicons
+                name={formData.agree_privacy ? "checkbox" : "square-outline"}
+                size={24}
+                color={formData.agree_privacy ? Colors.primary : "red"}
+              />
+              <Text style={styles.checkboxText}>
+                I agree to the{" "}
+                <Text
+                  style={styles.link}
+                  onPress={() =>
+                    Linking.openURL("https://your-privacy-policy-url.com")
+                  }
+                >
+                  Privacy Policy
+                </Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Submit Button */}
+          <TouchableOpacity
+            onPress={handleSubmit}
+            style={styles.submitButton}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Register</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </ImageBackground>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  scrollViewContainer: {
+    padding: 20,
+  },
+  formContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 10,
+    padding: 20,
+  },
+  inputField: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primary,
+    marginVertical: 10,
+    paddingLeft: 10,
+    paddingVertical: 8,
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+  },
+  button: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  checkboxContainer: {
+    marginTop: 20,
+  },
+  checkbox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkboxText: {
+    marginLeft: 10,
+    color: "#333",
+  },
+  link: {
+    color: "red",
+    textDecorationLine: "underline",
+  },
+  submitButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
+  },
+  verificationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+});
+
+export default Page;
