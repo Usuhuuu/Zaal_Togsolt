@@ -14,7 +14,9 @@ import { useEffect } from "react";
 const axiosConfig = {
   timeout: 5000,
 };
-const apiUrl = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3001";
+const apiUrl =
+  Constants.expoConfig?.extra?.apiUrl ||
+  "https://8f9e-118-176-174-110.ngrok-free.app";
 if (!apiUrl) {
   throw new Error("API_URL is not defined in the environment variables");
 }

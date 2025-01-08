@@ -9,7 +9,6 @@ import "react-native-reanimated";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
 
-// Initialize Sentry
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
@@ -49,6 +48,7 @@ function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
 }
 
 function RootLayout() {
+  // Call useFonts at the top level
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
@@ -96,7 +96,6 @@ function RootLayoutNav() {
           },
           headerTitleStyle: {},
           headerTintColor: Colors.light, // Text color of the header
-  
         }}
       />
       <Stack.Screen name="listing/[id]" options={{ headerTitle: ` ` }} />

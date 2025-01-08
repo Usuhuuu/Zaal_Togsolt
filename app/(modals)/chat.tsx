@@ -17,8 +17,11 @@ import { io, Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
 import { auth_Refresh_Function } from "./functions/refresh";
 import { throttle } from "lodash";
+import Constants from "expo-constants";
 
-const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app"; // Define apiUrl properly
+const apiUrl =
+  Constants.expoConfig?.extra?.apiUrl ||
+  "https://8f9e-118-176-174-110.ngrok-free.app";
 
 interface Message {
   groupId: string;

@@ -29,7 +29,9 @@ import * as Sentry from "@sentry/react-native";
 const Page = () => {
   // Access the API URL from the environment variables
 
-  const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app";
+  const apiUrl =
+    Constants.expoConfig?.extra?.apiUrl ||
+    "https://8f9e-118-176-174-110.ngrok-free.app";
 
   if (!apiUrl) {
     throw new Error("API_URL is not defined in the environment variables");
@@ -55,6 +57,7 @@ const Page = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      console.log(`${apiUrl}`);
       const response = await axios.post(
         `${apiUrl}/login`,
         { email, userPassword: password },
@@ -132,6 +135,7 @@ const Page = () => {
 
   const loginWithFacebook = async () => {
     try {
+      Alert.alert(`${apiUrl}`);
       const result = await LoginManager.logInWithPermissions([
         "public_profile",
         "email",
@@ -398,7 +402,7 @@ const Page = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    justifyContent: "center",  // Center content
+    justifyContent: "center", // Center content
     alignItems: "center",
     padding: 20,
   },
@@ -408,12 +412,12 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",  // Semi-transparent background
+    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent background
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 5,
-    elevation: 10,  // For Android shadow
+    elevation: 10, // For Android shadow
   },
   inputContainer: {
     marginBottom: 15,
@@ -423,7 +427,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     paddingHorizontal: 15,
-    borderRadius: 30,  // Rounded edges
+    borderRadius: 30, // Rounded edges
     backgroundColor: "#fff",
     fontSize: 16,
     color: "#333",
@@ -443,8 +447,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 30,  // Rounded edges for the button
-    elevation: 3,  // For Android button elevation
+    borderRadius: 30, // Rounded edges for the button
+    elevation: 3, // For Android button elevation
   },
   verifyButtonText: {
     color: "#fff",
@@ -453,7 +457,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.primary,
     padding: 10,
-    borderRadius: 30,  // Rounded button
+    borderRadius: 30, // Rounded button
     alignItems: "center",
     justifyContent: "center",
   },
@@ -462,7 +466,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,  // Increased font size for readability
+    fontSize: 18, // Increased font size for readability
   },
   separatorView: {
     flexDirection: "row",
@@ -478,7 +482,7 @@ const styles = StyleSheet.create({
   separatorText: {
     marginHorizontal: 12,
     color: "#666",
-    fontSize: 14,  // Slightly smaller text for separation
+    fontSize: 14, // Slightly smaller text for separation
   },
   socialButtons: {
     marginTop: 25,
@@ -488,13 +492,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     height: 50,
-    borderRadius: 30,  // Rounded edges
+    borderRadius: 30, // Rounded edges
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     paddingHorizontal: 15,
-    marginBottom: 12,  // Spacing between social buttons
-    elevation: 2,  // Button elevation
+    marginBottom: 12, // Spacing between social buttons
+    elevation: 2, // Button elevation
   },
   btnOutlineText: {
     color: "#333",

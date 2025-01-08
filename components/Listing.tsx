@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -15,7 +15,10 @@ import { Link, useRouter } from "expo-router";
 import { Listing } from "@/interfaces/listing";
 import { MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import BottomSheet, { BottomSheetFlatList, BottomSheetFlatListMethods } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetFlatListMethods,
+} from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
@@ -33,41 +36,56 @@ const ListingComponent = ({ listings: items, category, refresh }: Props) => {
 
   useEffect(() => {
     setLoading(true);
+    // Simulate data fetch
     setTimeout(() => {
       setLoading(false);
-    }, 200); // Simulate loading
+    }, 200);
   }, [category, items]);
 
   const handlePress = (id: string) => {
     router.push(`/listing/${id}`);
   };
 
-  const renderRow: ListRenderItem<Listing> = ({ item }) => (
-    <TouchableOpacity onPress={() => handlePress(item.id)} style={styles.itemContainer}>
-      <ImageBackground source={require("../assets/images/listingicons/1.png")} style={styles.backgroundImage}>
-        <View style={styles.detailsContainer}>
-          <Text style={styles.text}>{item.name}</Text>
-  
-          <View style={styles.ratingContainer}>
-            <MaterialIcons name="sports-score" size={24} color="red" />
-            <Text style={styles.text}>{item.review_scores_rating / 20}</Text>
+  const renderRow: ListRenderItem<Listing> = useCallback(
+    ({ item }) => (
+      <TouchableOpacity
+        onPress={() => handlePress(item.id)}
+        style={styles.itemContainer}
+      >
+        <ImageBackground
+          source={require("../assets/images/listingicons/1.png")}
+          style={styles.backgroundImage}
+        >
+          <View style={styles.detailsContainer}>
+            <Text style={styles.text}>{item.name}</Text>
+
+            <View style={styles.ratingContainer}>
+              <MaterialIcons name="sports-score" size={24} color="red" />
+              <Text style={styles.text}>{item.review_scores_rating / 20}</Text>
+            </View>
+
+            <View style={styles.locationContainer}>
+              <Image
+                source={require("../assets/images/placeholder.png")}
+                style={styles.placeholderImage}
+              />
+              <Text style={styles.text}>{item.city}</Text>
+              <Text style={styles.text}>{item.neighbourhood}</Text>
+            </View>
+
+            <Text style={styles.text}>${item.price} tugrug</Text>
+
+            <TouchableOpacity style={styles.viewButton}>
+              <Image
+                source={require("../assets/images/listingicons/right.png")}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
           </View>
-  
-          <View style={styles.locationContainer}>
-            <Image source={require("../assets/images/placeholder.png")} style={styles.placeholderImage} />
-            <Text style={styles.text}>{item.city}</Text>
-            <Text style={styles.text}>{item.neighbourhood}</Text>
-          </View>
-          
-          <Text style={styles.text}>${item.price} tugrug</Text>
-  
-          <TouchableOpacity style={styles.viewButton}>
-            <Image
-              source={require("../assets/images/listingicons/right.png")} style={styles.icon} />
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
-    </TouchableOpacity>
+        </ImageBackground>
+      </TouchableOpacity>
+    ),
+    [handlePress]
   );
 
   const CategoryButton = ({ label }: { label: string }) => (
@@ -77,17 +95,28 @@ const ListingComponent = ({ listings: items, category, refresh }: Props) => {
   );
 
   return (
-    <LinearGradient colors={['#f8f9fa', Colors.primary]} start={[0, 0]} end={[0, 1]} style={styles.container}>
+    <LinearGradient
+      colors={["#f8f9fa", Colors.primary]}
+      start={[0, 0]}
+      end={[0, 1]}
+      style={styles.container}
+    >
       <Link href={`/(modals)/sags`} asChild>
         <TouchableOpacity style={styles.searchbtn}>
-          <Image source={require("../assets/images/ranking.png")} style={styles.icon} />
+          <Image
+            source={require("../assets/images/ranking.png")}
+            style={styles.icon}
+          />
           <Text style={styles.buttonText}>Search</Text>
-          <Image source={require("../assets/images/listingicons/adjust.png")} style={styles.icon} />
+          <Image
+            source={require("../assets/images/listingicons/adjust.png")}
+            style={styles.icon}
+          />
         </TouchableOpacity>
       </Link>
 
       <View style={styles.categoryContainer}>
-        {['oirhon', 'shildeg', 'zovloh'].map(label => (
+        {["oirhon", "shildeg", "zovloh"].map((label) => (
           <CategoryButton key={label} label={label} />
         ))}
       </View>
@@ -116,60 +145,53 @@ const styles = StyleSheet.create({
   itemContainer: {
     marginBottom: 20,
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35, // Slightly increased for better depth
+    shadowOpacity: 0.35,
     shadowRadius: 6,
     elevation: 6,
   },
   backgroundImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
-    justifyContent: 'flex-end',
-    resizeMode: 'cover',
+    justifyContent: "flex-end",
+    resizeMode: "cover",
   },
   detailsContainer: {
     padding: 20,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    width: '100%',
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    width: "100%",
   },
   text: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 5,
   },
-  locationAndButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
   locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 10, // Padding for separation from button
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 10,
   },
   placeholderImage: {
     width: 20,
     height: 20,
     marginRight: 8,
   },
-  flatListContent: {
-  },
+  flatListContent: {},
   searchbtn: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     height: 45,
-    paddingHorizontal: '5%', // Adjusts padding for different screen sizes
+    paddingHorizontal: "5%",
     backgroundColor: Colors.primary,
     borderRadius: 20,
   },
@@ -178,16 +200,16 @@ const styles = StyleSheet.create({
     height: 23,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   categoryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     backgroundColor: Colors.light,
     borderRadius: 20,
-    paddingVertical: 8, // Increased for better spacing
+    paddingVertical: 8,
     marginVertical: 10,
   },
   categoryButton: {
@@ -195,20 +217,18 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.primary,
   },
   viewButton: {
     backgroundColor: "rgba(97, 179, 250, 0)",
-    height: 200, // Matches background image height
-    width: 40, // Button width
-    position: 'absolute',
+    height: 200,
+    width: 40,
+    position: "absolute",
     right: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-
 });
-
 
 export default ListingComponent;

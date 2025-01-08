@@ -86,8 +86,9 @@ const DetailsPage = () => {
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-  const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app";
-  Constants.expoConfig?.extra?.apiUrl;
+  const apiUrl =
+    Constants.expoConfig?.extra?.apiUrl ||
+    "https://8f9e-118-176-174-110.ngrok-free.app";
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;

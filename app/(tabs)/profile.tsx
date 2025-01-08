@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfileHeader from "@/components/ProfileHeader";
-import { user_data_fetching_function } from "@/app/(modals)/functions/UserProfile";
+import { useUserProfile } from "@/app/(modals)/functions/UserProfile";
 import ProfileData from "@/components/profileData";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
@@ -34,46 +34,20 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState<any>({});
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
-  const apiUrl = "https://8f9e-118-176-174-110.ngrok-free.app"; //Constants.expoConfig?.extra?.apiUrl ??
+  const apiUrl =
+    Constants.expoConfig?.extra?.apiUrl ??
+    "https://8f9e-118-176-174-110.ngrok-free.app";
 
+  const { data, error, isLoading } = useUserProfile(path, apiUrl);
   useEffect(() => {
-    const fetchData = throttle(async () => {
-      try {
-        const tokens: any = await SecureStore.getItemAsync("Tokens");
-        if (!tokens) {
-          console.warn("No tokens found. Data fetch skipped.");
-          return; // Exit early if tokens are not found
-        }
+    if (data) {
+      setFormData(data);
+    }
+  }, [data]);
 
-        const { accessToken, refreshToken } = JSON.parse(tokens);
-        if (!accessToken) {
-          console.warn("Access token is missing. Data fetch skipped.");
-          return; // Exit early if accessToken is missing
-        }
-
-        setLoading(true);
-        let retries = 3;
-        const fetchedData = await user_data_fetching_function(
-          path,
-          apiUrl,
-          accessToken,
-          refreshToken,
-          retries
-        );
-        setFormData(JSON.parse(fetchedData));
-      } catch (err) {
-        console.error("Error while fetching data:", err);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    fetchData();
-
-    return () => {
-      fetchData.cancel();
-    };
-  }, [path, apiUrl]); // Add any other dependencies as needed
+  if (error) {
+    Alert.alert("Error", error.message);
+  }
   const router = useRouter();
 
   const copyToClipboard = async () => {
