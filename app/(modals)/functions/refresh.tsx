@@ -22,7 +22,7 @@ export const auth_Refresh_Function = async (
     const data = refreshTokenAuth.data;
     if (refreshTokenAuth.status === 401) {
       await SecureStore.deleteItemAsync("Token"); // Clear expired tokens
-      throw new Error("User needs to log in again.");
+      Alert.alert("User needs to log in again.");
     } else if (refreshTokenAuth.status === 403) {
       // Invalid refresh token
       throw new Error("Refresh token is invalid.");

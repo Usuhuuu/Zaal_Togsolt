@@ -34,7 +34,9 @@ const Page = () => {
     "https://8f9e-118-176-174-110.ngrok-free.app";
 
   if (!apiUrl) {
-    throw new Error("API_URL is not defined in the environment variables");
+    Sentry.captureException(
+      "API_URL is not defined in the environment variables"
+    );
   }
 
   const axiosConfig = {
@@ -54,15 +56,21 @@ const Page = () => {
       setIsITApple(true);
     }
   }, []);
+
   const handleSubmit = async () => {
     setLoading(true);
+    console.log(`${apiUrl}`);
+
     try {
-      console.log(`${apiUrl}`);
       const response = await axios.post(
         `${apiUrl}/login`,
         { email, userPassword: password },
-        { ...axiosConfig, withCredentials: true }
+        {
+          ...axiosConfig,
+          withCredentials: true,
+        }
       );
+      console.log(response);
       if (response.status === 200) {
         const tokens = await SecureStore.setItemAsync(
           "Tokens",
@@ -78,8 +86,7 @@ const Page = () => {
       }
     } catch (err) {
       console.log(err);
-      Alert.alert("Error", er);
-      throw new Error("login error");
+      Sentry.captureException(err);
     } finally {
       setLoading(false);
     }
@@ -142,7 +149,7 @@ const Page = () => {
       ]);
       if (result.isCancelled) {
         console.log("==> Login cancelled");
-        throw new Error("login cancelled");
+        Sentry.captureException("login cancelled");
       } else {
         console.log("Login success with permissions:", result);
         const data = await AccessToken.getCurrentAccessToken();
@@ -166,15 +173,15 @@ const Page = () => {
               Alert.alert(`${tokens}`);
               Alert.alert("Facebook Login Success", "You are logged in!");
             } else {
-              throw new Error("Error on fbLogin");
+              Sentry.captureException("Error on fbLogin");
             }
           } catch (error: any) {
             //Sentry.captureEvent(error)
 
-            throw new Error("Failed to log in with Facebook.");
+            Sentry.captureException("Failed to log in with Facebook.");
           }
         } else {
-          throw new Error("No Facebook access token found.");
+          Sentry.captureException("No Facebook access token found.");
         }
       }
     } catch (error: any) {
@@ -240,7 +247,7 @@ const Page = () => {
             Alert.alert("service not available");
         }
       } else {
-        throw new Error("Server Has Problem Try Again Later ");
+        Sentry.captureException("Server Has Problem Try Again Later ");
       }
     }
   };

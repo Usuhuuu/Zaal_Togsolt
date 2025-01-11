@@ -41,6 +41,7 @@ const Profile: React.FC = () => {
   const { data, error, isLoading } = useUserProfile(path, apiUrl);
   useEffect(() => {
     if (data) {
+      console.log(data);
       setFormData(data);
     }
   }, [data]);

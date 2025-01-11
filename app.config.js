@@ -3,6 +3,7 @@ import 'dotenv/config';
 export default {
   expo: {
     entryPoint: "./app/_layout.tsx",
+    runtimeVersion: "1.0.0",
     name: "Zaalproject",
     slug: "zaalproject",
     version: "1.0.0",
@@ -21,6 +22,7 @@ export default {
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
+    jsEngine: "hermes",
     ios: {
       ios: {
         supportsTablet: true,
@@ -50,6 +52,7 @@ export default {
     plugins: [
       "expo-router",
       "expo-secure-store",
+      'expo-notifications',
       ["@react-native-google-signin/google-signin", {
         iosUrlScheme: 'com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6' || `${process.env.GOOGLE_URL}`,
       }],

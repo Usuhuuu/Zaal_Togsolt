@@ -52,7 +52,7 @@ const ChatComponent: React.FC = () => {
         if (!token) {
           setShouldFetch(false);
           Alert.alert("No token found.");
-          throw new Error("No token found.");
+          Sentry.captureException("No token found.");
         }
         const { accessToken, refreshToken } = JSON.parse(token);
         const response = await axios.get(`${apiUrl}/chat/check`, {
@@ -113,7 +113,8 @@ const ChatComponent: React.FC = () => {
       setCurrentGroupId(groupId);
       const token = await SecureStore.getItemAsync("Tokens");
       if (!token) {
-        throw new Error("Token not found while joining group.");
+        Sentry.captureException("Token not found while joining group.");
+        return Alert.alert("Login required to join group.");
       }
       const { accessToken } = JSON.parse(token);
       if (!socketRef.current || socketRef.current.disconnected) {

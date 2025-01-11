@@ -1,14 +1,48 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import Colors from '@/constants/Colors';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
+import * as Notifications from "expo-notifications";
 
 const notificationsData = [
-  { id: '1', message: 'Таны захиалга баталгаажсан.', time: '2 минутын өмнө', avatar: 'https://via.placeholder.com/40' },
-  { id: '2', message: 'Таны дараагийн захиалгад шинэ санал байна!', time: '1 цагийн өмнө', avatar: 'https://via.placeholder.com/40' },
-  { id: '3', message: 'Суралцах цагийн 30 минутын өмнө сануулга.', time: '3 цагийн өмнө', avatar: 'https://via.placeholder.com/40' },
-  { id: '4', message: 'Таны дасгалжуулагчтай шинэ мессеж ирлээ.', time: '5 цагийн өмнө', avatar: 'https://via.placeholder.com/40' },
-  { id: '5', message: 'Таны дасгал эхлэхэд 10 минут үлдлээ.', time: '1 өдрийн өмнө', avatar: 'https://via.placeholder.com/40' },
+  {
+    id: "1",
+    message: "Таны захиалга баталгаажсан.",
+    time: "2 минутын өмнө",
+    avatar: "https://via.placeholder.com/40",
+  },
+  {
+    id: "2",
+    message: "Таны дараагийн захиалгад шинэ санал байна!",
+    time: "1 цагийн өмнө",
+    avatar: "https://via.placeholder.com/40",
+  },
+  {
+    id: "3",
+    message: "Суралцах цагийн 30 минутын өмнө сануулга.",
+    time: "3 цагийн өмнө",
+    avatar: "https://via.placeholder.com/40",
+  },
+  {
+    id: "4",
+    message: "Таны дасгалжуулагчтай шинэ мессеж ирлээ.",
+    time: "5 цагийн өмнө",
+    avatar: "https://via.placeholder.com/40",
+  },
+  {
+    id: "5",
+    message: "Таны дасгал эхлэхэд 10 минут үлдлээ.",
+    time: "1 өдрийн өмнө",
+    avatar: "https://via.placeholder.com/40",
+  },
 ];
 
 const NotificationScreen = () => {
@@ -20,27 +54,42 @@ const NotificationScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Мэдэгдэлүүд</Text>
-      
-      
-        <TouchableOpacity style={[styles.buttons, { gap: 10,}]} onPress={() => handleNotificationPress('Friend Request')}>
-          <Image source={{ uri: "https://via.placeholder.com/40" }} style={styles.avatar} />
-          <Text style={styles.texts}>Friend Request</Text>
-          <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
-        </TouchableOpacity>
-    
+
+      <TouchableOpacity
+        style={[styles.buttons, { gap: 10 }]}
+        onPress={() => handleNotificationPress("Friend Request")}
+      >
+        <Image
+          source={{ uri: "https://via.placeholder.com/40" }}
+          style={styles.avatar}
+        />
+        <Text style={styles.texts}>Friend Request</Text>
+        <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
+      </TouchableOpacity>
 
       <FlatList
         data={notificationsData}
-        contentContainerStyle={{ top: 10, borderColor: Colors.primary, borderTopWidth: 1 }}
+        contentContainerStyle={{
+          top: 10,
+          borderColor: Colors.primary,
+          borderTopWidth: 1,
+        }}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.notificationItem} onPress={() => handleNotificationPress(item.message)}>
+          <TouchableOpacity
+            style={styles.notificationItem}
+            onPress={() => handleNotificationPress(item.message)}
+          >
             <View style={styles.notificationContent}>
               <Image source={{ uri: item.avatar }} style={styles.avatar} />
               <View style={styles.notificationText}>
                 <Text style={styles.notificationMessage}>{item.message}</Text>
                 <Text style={styles.notificationTime}>{item.time}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={Colors.primary}
+              />
             </View>
           </TouchableOpacity>
         )}
@@ -61,14 +110,14 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 26,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
     marginTop: 50,
-    textAlign: 'center',
+    textAlign: "center",
   },
   buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
     backgroundColor: Colors.secondary,
     padding: 20,
@@ -82,7 +131,7 @@ const styles = StyleSheet.create({
   },
   notificationItem: {
     padding: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     borderRadius: 8,
     margin: 10,
     shadowColor: "#000",
@@ -92,9 +141,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   notificationContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   notificationText: {
     flex: 1,
@@ -102,12 +151,12 @@ const styles = StyleSheet.create({
   },
   notificationMessage: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   notificationTime: {
     fontSize: 12,
-    color: '#888',
+    color: "#888",
     marginTop: 4,
   },
   avatar: {
@@ -119,19 +168,19 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 20,
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
     borderTopWidth: 1,
     borderTopColor: Colors.primary,
   },
   footerButtonText: {
     color: Colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   texts: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

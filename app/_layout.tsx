@@ -8,6 +8,7 @@ import { TouchableOpacity, View, Text } from "react-native";
 import "react-native-reanimated";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
+import * as Notifications from "expo-notifications";
 
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
