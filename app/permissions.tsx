@@ -3,7 +3,6 @@ import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 import Constants from "expo-constants";
-import { Alert } from "react-native";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ||

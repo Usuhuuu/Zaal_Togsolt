@@ -1,4 +1,3 @@
-import Constants from "expo-constants";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";

@@ -18,16 +18,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
-import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 import Team from "@/components/clans";
 import { useRouter, Href } from "expo-router";
-import ProfileSettings from "../settings/profileSettings";
-import { throttle } from "lodash";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
-import axios from "axios";
 
 const Profile: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -77,76 +72,89 @@ const Profile: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={[Colors.primary, Colors.light]}
-        start={[0, 0]}
-        end={[0, 1.2]}
-        locations={[0, 1]}
-        style={styles.background}
-      />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.titleBar}>
-          <TouchableOpacity onPress={handleBackPress}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleSharePress}>
-            <Ionicons name="share-social" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              router.push(
-                "/settings/profileSettings" as Href<"/settings/profileSettings">
-              )
-            }
-          >
-            <Ionicons name="settings" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+      <View>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : (
+          <>
+            <LinearGradient
+              colors={[Colors.primary, Colors.light]}
+              start={[0, 0]}
+              end={[0, 1.2]}
+              locations={[0, 1]}
+              style={styles.background}
+            />
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+              <View style={styles.titleBar}>
+                <TouchableOpacity onPress={handleBackPress}>
+                  <Ionicons name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSharePress}>
+                  <Ionicons name="share-social" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push(
+                      "/settings/profileSettings" as Href<"/settings/profileSettings">
+                    )
+                  }
+                >
+                  <Ionicons name="settings" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
 
-        <ProfileHeader
-          copyToClipboard={copyToClipboard}
-          profileImageUri="https://example.com/profile.jpg"
-          firstName={formData.firstName}
-          unique_user_ID={formData.unique_user_ID}
-        />
-        <Team />
-        <ProfileData />
-
-        {/* Button to open modal */}
-        <View style={styles.saved}>
-          <TouchableOpacity style={styles.savedBackground} onPress={openModal}>
-            <ImageBackground
-              source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
-              resizeMode="cover"
-              borderRadius={20} // Rounded corners
-              style={styles.savedBackground}
-            >
-              <Text style={styles.savedText}>hadgalsan tuuhuud</Text>
-              <ImageBackground
-                source={require("@/assets/images/saved.png")} // Replace with your image path
-                style={styles.savedicon}
+              <ProfileHeader
+                copyToClipboard={copyToClipboard}
+                profileImageUri="https://example.com/profile.jpg"
+                firstName={formData.firstName}
+                unique_user_ID={formData.unique_user_ID}
               />
-            </ImageBackground>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+              <Team />
+              <ProfileData />
 
-      {/* Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <SavedHalls />
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+              {/* Button to open modal */}
+              <View style={styles.saved}>
+                <TouchableOpacity
+                  style={styles.savedBackground}
+                  onPress={openModal}
+                >
+                  <ImageBackground
+                    source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
+                    resizeMode="cover"
+                    borderRadius={20} // Rounded corners
+                    style={styles.savedBackground}
+                  >
+                    <Text style={styles.savedText}>hadgalsan tuuguud</Text>
+                    <ImageBackground
+                      source={require("@/assets/images/saved.png")} // Replace with your image path
+                      style={styles.savedicon}
+                    />
+                  </ImageBackground>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+            {/* Modal */}
+            <Modal
+              visible={modalVisible}
+              animationType="slide"
+              transparent={true}
+              onRequestClose={closeModal}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <SavedHalls />
+                  <TouchableOpacity
+                    onPress={closeModal}
+                    style={styles.closeButton}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          </>
+        )}
+      </View>
     </SafeAreaView>
   );
 };

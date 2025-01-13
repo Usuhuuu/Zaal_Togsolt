@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Image,
   ImageBackground,
 } from "react-native";
 import { Ionicons, Zocial } from "@expo/vector-icons";

@@ -8,7 +8,7 @@ import { TouchableOpacity, View, Text } from "react-native";
 import "react-native-reanimated";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
-import * as Notifications from "expo-notifications";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
@@ -24,7 +24,6 @@ export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-// Define a type for the error boundary props
 interface CustomErrorBoundaryProps {
   error?: Error;
   children: ReactNode;
@@ -49,17 +48,16 @@ function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
 }
 
 function RootLayout() {
-  // Call useFonts at the top level
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
+  const router = useRouter();
+
   useEffect(() => {
     if (error) {
       Sentry.captureException(error); // Log font load errors to Sentry
-      console.error("Error loading fonts:", error);
-      throw error;
     }
   }, [error]);
 
@@ -93,10 +91,9 @@ function RootLayoutNav() {
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: Colors.primary, // Background color of the header
+            backgroundColor: Colors.primary,
           },
-          headerTitleStyle: {},
-          headerTintColor: Colors.light, // Text color of the header
+          headerTintColor: Colors.light,
         }}
       />
       <Stack.Screen name="listing/[id]" options={{ headerTitle: ` ` }} />
@@ -113,20 +110,20 @@ function RootLayoutNav() {
           ),
         }}
       />
-      {/* Add Notification Screen */}
       <Stack.Screen
         name="listing/notification"
         options={{
-          headerShown: false, // Hide the header for the notification screen
+          headerShown: false,
         }}
       />
     </Stack>
   );
 }
 
-// Wrap the entire app in Sentry and Error Boundary
 export default Sentry.wrap(() => (
   <CustomErrorBoundary>
-    <RootLayout />
+    <SafeAreaView>
+      <RootLayout />
+    </SafeAreaView>
   </CustomErrorBoundary>
 ));

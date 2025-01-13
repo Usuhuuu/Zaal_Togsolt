@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { StyleSheet, Image } from "react-native";
 import { Tabs } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Colors from "@/constants/Colors";
@@ -106,7 +106,7 @@ const Layout = () => {
   return (
     <SavedHallsProvider>
       <Drawer.Navigator
-       drawerContent={(props) => <CustomDrawerContent {...props} />}
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           drawerLabelStyle: {
             marginLeft: -10,
@@ -119,20 +119,21 @@ const Layout = () => {
         }}
       >
         {/* Drawer item wrapping Tabs */}
-        <Drawer.Screen name="Home" component={TabsLayout}
-        options={{
-          drawerLabel: "Home",
-          headerShown: false ,
-          drawerIcon: () => (
-            <Image
-              source={require("../../assets/tab-icons/home.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
-          ),
-          }
-        }
+        <Drawer.Screen
+          name="Home"
+          component={TabsLayout}
+          options={{
+            drawerLabel: "Home",
+            headerShown: false,
+            drawerIcon: () => (
+              <Image
+                source={require("../../assets/tab-icons/home.png")}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Info Screen"
+                accessibilityHint="Navigates to the info screen"
+              />
+            ),
+          }}
         />
         {/* Additional drawer screens */}
         <Drawer.Screen
@@ -140,42 +141,44 @@ const Layout = () => {
           component={InfoScreen}
           options={{
             drawerLabel: "Medeelel",
-            headerShown: false, 
+            headerShown: false,
             drawerIcon: () => (
               <Image
-              source={require("../../assets/tab-icons/news.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
+                source={require("../../assets/tab-icons/news.png")}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Info Screen"
+                accessibilityHint="Navigates to the info screen"
+              />
             ),
-            }} // Show header for InfoScreen
+          }} // Show header for InfoScreen
         />
         <Drawer.Screen
           name="Surgalt"
           component={Dtraining}
-          options={{ headerShown: false ,
+          options={{
+            headerShown: false,
             drawerIcon: () => (
               <Image
-              source={require("../../assets/tab-icons/training.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
+                source={require("../../assets/tab-icons/training.png")}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Info Screen"
+                accessibilityHint="Navigates to the info screen"
+              />
             ),
           }} // Show header for InfoScreen
         />
-         <Drawer.Screen
+        <Drawer.Screen
           name="Tohirgoo"
           component={MainSettings}
-          options={{ headerShown: false ,
+          options={{
+            headerShown: false,
             drawerIcon: () => (
               <Image
-              source={require("../../assets/tab-icons/settings.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
+                source={require("../../assets/tab-icons/settings.png")}
+                style={{ width: 24, height: 24 }}
+                accessibilityLabel="Info Screen"
+                accessibilityHint="Navigates to the info screen"
+              />
             ),
           }} // Show header for InfoScreen
         />

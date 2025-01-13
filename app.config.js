@@ -22,7 +22,7 @@ export default {
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
-    jsEngine: "hermes",
+    jsEngine: "jsc",
     ios: {
       ios: {
         supportsTablet: true,
