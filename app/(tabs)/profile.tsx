@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -8,47 +8,54 @@ import {
   Text,
   Modal,
   ImageBackground,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfileHeader from "@/components/ProfileHeader";
-import { useUserProfile } from "@/app/(modals)/functions/UserProfile";
+import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
 import ProfileData from "@/components/profileData";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
-import { auth_Refresh_Function } from "../(modals)/functions/refresh";
 import Team from "@/components/clans";
 import { useRouter, Href } from "expo-router";
-import ProfileSettings from "../settings/profileSettings";
-import { throttle } from "lodash";
 
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
-import axios from "axios";
+import useSWR from "swr";
+import ProfileAdmin from "@/components/profileDrawer/admin";
 
 const Profile: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({});
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string>("");
+  const [roleFetched, setRoleFetched] = useState<boolean>(false);
   const apiUrl =
     Constants.expoConfig?.extra?.apiUrl ??
     "https://8f9e-118-176-174-110.ngrok-free.app";
 
-  const { data, error, isLoading } = useUserProfile(path, apiUrl);
+  const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
+    fetcher: () => fetchRoleAndProfil(path),
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    dedupingInterval: 10000,
+    errorRetryInterval: 4000,
+    errorRetryCount: 3,
+  });
+
   useEffect(() => {
     if (data) {
-      console.log(data);
-      setFormData(data);
+      setFormData(data.profileData);
+      setUserRole(data.role);
+    } else if (error) {
+      console.error("Error fetching role and profile data:", error);
     }
-  }, [data]);
+    // Set loading state based on isLoading
+    setLoading(isLoading);
+  }, [data, error, isLoading]);
 
-  if (error) {
-    Alert.alert("Error", error.message);
-  }
   const router = useRouter();
 
   const copyToClipboard = async () => {
@@ -75,78 +82,137 @@ const Profile: React.FC = () => {
     setModalVisible(false); // Close the modal
   };
 
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={[Colors.primary, Colors.light]}
-        start={[0, 0]}
-        end={[0, 1.2]}
-        locations={[0, 1]}
-        style={styles.background}
-      />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.titleBar}>
-          <TouchableOpacity onPress={handleBackPress}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleSharePress}>
-            <Ionicons name="share-social" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              router.push(
-                "/settings/profileSettings" as Href<"/settings/profileSettings">
-              )
-            }
-          >
-            <Ionicons name="settings" size={24} color="#fff" />
-          </TouchableOpacity>
+      {loading ? (
+        <View>
+          <Text>Loading...</Text>
         </View>
-
-        <ProfileHeader
-          copyToClipboard={copyToClipboard}
-          profileImageUri="https://example.com/profile.jpg"
-          firstName={formData.firstName}
-          unique_user_ID={formData.unique_user_ID}
-        />
-        <Team />
-        <ProfileData />
-
-        {/* Button to open modal */}
-        <View style={styles.saved}>
-          <TouchableOpacity style={styles.savedBackground} onPress={openModal}>
-            <ImageBackground
-              source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
-              resizeMode="cover"
-              borderRadius={20} // Rounded corners
-              style={styles.savedBackground}
-            >
-              <Text style={styles.savedText}>hadgalsan tuuhuud</Text>
-              <ImageBackground
-                source={require("@/assets/images/saved.png")} // Replace with your image path
-                style={styles.savedicon}
+      ) : (
+        <>
+          {/* Admin Role */}
+          {userRole === "admin" && (
+            <>
+              <ProfileAdmin
+                copyToClipboard={copyToClipboard}
+                formData={formData}
               />
-            </ImageBackground>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            </>
+          )}
 
-      {/* Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <SavedHalls />
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+          {/* Contractor Role */}
+          {userRole === "contractor" && (
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+              <View style={styles.titleBar}>
+                <TouchableOpacity onPress={handleBackPress}>
+                  <Ionicons name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSharePress}>
+                  <Ionicons name="share-social" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push(
+                      "/settings/profileSettings" as Href<"/settings/profileSettings">
+                    )
+                  }
+                >
+                  <Ionicons name="settings" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Add contractor-specific content */}
+              <Text style={styles.contractorText}>Welcome, Contractor!</Text>
+            </ScrollView>
+          )}
+
+          {/* Regular User Role */}
+          {userRole === "user" && (
+            <>
+              <LinearGradient
+                colors={[Colors.primary, Colors.light]}
+                start={[0, 0]}
+                end={[0, 1.2]}
+                locations={[0, 1]}
+                style={styles.background}
+              />
+              <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <View style={styles.titleBar}>
+                  <TouchableOpacity onPress={handleBackPress}>
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleSharePress}>
+                    <Ionicons name="share-social" size={24} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push(
+                        "/settings/profileSettings" as Href<"/settings/profileSettings">
+                      )
+                    }
+                  >
+                    <Ionicons name="settings" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+
+                <ProfileHeader
+                  copyToClipboard={copyToClipboard}
+                  profileImageUri="https://example.com/profile.jpg"
+                  firstName={formData.firstName}
+                  unique_user_ID={formData.unique_user_ID}
+                />
+                <Team />
+                <ProfileData />
+
+                {/* Button to open modal */}
+                <View style={styles.saved}>
+                  <TouchableOpacity
+                    style={styles.savedBackground}
+                    onPress={openModal}
+                  >
+                    <ImageBackground
+                      source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
+                      resizeMode="cover"
+                      borderRadius={20} // Rounded corners
+                      style={styles.savedBackground}
+                    >
+                      <Text style={styles.savedText}>Saved Records</Text>
+                      <ImageBackground
+                        source={require("@/assets/images/saved.png")} // Replace with your image path
+                        style={styles.savedicon}
+                      />
+                    </ImageBackground>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+
+              {/* Modal */}
+              <Modal
+                visible={modalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={closeModal}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <SavedHalls />
+                    <TouchableOpacity
+                      onPress={closeModal}
+                      style={styles.closeButton}
+                    >
+                      <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </>
+          )}
+        </>
+      )}
     </SafeAreaView>
   );
 };
@@ -234,6 +300,20 @@ const styles = StyleSheet.create({
     alignItems: "center", // Adjust as needed
     width: 80,
     height: 80,
+  },
+  adminText: {
+    color: "black",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  contractorText: {
+    color: "black",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

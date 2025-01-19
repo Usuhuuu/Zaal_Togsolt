@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Image,
   ImageBackground,
 } from "react-native";
 import { Ionicons, Zocial } from "@expo/vector-icons";
@@ -71,7 +70,7 @@ const Page = () => {
         }
       );
       console.log(response);
-      if (response.status === 200) {
+      if (response.status == 200) {
         const tokens = await SecureStore.setItemAsync(
           "Tokens",
           JSON.stringify({

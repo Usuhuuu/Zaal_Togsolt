@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Image, Text } from "react-native";
 import { Tabs } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Colors from "@/constants/Colors";
@@ -10,10 +10,13 @@ import InfoScreen from "@/components/InfoScreen"; // Example drawer screen
 import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
 import MainSettings from "../settings/mainSettings";
+import useSWR from "swr";
+import ProfileNotification from "@/components/profileDrawer/notification";
+import { useSWRConfig } from "swr/dist/_internal";
+import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
 
 // Create a Drawer Navigator
 const Drawer = createDrawerNavigator();
-
 const TabsLayout = () => (
   <Tabs
     screenOptions={{
@@ -103,10 +106,134 @@ const TabsLayout = () => (
 );
 
 const Layout = () => {
+  const { cache } = useSWRConfig();
+  const [userRole, setUserRole] = useState<string>("user");
+
+  const {
+    data: userData,
+    error: userError,
+    isLoading: userLoading,
+  } = useSWR("RoleAndProfile_main", {
+    fetcher: () => fetchRoleAndProfil("main"),
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    dedupingInterval: 10000,
+    errorRetryInterval: 4000,
+    errorRetryCount: 3,
+  });
+
+  useEffect(() => {
+    if (userData) {
+      setUserRole(userData.role);
+    } else if (userError) {
+      console.error("Error fetching user data:", userError);
+    }
+  }, [userData]);
+
+  if (userLoading) {
+    return <Text>Loading...</Text>;
+  }
+  const renderScreens = () => {
+    if (userRole === "admin") {
+      return (
+        <>
+          <Drawer.Screen
+            name="Homesda"
+            component={TabsLayout}
+            options={{
+              drawerLabel: "Home",
+              headerShown: false,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/tab-icons/home.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="notification"
+            component={ProfileNotification}
+            options={{
+              drawerLabel: "Notification",
+              headerShown: true,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/sport-icons/notifications.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+        </>
+      );
+    } else if (userRole === "user") {
+      return (
+        <>
+          <Drawer.Screen
+            name="Home"
+            component={TabsLayout}
+            options={{
+              drawerLabel: "Home",
+              headerShown: false,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/tab-icons/home.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Medeelel"
+            component={InfoScreen}
+            options={{
+              drawerLabel: "Medeelel",
+              headerShown: false,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/tab-icons/news.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Surgalt"
+            component={Dtraining}
+            options={{
+              headerShown: false,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/tab-icons/training.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Tohirgoo"
+            component={MainSettings}
+            options={{
+              headerShown: false,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/tab-icons/settings.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+        </>
+      );
+    }
+    return null;
+  };
+
   return (
     <SavedHallsProvider>
       <Drawer.Navigator
-       drawerContent={(props) => <CustomDrawerContent {...props} />}
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           drawerLabelStyle: {
             marginLeft: -10,
@@ -118,67 +245,7 @@ const Layout = () => {
           },
         }}
       >
-        {/* Drawer item wrapping Tabs */}
-        <Drawer.Screen name="Home" component={TabsLayout}
-        options={{
-          drawerLabel: "Home",
-          headerShown: false ,
-          drawerIcon: () => (
-            <Image
-              source={require("../../assets/tab-icons/home.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
-          ),
-          }
-        }
-        />
-        {/* Additional drawer screens */}
-        <Drawer.Screen
-          name="Medeelel"
-          component={InfoScreen}
-          options={{
-            drawerLabel: "Medeelel",
-            headerShown: false, 
-            drawerIcon: () => (
-              <Image
-              source={require("../../assets/tab-icons/news.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
-            ),
-            }} // Show header for InfoScreen
-        />
-        <Drawer.Screen
-          name="Surgalt"
-          component={Dtraining}
-          options={{ headerShown: false ,
-            drawerIcon: () => (
-              <Image
-              source={require("../../assets/tab-icons/training.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
-            ),
-          }} // Show header for InfoScreen
-        />
-         <Drawer.Screen
-          name="Tohirgoo"
-          component={MainSettings}
-          options={{ headerShown: false ,
-            drawerIcon: () => (
-              <Image
-              source={require("../../assets/tab-icons/settings.png")}
-              style={{ width: 24, height: 24 }}
-              accessibilityLabel="Info Screen"
-              accessibilityHint="Navigates to the info screen"  
-            />
-            ),
-          }} // Show header for InfoScreen
-        />
+        {renderScreens()}
       </Drawer.Navigator>
     </SavedHallsProvider>
   );
