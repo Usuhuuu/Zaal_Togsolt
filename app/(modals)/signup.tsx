@@ -14,8 +14,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import Constants from "expo-constants";
-import Colors from "@/constants/Colors";  // Assuming Colors is defined properly
-import { defaultStyles } from "@/constants/Styles";  // Assuming Styles is defined
+import Colors from "@/constants/Colors"; // Assuming Colors is defined properly
+import { defaultStyles } from "@/constants/Styles"; // Assuming Styles is defined
 
 const API_URL = "https://8f9e-118-176-174-110.ngrok-free.app";
 //Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
@@ -153,6 +153,7 @@ const Page = () => {
               clearTextOnFocus={true}
               onFocus={() => setIsItPossible(false)}
               style={[styles.inputField]}
+              placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity
               onPress={handleUserID}
@@ -169,10 +170,12 @@ const Page = () => {
             value={formData.lastName}
             onChangeText={(value) => handleInputChange("lastName", value)}
             style={styles.inputField}
+            placeholderTextColor={Colors.grey}
           />
           <TextInput
             placeholder="First Name"
             value={formData.firstName}
+            placeholderTextColor={Colors.grey}
             onChangeText={(value) => handleInputChange("firstName", value)}
             style={styles.inputField}
           />
@@ -181,6 +184,7 @@ const Page = () => {
             value={formData.email}
             onChangeText={(value) => handleInputChange("email", value)}
             style={styles.inputField}
+            placeholderTextColor={Colors.grey}
           />
 
           {/* Phone Verification Section */}
@@ -190,6 +194,7 @@ const Page = () => {
               value={formData.phoneNumber}
               onChangeText={(value) => handleInputChange("phoneNumber", value)}
               style={styles.inputField}
+              placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity onPress={handleSendMSJ} style={styles.button}>
               <Text style={styles.buttonText}>Send Verification Code</Text>
@@ -201,8 +206,11 @@ const Page = () => {
             <TextInput
               placeholder="Verification Code"
               value={formData.verificationCode}
-              onChangeText={(value) => handleInputChange("verificationCode", value)}
+              onChangeText={(value) =>
+                handleInputChange("verificationCode", value)
+              }
               style={styles.inputField}
+              placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity
               onPress={() => setVerificationCompleted(true)}
@@ -220,8 +228,12 @@ const Page = () => {
               value={formData.password}
               onChangeText={(value) => handleInputChange("password", value)}
               style={styles.inputField}
+              placeholderTextColor={Colors.grey}
             />
-            <TouchableOpacity onPress={handlePasswordToggle} style={styles.eyeIcon}>
+            <TouchableOpacity
+              onPress={handlePasswordToggle}
+              style={styles.eyeIcon}
+            >
               <Ionicons
                 name={passwordHide ? "eye-off" : "eye"}
                 size={24}
@@ -235,10 +247,16 @@ const Page = () => {
               placeholder="Confirm Password"
               secureTextEntry={passwordHide}
               value={formData.confirm_password}
-              onChangeText={(value) => handleInputChange("confirm_password", value)}
+              onChangeText={(value) =>
+                handleInputChange("confirm_password", value)
+              }
               style={styles.inputField}
+              placeholderTextColor={Colors.grey}
             />
-            <TouchableOpacity onPress={handlePasswordToggle} style={styles.eyeIcon}>
+            <TouchableOpacity
+              onPress={handlePasswordToggle}
+              style={styles.eyeIcon}
+            >
               <Ionicons
                 name={passwordHide ? "eye-off" : "eye"}
                 size={24}
@@ -250,7 +268,9 @@ const Page = () => {
           {/* Terms and Privacy Agreement */}
           <View style={styles.checkboxContainer}>
             <TouchableOpacity
-              onPress={() => handleInputChange("agree_terms", !formData.agree_terms)}
+              onPress={() =>
+                handleInputChange("agree_terms", !formData.agree_terms)
+              }
               style={styles.checkbox}
             >
               <Ionicons
@@ -272,7 +292,9 @@ const Page = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => handleInputChange("agree_privacy", !formData.agree_privacy)}
+              onPress={() =>
+                handleInputChange("agree_privacy", !formData.agree_privacy)
+              }
               style={styles.checkbox}
             >
               <Ionicons

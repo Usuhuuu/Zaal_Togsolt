@@ -24,13 +24,12 @@ export default {
     },
     jsEngine: "hermes",
     ios: {
-      ios: {
-        supportsTablet: true,
-        bundleIdentifier: "com.usuhbayr.zaalproject",
-        usesAppleSignIn: true,
-        config: {
-          usesNonExemptEncryption: false
-        }
+
+      supportsTablet: true,
+      bundleIdentifier: "com.usuhbayr.zaalproject",
+      usesAppleSignIn: true,
+      config: {
+        usesNonExemptEncryption: false
       },
     },
     assetBundlePatterns: [
@@ -81,6 +80,7 @@ export default {
         },
         ios: {
           infoPlist: {
+            "aps-environment": "development",
             GMSApiKey: process.env.GOOGLE_MAPS_API_KEY,
             NSLocationWhenInUseUsageDescription: "Your app needs access to your location to show your position on the map",
             NSLocationAlwaysUsageDescription: "Your app needs access to your location for continuous location updates",

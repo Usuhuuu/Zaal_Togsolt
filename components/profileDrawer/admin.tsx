@@ -1,8 +1,11 @@
 import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Colors from "@/constants/Colors";
+import { useNavigation } from "@react-navigation/native";
+import { useDrawerStatus } from "@react-navigation/drawer";
+import { DrawerActions } from "@react-navigation/native";
 interface ProfileAdminProps {
   copyToClipboard: () => void;
   formData: String;
@@ -21,12 +24,31 @@ const ProfileAdmin: React.FC<ProfileAdminProps> = ({
       console.error("Error sending notification:", err);
     }
   };
-
+  const navigation = useNavigation();
+  const isDrawerOpen = useDrawerStatus();
+  const openDrawer = () => {
+    navigation.dispatch(DrawerActions.openDrawer()); // Dispatch the openDrawer action
+  };
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.topContainer}>
+        <TouchableOpacity onPress={openDrawer}>
+          <Ionicons name="menu" size={28} color={Colors.primary} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Admin Dashboard</Text>
+        <TouchableOpacity onPress={openDrawer}>
+          <Image
+            style={{
+              width: 40,
+              height: 40,
+              borderColor: Colors.primary,
+              borderWidth: 0.5,
+              borderRadius: 50,
+            }}
+            source={require("../../assets/images/profileIcons/profile.png")}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Buttons Section */}
@@ -58,14 +80,15 @@ const styles = StyleSheet.create({
   topContainer: {
     width: "100%",
     height: 60,
-    backgroundColor: "gray",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
+    flexDirection: "row",
+    paddingHorizontal: 20,
   },
   headerText: {
-    color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
+    color: Colors.primary,
   },
   buttonContainer: {
     marginTop: 30,

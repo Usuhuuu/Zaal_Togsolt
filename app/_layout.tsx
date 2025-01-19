@@ -3,8 +3,8 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, ReactNode } from "react";
-import { TouchableOpacity, View, Text } from "react-native";
+import React, { useEffect, ReactNode, useState } from "react";
+import { TouchableOpacity, View, Text, Alert } from "react-native";
 import "react-native-reanimated";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
@@ -75,6 +75,35 @@ function RootLayout() {
 
   return <RootLayoutNav />;
 }
+
+const NotificationPermissions = async () => {
+  const [notificatonToken, setNotificatonToken] = useState<string | null>(null);
+  useEffect(() => {
+    const getPermissions = async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status == "granted") {
+      } else {
+        Alert.alert("You need to enable permissions to receive notifications!");
+      }
+      const token = await Notifications.getExpoPushTokenAsync();
+      console.log(token);
+      setNotificatonToken(token.data);
+    };
+    getPermissions();
+
+    const comingNotification = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received", notification);
+      }
+    );
+    return () => {
+      comingNotification.remove();
+    };
+  }, []);
+};
+useEffect(() => {
+  NotificationPermissions();
+}, []);
 
 function RootLayoutNav() {
   const router = useRouter();

@@ -24,10 +24,10 @@ import {
   statusCodes,
 } from "@react-native-google-signin/google-signin";
 import * as Sentry from "@sentry/react-native";
+import { useNavigation } from "@react-navigation/native";
+import axiosInstance from "./functions/axiosInstanc";
 
 const Page = () => {
-  // Access the API URL from the environment variables
-
   const apiUrl =
     Constants.expoConfig?.extra?.apiUrl ||
     "https://8f9e-118-176-174-110.ngrok-free.app";
@@ -38,9 +38,6 @@ const Page = () => {
     );
   }
 
-  const axiosConfig = {
-    timeout: 5000,
-  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -61,14 +58,10 @@ const Page = () => {
     console.log(`${apiUrl}`);
 
     try {
-      const response = await axios.post(
-        `${apiUrl}/login`,
-        { email, userPassword: password },
-        {
-          ...axiosConfig,
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.post("/login", {
+        email,
+        userPassword: password,
+      });
       console.log(response);
       if (response.status == 200) {
         const tokens = await SecureStore.setItemAsync(
@@ -97,11 +90,9 @@ const Page = () => {
 
   const mobileVerify = async () => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/auth/phoneVerification`, // Use apiUrl from environment variable
-        { phoneNumber },
-        { ...axiosConfig, withCredentials: true }
-      );
+      const response = await axiosInstance.post("/auth/phoneVerification", {
+        phoneNumber,
+      });
       response.status === 200
         ? Alert.alert("Verification Sent", "Verification code sent")
         : Alert.alert("Error", "Verification code not sent");
@@ -113,11 +104,9 @@ const Page = () => {
 
   const mobileVerifyCheck = async () => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/auth/verifyCode`, // Use apiUrl from environment variable
-        { verifyCode },
-        { ...axiosConfig, withCredentials: true }
-      );
+      const response = await axiosInstance.post("/auth/verifyCode", {
+        verifyCode,
+      });
       response.status === 200
         ? setIsVerified(true)
         : Alert.alert("Error", "Failed to verify");
@@ -153,13 +142,12 @@ const Page = () => {
         console.log("Login success with permissions:", result);
         const data = await AccessToken.getCurrentAccessToken();
         if (data) {
-          const accessToken = data.accessToken;
+          const fbAccessToken = data.accessToken;
           try {
-            const res = await axios.post(
-              `${apiUrl}/auth/facebook`,
-              { accessToken },
-              { ...axiosConfig, withCredentials: true }
-            );
+            const res = await axiosInstance.post("/auth/facebook", {
+              fbAccessToken,
+            });
+
             console.log("Facebook login result:", res);
             if (res.status == 200) {
               const tokens = await SecureStore.setItemAsync(
@@ -216,12 +204,11 @@ const Page = () => {
       await GoogleSignin.hasPlayServices();
       const user_info = await GoogleSignin.signIn();
       const { idToken, accessToken } = await GoogleSignin.getTokens();
-      if (accessToken) {
-        const response = await axios.post(
-          `${apiUrl}/auth/google`,
-          { accessToken },
-          { ...axiosConfig, withCredentials: true }
-        );
+      const googleAccessToken = accessToken;
+      if (googleAccessToken) {
+        const response = await axiosInstance.post("/auth/google", {
+          googleAccessToken,
+        });
         if (response.status == 200) {
           const tokens = await SecureStore.setItemAsync(
             "Tokens",
@@ -266,6 +253,7 @@ const Page = () => {
             value={email}
             onChangeText={setEmail}
             style={styles.input}
+            placeholderTextColor={Colors.grey}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -276,6 +264,7 @@ const Page = () => {
             value={password}
             onChangeText={setPassword}
             style={styles.input}
+            placeholderTextColor={Colors.grey}
           />
           <TouchableOpacity
             style={styles.eyeIcon}
@@ -295,6 +284,7 @@ const Page = () => {
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             style={styles.input}
+            placeholderTextColor={Colors.grey}
           />
           <TouchableOpacity style={styles.verifyButton} onPress={mobileVerify}>
             <Text style={styles.verifyButtonText}>Verify</Text>
@@ -307,6 +297,7 @@ const Page = () => {
             value={verifyCode}
             onChangeText={setVerifyCode}
             style={styles.input}
+            placeholderTextColor={Colors.grey}
           />
           <TouchableOpacity
             style={styles.verifyButton}
@@ -463,7 +454,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.primary,
     padding: 10,
-    borderRadius: 30, // Rounded button
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
   },

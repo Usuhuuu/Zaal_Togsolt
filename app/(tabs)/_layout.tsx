@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Image, Text } from "react-native";
+import { StyleSheet, Image, Text, TouchableOpacity } from "react-native";
 import { Tabs } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Colors from "@/constants/Colors";
@@ -12,8 +12,9 @@ import CustomDrawerContent from "@/components/CostumDrawerContent";
 import MainSettings from "../settings/mainSettings";
 import useSWR from "swr";
 import ProfileNotification from "@/components/profileDrawer/notification";
-import { useSWRConfig } from "swr/dist/_internal";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 // Create a Drawer Navigator
 const Drawer = createDrawerNavigator();
@@ -106,8 +107,8 @@ const TabsLayout = () => (
 );
 
 const Layout = () => {
-  const { cache } = useSWRConfig();
   const [userRole, setUserRole] = useState<string>("user");
+  const navigation = useNavigation(); // Move this to the top level to avoid hook order issues
 
   const {
     data: userData,
@@ -133,12 +134,13 @@ const Layout = () => {
   if (userLoading) {
     return <Text>Loading...</Text>;
   }
+
   const renderScreens = () => {
     if (userRole === "admin") {
       return (
         <>
           <Drawer.Screen
-            name="Homesda"
+            name="Admin Dashboard"
             component={TabsLayout}
             options={{
               drawerLabel: "Home",
@@ -152,11 +154,23 @@ const Layout = () => {
             }}
           />
           <Drawer.Screen
-            name="notification"
+            name="Notification Manager"
             component={ProfileNotification}
             options={{
               drawerLabel: "Notification",
               headerShown: true,
+              headerLeft: () => (
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={28}
+                    color={Colors.primary}
+                    style={{
+                      marginLeft: 15,
+                    }}
+                  />
+                </TouchableOpacity>
+              ),
               drawerIcon: () => (
                 <Image
                   source={require("../../assets/sport-icons/notifications.png")}

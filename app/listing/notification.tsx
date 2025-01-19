@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import * as Notifications from "expo-notifications";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const notificationsData = [
   {
@@ -44,7 +44,6 @@ const notificationsData = [
     avatar: "https://via.placeholder.com/40",
   },
 ];
-
 const NotificationScreen = () => {
   // Function to handle notification press
   const handleNotificationPress = (message: string) => {
@@ -52,54 +51,78 @@ const NotificationScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Мэдэгдэлүүд</Text>
-
-      <TouchableOpacity
-        style={[styles.buttons, { gap: 10 }]}
-        onPress={() => handleNotificationPress("Friend Request")}
-      >
-        <Image
-          source={{ uri: "https://via.placeholder.com/40" }}
-          style={styles.avatar}
-        />
-        <Text style={styles.texts}>Friend Request</Text>
-        <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
-      </TouchableOpacity>
-
-      <FlatList
-        data={notificationsData}
-        contentContainerStyle={{
-          top: 10,
-          borderColor: Colors.primary,
-          borderTopWidth: 1,
-        }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.notificationItem}
-            onPress={() => handleNotificationPress(item.message)}
-          >
-            <View style={styles.notificationContent}>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
-              <View style={styles.notificationText}>
-                <Text style={styles.notificationMessage}>{item.message}</Text>
-                <Text style={styles.notificationTime}>{item.time}</Text>
-              </View>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={Colors.primary}
-              />
-            </View>
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <TouchableOpacity onPress={() => {}}>
+            <Ionicons
+              name="arrow-back"
+              size={28}
+              color={Colors.primary}
+              style={{
+                marginLeft: 15,
+              }}
+            />
           </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.id}
-      />
+          <Text style={styles.header}>Мэдэгдэлүүд</Text>
+          <TouchableOpacity onPress={() => {}}>
+            <Ionicons
+              name="search"
+              size={28}
+              color={Colors.primary}
+              style={{
+                marginRight: 15,
+              }}
+            />
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerButtonText}>google ad</Text>
+        <TouchableOpacity
+          style={[styles.buttons, { gap: 10 }]}
+          onPress={() => handleNotificationPress("Friend Request")}
+        >
+          <Image
+            source={{ uri: "https://via.placeholder.com/40" }}
+            style={styles.avatar}
+          />
+          <Text style={styles.texts}>Friend Request</Text>
+          <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
+        </TouchableOpacity>
+
+        <FlatList
+          data={notificationsData}
+          contentContainerStyle={{
+            top: 10,
+            borderColor: Colors.primary,
+            borderTopWidth: 1,
+          }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.notificationItem}
+              onPress={() => handleNotificationPress(item.message)}
+            >
+              <View style={styles.notificationContent}>
+                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                <View style={styles.notificationText}>
+                  <Text style={styles.notificationMessage}>{item.message}</Text>
+                  <Text style={styles.notificationTime}>{item.time}</Text>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={Colors.primary}
+                />
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.id}
+        />
+
+        <View style={styles.footer}>
+          <Text style={styles.footerButtonText}>google ad</Text>
+        </View>
       </View>
-    </View>
+    </SafeAreaProvider>
   );
 };
 
@@ -108,11 +131,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 50,
+    justifyContent: "space-between",
+    backgroundColor: Colors.light,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primary,
+  },
   header: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#000",
-    marginTop: 50,
     textAlign: "center",
   },
   buttons: {
