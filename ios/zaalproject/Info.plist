@@ -5,6 +5,24 @@
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
 
+    <!-- Required Notification -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>location</string>
+        <string>fetch</string>
+        <string>remote-notification</string> <!-- Allow receiving remote notifications in the background -->
+    </array>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Your app needs access to your location to show your position on the map</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Your app needs access to your location for continuous location updates</string>
+
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/> <!-- Allow loading resources over HTTP if needed -->
+    </dict>
 
     <!-- Google map configuration-->
     <key>GMSApiKey</key>

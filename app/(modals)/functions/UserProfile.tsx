@@ -1,5 +1,3 @@
-import useSWR from "swr";
-import * as Sentry from "@sentry/react-native";
 import axiosInstance from "./axiosInstanc";
 import * as SecureStore from "expo-secure-store";
 

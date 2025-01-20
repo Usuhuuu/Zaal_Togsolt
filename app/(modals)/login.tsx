@@ -25,7 +25,7 @@ import {
 } from "@react-native-google-signin/google-signin";
 import * as Sentry from "@sentry/react-native";
 import { useNavigation } from "@react-navigation/native";
-import axiosInstance from "./functions/axiosInstanc";
+import axiosInstance, { axiosInstanceRegular } from "./functions/axiosInstanc";
 
 const Page = () => {
   const apiUrl =
@@ -55,16 +55,14 @@ const Page = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    console.log(`${apiUrl}`);
 
     try {
-      const response = await axiosInstance.post("/login", {
+      const response = await axiosInstanceRegular.post("/login", {
         email,
         userPassword: password,
       });
-      console.log(response);
       if (response.status == 200) {
-        const tokens = await SecureStore.setItemAsync(
+        await SecureStore.setItemAsync(
           "Tokens",
           JSON.stringify({
             accessToken: response.data.accessToken,
@@ -90,9 +88,12 @@ const Page = () => {
 
   const mobileVerify = async () => {
     try {
-      const response = await axiosInstance.post("/auth/phoneVerification", {
-        phoneNumber,
-      });
+      const response = await axiosInstanceRegular.post(
+        "/auth/phoneVerification",
+        {
+          phoneNumber,
+        }
+      );
       response.status === 200
         ? Alert.alert("Verification Sent", "Verification code sent")
         : Alert.alert("Error", "Verification code not sent");
@@ -104,7 +105,7 @@ const Page = () => {
 
   const mobileVerifyCheck = async () => {
     try {
-      const response = await axiosInstance.post("/auth/verifyCode", {
+      const response = await axiosInstanceRegular.post("/auth/verifyCode", {
         verifyCode,
       });
       response.status === 200
@@ -144,7 +145,7 @@ const Page = () => {
         if (data) {
           const fbAccessToken = data.accessToken;
           try {
-            const res = await axiosInstance.post("/auth/facebook", {
+            const res = await axiosInstanceRegular.post("/auth/facebook", {
               fbAccessToken,
             });
 
@@ -206,7 +207,7 @@ const Page = () => {
       const { idToken, accessToken } = await GoogleSignin.getTokens();
       const googleAccessToken = accessToken;
       if (googleAccessToken) {
-        const response = await axiosInstance.post("/auth/google", {
+        const response = await axiosInstanceRegular.post("/auth/google", {
           googleAccessToken,
         });
         if (response.status == 200) {

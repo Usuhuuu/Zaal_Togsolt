@@ -16,9 +16,9 @@ import axios from "axios";
 import Constants from "expo-constants";
 import Colors from "@/constants/Colors"; // Assuming Colors is defined properly
 import { defaultStyles } from "@/constants/Styles"; // Assuming Styles is defined
+import { axiosInstanceRegular } from "./functions/axiosInstanc";
 
-const API_URL = "https://8f9e-118-176-174-110.ngrok-free.app";
-//Constants.expoConfig?.extra?.apiUrl ?? "http://localhost:3001";
+const API_URL = Constants.expoConfig?.extra?.apiUrl ?? "https://localhost:443";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -38,16 +38,26 @@ const Page = () => {
   const [passwordHide, setPasswordHide] = useState(true);
   const [verificationCompleted, setVerificationCompleted] = useState(false);
   const [isItPossible, setIsItPossible] = useState(false);
-
-  const axiosConfig = {
-    timeout: 5000,
-  };
-
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [field]: value,
     }));
+  };
+
+  const validatePassword = (password: string) => {
+    const regex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,16}$/;
+
+    // Check if the password matches the regex
+    if (!regex.test(password)) {
+      setErrorMessage(
+        "Password must be 8-16 characters, include at least one letter, one number, and one special character."
+      );
+    } else {
+      setErrorMessage("");
+    }
   };
 
   const handleSubmit = async () => {
@@ -69,11 +79,10 @@ const Page = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/signup`, formData, {
-        ...axiosConfig,
-        withCredentials: true,
-        validateStatus: (status) => status < 500,
-      });
+      const response = await axiosInstanceRegular.post(
+        "/auth/signup",
+        formData
+      );
       if (response.status === 200) {
         Alert.alert("Success", response.data.message);
       } else if (response.status === 401) {
@@ -93,14 +102,10 @@ const Page = () => {
   const handleSendMSJ = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/verification`,
-        { phoneNumber: formData.phoneNumber },
-        {
-          ...axiosConfig,
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstanceRegular.post("/auth/verification", {
+        phoneNumber: formData.phoneNumber,
+      });
+
       if (response.status === 200) {
         setVerificationCompleted(true);
         Alert.alert("Success", "Verification code sent.");
@@ -119,11 +124,9 @@ const Page = () => {
 
   const handleUserID = async () => {
     try {
-      const response = await axios.post(
-        `${API_URL}/checkunique`,
-        { unique_user_ID: formData.user_id },
-        { timeout: 5000, withCredentials: true }
-      );
+      const response = await axiosInstanceRegular.post("/checkunique", {
+        unique_user_ID: formData.user_id,
+      });
       if (response.data.user_id_available) {
         setIsItPossible(true);
       } else {
@@ -188,12 +191,12 @@ const Page = () => {
           />
 
           {/* Phone Verification Section */}
-          <View style={styles.verificationContainer}>
+          <View style={styles.inputContainer}>
             <TextInput
               placeholder="Phone Number"
               value={formData.phoneNumber}
               onChangeText={(value) => handleInputChange("phoneNumber", value)}
-              style={styles.inputField}
+              style={styles.inputFieldRightPhone}
               placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity onPress={handleSendMSJ} style={styles.button}>
@@ -202,14 +205,14 @@ const Page = () => {
           </View>
 
           {/* Verification Code Section */}
-          <View style={styles.verificationContainer}>
+          <View style={styles.inputContainer}>
             <TextInput
               placeholder="Verification Code"
               value={formData.verificationCode}
               onChangeText={(value) =>
                 handleInputChange("verificationCode", value)
               }
-              style={styles.inputField}
+              style={styles.inputFieldRight}
               placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity
@@ -227,9 +230,12 @@ const Page = () => {
               secureTextEntry={passwordHide}
               value={formData.password}
               onChangeText={(value) => handleInputChange("password", value)}
-              style={styles.inputField}
+              style={styles.inputFieldRight}
               placeholderTextColor={Colors.grey}
             />
+            {errorMessage ? (
+              <Text style={{ color: "red" }}>{errorMessage}</Text>
+            ) : null}
             <TouchableOpacity
               onPress={handlePasswordToggle}
               style={styles.eyeIcon}
@@ -250,7 +256,7 @@ const Page = () => {
               onChangeText={(value) =>
                 handleInputChange("confirm_password", value)
               }
-              style={styles.inputField}
+              style={styles.inputFieldRight}
               placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity
@@ -343,7 +349,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   formContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    backgroundColor: Colors.light, //"rgba(255, 255, 255, 0.7)",
     borderRadius: 10,
     padding: 20,
   },
@@ -351,10 +357,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.primary,
     marginVertical: 10,
-    paddingLeft: 10,
     paddingVertical: 8,
-    justifyContent: "space-between",
-    gap: 10,
+    minWidth: "40%",
+  },
+  inputFieldRight: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primary,
+    marginVertical: 10,
+    paddingVertical: 8,
+    minWidth: "40%",
+    maxWidth: "80%",
+  },
+  inputFieldRightPhone: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primary,
+    marginVertical: 10,
+    paddingVertical: 8,
+    minWidth: "40%",
+    maxWidth: "40%",
   },
   inputContainer: {
     flexDirection: "row",
@@ -368,8 +388,8 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: Colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 5,
     marginTop: 10,
     alignItems: "center",
@@ -384,6 +404,7 @@ const styles = StyleSheet.create({
   checkbox: {
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 5,
   },
   checkboxText: {
     marginLeft: 10,
@@ -408,6 +429,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
+    paddingVertical: 8,
   },
 });
 

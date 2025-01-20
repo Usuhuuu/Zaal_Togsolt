@@ -24,13 +24,20 @@ export default {
     },
     jsEngine: "hermes",
     ios: {
-
       supportsTablet: true,
       bundleIdentifier: "com.usuhbayr.zaalproject",
       usesAppleSignIn: true,
       config: {
         usesNonExemptEncryption: false
       },
+      infoPlist: {
+        "NSLocationWhenInUseUsageDescription": "Your app needs access to your location to show your position on the map",
+        "NSLocationAlwaysUsageDescription": "Your app needs access to your location for continuous location updates",
+        "UIBackgroundModes": ["location"],
+        "UIAppFonts": [
+          "assets/fonts/SpaceMono-Regular.ttf"
+        ]
+      }
     },
     assetBundlePatterns: [
       "**/*"
@@ -41,6 +48,18 @@ export default {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
+      },
+      permissions: [
+        "NOTIFICATIONS", // Request notification permissions for Android
+        "ACCESS_FINE_LOCATION", // Optional: for location services
+      ],
+      manifest: {
+        "meta-data": [
+          {
+            "android:name": "com.google.android.geo.API_KEY",
+            "android:value": process.env.GOOGLE_MAPS_API_KEY || "AIzaSyDezC8XCeVeRY1lh34mbxAjuhe1OWJhLRc",
+          },
+        ],
       }
     },
     web: {

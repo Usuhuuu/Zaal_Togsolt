@@ -78,17 +78,28 @@ function RootLayout() {
 
 const NotificationPermissions = async () => {
   const [notificatonToken, setNotificatonToken] = useState<string | null>(null);
+
   useEffect(() => {
     const getPermissions = async () => {
       const { status } = await Notifications.getPermissionsAsync();
-      if (status == "granted") {
-      } else {
-        Alert.alert("You need to enable permissions to receive notifications!");
+      if (status !== "granted") {
+        // Request permissions if not granted
+        const { status: newStatus } =
+          await Notifications.requestPermissionsAsync();
+        if (newStatus !== "granted") {
+          Alert.alert(
+            "You need to enable permissions to receive notifications!"
+          );
+          return;
+        }
       }
+
+      // Get Expo push token after permission is granted
       const token = await Notifications.getExpoPushTokenAsync();
-      console.log(token);
+      console.log("Expo push token: ", token);
       setNotificatonToken(token.data);
     };
+
     getPermissions();
 
     const comingNotification = Notifications.addNotificationReceivedListener(

@@ -2,6 +2,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { auth_Refresh_Function } from "./refresh";
 import Constants from "expo-constants";
+import { config } from "process";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
@@ -9,6 +10,15 @@ const apiUrl =
 
 // Create the main axios instance for normal requests
 const axiosInstance = axios.create({
+  baseURL: apiUrl,
+  timeout: 5000,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export const axiosInstanceRegular = axios.create({
   baseURL: apiUrl,
   timeout: 5000,
   withCredentials: true,
