@@ -11,10 +11,12 @@ import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
 import MainSettings from "../settings/mainSettings";
 import useSWR from "swr";
-import ProfileNotification from "@/components/profileDrawer/notification";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import ProfileNotification from "@/components/profileScreens/drawerScreen/notification";
+import ProfileStatistical from "@/components/profileScreens/contractorScreen/statistical";
+import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScreen";
 
 // Create a Drawer Navigator
 const Drawer = createDrawerNavigator();
@@ -136,7 +138,7 @@ const Layout = () => {
   }
 
   const renderScreens = () => {
-    if (userRole === "admin") {
+    if (userRole == "admin") {
       return (
         <>
           <Drawer.Screen
@@ -150,6 +152,29 @@ const Layout = () => {
                   source={require("../../assets/tab-icons/home.png")}
                   style={{ width: 24, height: 24 }}
                 />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Personal Info"
+            component={UserInfoScreen}
+            options={{
+              headerTitle: "Personal Info",
+              headerShown: true,
+              headerLeft: () => (
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={28}
+                    color={Colors.primary}
+                    style={{
+                      marginLeft: 15,
+                    }}
+                  />
+                </TouchableOpacity>
+              ),
+              drawerIcon: () => (
+                <Ionicons name="person" size={24} color={Colors.primary} />
               ),
             }}
           />
@@ -181,7 +206,7 @@ const Layout = () => {
           />
         </>
       );
-    } else if (userRole === "user") {
+    } else if (userRole == "user") {
       return (
         <>
           <Drawer.Screen
@@ -235,6 +260,46 @@ const Layout = () => {
                   source={require("../../assets/tab-icons/settings.png")}
                   style={{ width: 24, height: 24 }}
                 />
+              ),
+            }}
+          />
+        </>
+      );
+    } else if (userRole == "contractor") {
+      return (
+        <>
+          <Drawer.Screen
+            name="Home"
+            component={TabsLayout}
+            options={{
+              drawerLabel: "Home",
+              headerShown: false,
+              drawerIcon: () => (
+                <Image
+                  source={require("../../assets/tab-icons/home.png")}
+                  style={{ width: 24, height: 24 }}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Statistics"
+            component={ProfileStatistical}
+            options={{
+              drawerLabel: "Statistics",
+              headerShown: true,
+              drawerIcon: () => <Ionicons name="checkmark-circle" />,
+              headerLeft: () => (
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={28}
+                    color={Colors.primary}
+                    style={{
+                      marginLeft: 15,
+                    }}
+                  />
+                </TouchableOpacity>
               ),
             }}
           />

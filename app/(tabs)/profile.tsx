@@ -23,7 +23,8 @@ import { useRouter, Href } from "expo-router";
 // Import SavedHalls component
 import SavedHalls from "@/app/(modals)/SavedHalls";
 import useSWR from "swr";
-import ProfileAdmin from "@/components/profileDrawer/admin";
+import ContractorPage from "@/components/profileScreens/contractor";
+import ProfileAdmin from "@/components/profileScreens/admin";
 
 const Profile: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -39,7 +40,7 @@ const Profile: React.FC = () => {
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),
     revalidateOnFocus: false,
-    shouldRetryOnError: false,
+    shouldRetryOnError: true,
     dedupingInterval: 10000,
     errorRetryInterval: 4000,
     errorRetryCount: 3,
@@ -106,28 +107,12 @@ const Profile: React.FC = () => {
 
           {/* Contractor Role */}
           {userRole === "contractor" && (
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-              <View style={styles.titleBar}>
-                <TouchableOpacity onPress={handleBackPress}>
-                  <Ionicons name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSharePress}>
-                  <Ionicons name="share-social" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push(
-                      "/settings/profileSettings" as Href<"/settings/profileSettings">
-                    )
-                  }
-                >
-                  <Ionicons name="settings" size={24} color="#fff" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Add contractor-specific content */}
-              <Text style={styles.contractorText}>Welcome, Contractor!</Text>
-            </ScrollView>
+            <>
+              <ContractorPage
+                copyToClipboard={copyToClipboard}
+                formData={formData}
+              />
+            </>
           )}
 
           {/* Regular User Role */}

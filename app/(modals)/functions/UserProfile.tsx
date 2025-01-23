@@ -7,7 +7,7 @@ export const fetchRoleAndProfil = async (path: String) => {
     throw new Error("No token found");
   }
   try {
-    const response = await axiosInstance.get(`auth/profile_${path}`);
+    const response = await axiosInstance.get(`/auth/profile_${path}`);
     return {
       role: response.data.role,
       profileData: response.data.formData,

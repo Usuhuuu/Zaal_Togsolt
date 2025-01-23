@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import useSWR from "swr";
+import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
+import { useNavigation } from "@react-navigation/native";
+import { Href, router } from "expo-router";
 
 const notificationsData = [
   {
@@ -45,83 +49,105 @@ const notificationsData = [
   },
 ];
 const NotificationScreen = () => {
-  // Function to handle notification press
+  const [userData, setUserData] = useState<string>("");
+  const [isitLoading, setIsitLoading] = useState<boolean>(true);
+  const navigation = useNavigation();
+
   const handleNotificationPress = (message: string) => {
     alert(`Та дарахад: ${message}`);
   };
 
+  const {
+    data: userFriendData,
+    error,
+    isLoading,
+  } = useSWR("User_Friend", {
+    fetcher: () => fetchRoleAndProfil("friends"),
+    revalidateOnFocus: false,
+    shouldRetryOnError: true,
+    errorRetryInterval: 4000,
+    errorRetryCount: 3,
+    dedupeInterval: 10000,
+  });
+  useEffect(() => {
+    if (userFriendData) {
+      setUserData(userFriendData);
+    } else if (error) {
+      console.error("Error fetching user friend data:", error);
+    }
+
+    //setIsitLoading(isLoading);
+  });
+
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <TouchableOpacity onPress={() => {}}>
-            <Ionicons
-              name="arrow-back"
-              size={28}
-              color={Colors.primary}
-              style={{
-                marginLeft: 15,
-              }}
-            />
-          </TouchableOpacity>
-          <Text style={styles.header}>Мэдэгдэлүүд</Text>
-          <TouchableOpacity onPress={() => {}}>
-            <Ionicons
-              name="search"
-              size={28}
-              color={Colors.primary}
-              style={{
-                marginRight: 15,
-              }}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.buttons, { gap: 10 }]}
-          onPress={() => handleNotificationPress("Friend Request")}
-        >
-          <Image
-            source={{ uri: "https://via.placeholder.com/40" }}
-            style={styles.avatar}
-          />
-          <Text style={styles.texts}>Friend Request</Text>
-          <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
-        </TouchableOpacity>
-
-        <FlatList
-          data={notificationsData}
-          contentContainerStyle={{
-            top: 10,
-            borderColor: Colors.primary,
-            borderTopWidth: 1,
-          }}
-          renderItem={({ item }) => (
+      {isLoading ? (
+        <>
+          <Text>Hello</Text>
+        </>
+      ) : (
+        <>
+          <View style={styles.container}>
             <TouchableOpacity
-              style={styles.notificationItem}
-              onPress={() => handleNotificationPress(item.message)}
+              style={[styles.buttons, { gap: 10 }]}
+              onPress={() =>
+                router.push(
+                  "/listing/friendRequest" as Href<"listing/friendRequest">
+                )
+              }
             >
-              <View style={styles.notificationContent}>
-                <Image source={{ uri: item.avatar }} style={styles.avatar} />
-                <View style={styles.notificationText}>
-                  <Text style={styles.notificationMessage}>{item.message}</Text>
-                  <Text style={styles.notificationTime}>{item.time}</Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={Colors.primary}
-                />
-              </View>
+              <Image
+                source={{ uri: "https://via.placeholder.com/40" }}
+                style={styles.avatar}
+              />
+              <Text style={styles.texts}>Friend Request</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={Colors.primary}
+              />
             </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.id}
-        />
 
-        <View style={styles.footer}>
-          <Text style={styles.footerButtonText}>google ad</Text>
-        </View>
-      </View>
+            <FlatList
+              data={notificationsData}
+              contentContainerStyle={{
+                top: 10,
+                borderColor: Colors.primary,
+                borderTopWidth: 1,
+              }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.notificationItem}
+                  onPress={() => handleNotificationPress(item.message)}
+                >
+                  <View style={styles.notificationContent}>
+                    <Image
+                      source={{ uri: item.avatar }}
+                      style={styles.avatar}
+                    />
+                    <View style={styles.notificationText}>
+                      <Text style={styles.notificationMessage}>
+                        {item.message}
+                      </Text>
+                      <Text style={styles.notificationTime}>{item.time}</Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                  </View>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+            />
+
+            <View style={styles.footer}>
+              <Text style={styles.footerButtonText}>google ad</Text>
+            </View>
+          </View>
+        </>
+      )}
     </SafeAreaProvider>
   );
 };

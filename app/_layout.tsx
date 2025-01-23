@@ -93,8 +93,6 @@ const NotificationPermissions = async () => {
           return;
         }
       }
-
-      // Get Expo push token after permission is granted
       const token = await Notifications.getExpoPushTokenAsync();
       console.log("Expo push token: ", token);
       setNotificatonToken(token.data);
@@ -153,11 +151,31 @@ function RootLayoutNav() {
           ),
         }}
       />
-      {/* Add Notification Screen */}
       <Stack.Screen
         name="listing/notification"
         options={{
-          headerShown: false, // Hide the header for the notification screen
+          headerShown: true,
+          title: `Мэдэгдэлүүд`,
+          headerTitleStyle: { fontSize: 28, color: Colors.primary },
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={28} color={Colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <Stack.Screen
+        name="listing/friendRequest"
+        options={{
+          title: `Friend Request`,
+          headerTitleStyle: { fontSize: 25, color: Colors.primary },
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={28} color={Colors.primary} />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Stack>
