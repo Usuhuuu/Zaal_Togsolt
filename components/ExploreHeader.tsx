@@ -9,22 +9,38 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Href, Link, router, useNavigation } from "expo-router";  // Import useNavigation
-import { DrawerActions } from "@react-navigation/native";  // Import DrawerActions
+import { Href, Link, router, useNavigation } from "expo-router"; // Import useNavigation
+import { DrawerActions } from "@react-navigation/native"; // Import DrawerActions
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 
 const categories = [
-  { name: "Sags", source: require("../assets/sport-icons/basketball.png") },
+  {
+    name: "Sags",
+    source: require("../assets/sport-icons/test_icons/basketball.png"),
+  },
   {
     name: "Volley-ball",
-    source: require("../assets/sport-icons/volleyball.png"),
+    source: require("../assets/sport-icons/test_icons/volleyball.png"),
   },
-  { name: "Hol-Bombog", source: require("../assets/sport-icons/football.png") },
-  { name: "Tennis", source: require("../assets/sport-icons/table-tennis.png") },
-  { name: "Bowling", source: require("../assets/sport-icons/lanes.png") },
-  { name: "Golf", source: require("../assets/sport-icons/golf.png") },
+  {
+    name: "Hol-Bombog",
+    source: require("../assets/sport-icons/test_icons/football.png"),
+  },
+  {
+    name: "Tennis",
+    source: require("../assets/sport-icons/test_icons/tennis.png"),
+  },
+  {
+    name: "Bowling",
+    source: require("../assets/sport-icons/test_icons/bowling.png"),
+  },
+  {
+    name: "Golf",
+    source: require("../assets/sport-icons/test_icons/golf.png"),
+  },
 ];
 
 interface Props {
@@ -35,8 +51,8 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
   const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  
-  const navigation = useNavigation();  // Initialize navigation hook
+
+  const navigation = useNavigation(); // Initialize navigation hook
 
   const selectCategory = (index: number) => {
     const selected = itemsRef.current[index];
@@ -55,7 +71,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
   // Function to open the drawer
   const openDrawer = () => {
-    navigation.dispatch(DrawerActions.openDrawer());  // Dispatch the openDrawer action
+    navigation.dispatch(DrawerActions.openDrawer()); // Dispatch the openDrawer action
   };
 
   return (
@@ -74,29 +90,40 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
               <TouchableOpacity style={styles.search}>
                 <Image
                   source={require("../assets/images/ranking.png")}
-                  style={{ width: 30, height: 30 , right: 100}}
+                  style={{ width: 30, height: 30, right: 100 }}
                 />
               </TouchableOpacity>
             </View>
 
-              <TouchableOpacity style={styles.notification}
+            <TouchableOpacity
+              style={styles.notification}
               onPress={() =>
                 router.push(
                   "/listing/notification" as Href<"/listing/notification">
                 )
               }
-              >
-                <Image
-                  source={require("../assets/sport-icons/notifications.png")}
-                  style={{ width: 23, height: 23 }}
-                />
-              </TouchableOpacity>
+            >
+              {/* <Image
+                source={require("../assets/sport-icons/notifications.png")}
+                style={{ width: 23, height: 23 }}
+              /> */}
+              <Ionicons
+                name="notifications"
+                size={25}
+                style={{ color: Colors.primary }}
+              />
+            </TouchableOpacity>
 
             {/* The button to open the drawer */}
             <TouchableOpacity style={styles.notification} onPress={openDrawer}>
-              <Image
+              {/* <Image
                 source={require("../assets/images/category.png")}
                 style={{ width: 20, height: 20 }}
+              /> */}
+              <Ionicons
+                name="menu"
+                size={25}
+                style={{ color: Colors.primary }}
               />
             </TouchableOpacity>
           </View>
@@ -109,7 +136,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             {categories.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                ref={(el) => (itemsRef.current[index] = el)}
+                //ref={(el) => (itemsRef.current[index] = el)}
                 style={
                   activeIndex === index
                     ? styles.categoriesBtnActive
@@ -120,7 +147,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 <View style={styles.iconContainer}>
                   <Image
                     source={item.source}
-                    style={{ width: 20, height: 20 }}
+                    style={{ width: 25, height: 25 }}
                   />
                 </View>
                 <Text style={styles.titleText}>{item.name}</Text>
@@ -181,7 +208,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.light,
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -195,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   titleText: {
-    color: "#000",
+    color: Colors.dark,
     fontWeight: "condensed",
   },
   scrollViewContent: {
@@ -207,7 +234,6 @@ const styles = StyleSheet.create({
   categoriesBtn: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
     paddingBottom: 6,
   },
   categoriesBtnActive: {

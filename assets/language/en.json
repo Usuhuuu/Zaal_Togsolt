@@ -1,0 +1,101 @@
+{
+    "type": "en",
+    "name": "English",
+    "author": "Zaal Togsolt",
+    "version": "1.0.0",
+    "data": {
+        "hello": "Hello",
+        "world": "World",
+        "sportDetails":[
+            {"Basketball": "Basketball", "iconLocationBasketball": "assets/icons/basketball.png"},
+            {"Football": "Football", "iconLocationFootball": "assets/icons/football.png"},
+            {"Volleyball": "Volleyball", "iconLocationVolleyball": "assets/icons/volleyball.png"},
+            {"Tennis": "Tennis", "iconLocationTennis": "assets/icons/tennis.png"},
+            {"bowling": "Bowling", "iconLocationBowling": "assets/icons/bowling.png"},
+            {"golf": "Golf", "iconLocationGolf": "assets/icons/golf.png"}
+        ],
+        "home": "Home",
+        "together":"Together",
+        "order": "Order",
+        "profile": "Profile",
+        "settings": [
+           {
+                "settings": "Settings",
+                "iconLocationSettings": "assets/icons/settings.png",
+                "settingSubtitle":"Update Your Settings Here"
+           },
+           {
+            "preferences": "Preferences",
+            "language": "Language",
+            "iconLocationSettings": "",
+            "theme": "Theme",
+            "iconLocationTheme": "",
+            "notification": "Notification",
+            "iconLocationNotification": "",
+            "about": "About"
+           },{
+            "help&Support": "Help & Support",
+            "contractUs": "Contract Us",
+            "iconLocationContractUs": "",
+            "FAQ": "FAQ",
+            "iconLocationFAQ": "",
+            "terms&Conditions": "Terms & Conditions",
+            "iconLocationTerms&Conditions": "",
+            "privacyPolicy": "Privacy Policy",
+            "iconLocationPrivacyPolicy": ""
+           },{
+            "account": "Account",
+            "profile": "Profile",
+            "iconLocationProfile": "",
+            "changePassword": "Change Password",
+            "iconLocationChangePassword": "",
+            "deleteAccount": "Delete Account",
+            "iconLocationdeleteAccount": ""
+           },{
+            "socialMedia": "Social Media",
+            "facebook": "Facebook",
+            "iconLocationFacebook": "",
+            "twitter": "Twitter",
+            "iconLocationTwitter": "",
+            "instagram": "Instagram",
+            "iconLocationInstagram": ""
+           }
+           
+
+        ],
+        "login&Register": [
+            {
+                "login": "Login",
+                "email": "Email",
+                "password": "Password",
+                "phoneNum": "Phone Number",
+                "verify": "Verify",
+                "verifyCode": "Verification Code",
+                "CheckCode": "Check Code",
+                "forgotPassword": "Forgot Password",
+                "continuewithgoogle": "Continue with Google",
+                "continuewithfacebook": "Continue with Facebook"
+
+            },
+            {
+                "register": "Register",
+                "userID": "User ID",
+                "lastName": "Last Name",
+                "firstName": "First Name",
+                "email": "Email",
+                "phoneNum": "Phone Number",
+                "verificationCode": "Verification Code",
+                "verify": "Verify",
+                "password": "Password",
+                "confirmPassword": "Confirm Password",
+                "iagree to the": "I agree to the",
+                "terms&Conditions": "Terms & Conditions",
+                "privacyPolicy": "Privacy Policy"
+
+            }
+        ]
+       
+        
+        
+    }
+}

@@ -60,15 +60,27 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
 
   useEffect(() => {
     if (data) {
-      const profileData = JSON.parse(data.profileData);
-      setFriendData(profileData.friends);
-      setUserRequestData(profileData.recieved_requests);
+      // Check if profileData exists and is a valid JSON string
+      let profileData = { friends: [], recieved_requests: [] };
+      if (
+        typeof data.profileData === "string" &&
+        data.profileData.trim() !== ""
+      ) {
+        try {
+          profileData = JSON.parse(data.profileData);
+        } catch (err) {
+          console.error("Error parsing profileData:", err);
+        }
+      }
+      setFriendData(profileData.friends || []);
+      setUserRequestData(profileData.recieved_requests || []);
     } else if (error) {
       console.error("Error fetching user friend data:", error);
     }
 
+    // Set loading state
     setIsitLoading(isLoading);
-  }, []);
+  }, [data, error, isLoading]);
 
   return (
     <>

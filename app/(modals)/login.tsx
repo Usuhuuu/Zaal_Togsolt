@@ -26,6 +26,7 @@ import {
 import * as Sentry from "@sentry/react-native";
 import { useNavigation } from "@react-navigation/native";
 import axiosInstance, { axiosInstanceRegular } from "./functions/axiosInstanc";
+import { router } from "expo-router";
 
 const Page = () => {
   const apiUrl =
@@ -69,7 +70,8 @@ const Page = () => {
             refreshToken: response.data.refreshToken,
           })
         );
-        Alert.alert("Login successful");
+        Alert.alert("Login Success");
+        router.push("/");
       } else {
         setEr("Login failed");
         Alert.alert(er);

@@ -40,7 +40,9 @@ const Profile: React.FC = () => {
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),
     revalidateOnFocus: false,
+    revalidateOnReconnect: true,
     shouldRetryOnError: true,
+    refreshWhenHidden: false,
     dedupingInterval: 10000,
     errorRetryInterval: 4000,
     errorRetryCount: 3,
@@ -52,6 +54,7 @@ const Profile: React.FC = () => {
       setUserRole(data.role);
     } else if (error) {
       console.error("Error fetching role and profile data:", error);
+      router.push("/login");
     }
     // Set loading state based on isLoading
     setLoading(isLoading);

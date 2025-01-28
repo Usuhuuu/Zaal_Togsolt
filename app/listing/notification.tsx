@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
@@ -82,9 +83,7 @@ const NotificationScreen = () => {
   return (
     <SafeAreaProvider>
       {isLoading ? (
-        <>
-          <Text>Hello</Text>
-        </>
+        <ActivityIndicator size="large" style={styles.container} />
       ) : (
         <>
           <View style={styles.container}>
