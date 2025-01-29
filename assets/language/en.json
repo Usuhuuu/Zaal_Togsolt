@@ -4,66 +4,73 @@
     "author": "Zaal Togsolt",
     "version": "1.0.0",
     "data": {
-        "hello": "Hello",
-        "world": "World",
-        "sportDetails":[
-            {"Basketball": "Basketball", "iconLocationBasketball": "assets/icons/basketball.png"},
-            {"Football": "Football", "iconLocationFootball": "assets/icons/football.png"},
-            {"Volleyball": "Volleyball", "iconLocationVolleyball": "assets/icons/volleyball.png"},
-            {"Tennis": "Tennis", "iconLocationTennis": "assets/icons/tennis.png"},
-            {"bowling": "Bowling", "iconLocationBowling": "assets/icons/bowling.png"},
-            {"golf": "Golf", "iconLocationGolf": "assets/icons/golf.png"}
-        ],
         "home": "Home",
         "together":"Together",
         "order": "Order",
         "profile": "Profile",
         "settings": [
-           {
-                "settings": "Settings",
-                "iconLocationSettings": "assets/icons/settings.png",
-                "settingSubtitle":"Update Your Settings Here"
-           },
-           {
-            "preferences": "Preferences",
-            "language": "Language",
-            "iconLocationSettings": "",
-            "theme": "Theme",
-            "iconLocationTheme": "",
-            "notification": "Notification",
-            "iconLocationNotification": "",
-            "about": "About"
-           },{
-            "help&Support": "Help & Support",
-            "contractUs": "Contract Us",
-            "iconLocationContractUs": "",
-            "FAQ": "FAQ",
-            "iconLocationFAQ": "",
-            "terms&Conditions": "Terms & Conditions",
-            "iconLocationTerms&Conditions": "",
-            "privacyPolicy": "Privacy Policy",
-            "iconLocationPrivacyPolicy": ""
-           },{
-            "account": "Account",
-            "profile": "Profile",
-            "iconLocationProfile": "",
-            "changePassword": "Change Password",
-            "iconLocationChangePassword": "",
-            "deleteAccount": "Delete Account",
-            "iconLocationdeleteAccount": ""
-           },{
-            "socialMedia": "Social Media",
-            "facebook": "Facebook",
-            "iconLocationFacebook": "",
-            "twitter": "Twitter",
-            "iconLocationTwitter": "",
-            "instagram": "Instagram",
-            "iconLocationInstagram": ""
-           }
-           
-
+            {
+            "settingsDetails": "Settings",
+            "iconLocationSettings": "assets/icons/settings.png",
+            "settingSubtitle": "Update Your Settings Here",
+            "preferences": [
+                {
+                "headerPreferences": "Preferences",
+                "language": "Languages",
+                "iconLocationSettings": "globe",
+                "theme": "Theme",
+                "iconLocationTheme": "moon",
+                "notification": "Notification",
+                "iconLocationNotification": "notifications",
+                "about": "About",
+                "iconLocationAbout": "information-circle"
+                }
+            ],
+            "helpSupport": [
+                {
+                "helpSupport": "Help & Support",
+                "contractUs": "Contract Us",
+                "iconLocationContractUs": "mail",
+                "FAQ": "FAQ",
+                "iconLocationFAQ": "help-circle",
+                "termsConditions": "Terms & Conditions",
+                "iconLocationTerms&Conditions": "document",
+                "privacyPolicy": "Privacy Policy",
+                "iconLocationPrivacyPolicy": "lock-closed"
+                }
+            ],
+            "socialMedia": [
+                {
+                "socialMedia": "Social Media",
+                "facebook": "Facebook",
+                "iconLocationFacebook": "logo-facebook",
+                "twitter": "Twitter",
+                "iconLocationTwitter": "logo-twitter",
+                "instagram": "Instagram",
+                "iconLocationInstagram": "logo-instagram"
+                }
+            ],
+            "accountDetails": [
+                {
+                "account": "Account",
+                "profile": "Profile",
+                "iconLocationProfile": "person",
+                "changePassword": "Change Password",
+                "iconLocationChangePassword": "lock-closed",
+                "deleteAccount": "Delete Account",
+                "iconLocationdeleteAccount": "trash"
+                }
+            ]
+        }],
+        "sportTextIcons": [
+            { "name": "Basketball", "icon": "basketball" },
+            { "name": "Football", "icon": "football"  },
+            { "name": "Volleyball",  "icon": "volleyball"  },
+            { "name": "Tennis", "icon": "tennis" },
+            { "name": "Bowling", "icon": "bowling"},
+            { "name": "Golf","icon": "golf" }
         ],
-        "login&Register": [
+        "login": [
             {
                 "login": "Login",
                 "email": "Email",
@@ -75,25 +82,29 @@
                 "forgotPassword": "Forgot Password",
                 "continuewithgoogle": "Continue with Google",
                 "continuewithfacebook": "Continue with Facebook"
-
-            },
+            }
+        ],
+        "Register":[
             {
                 "register": "Register",
                 "userID": "User ID",
+                "checkID": "Check ID",
                 "lastName": "Last Name",
                 "firstName": "First Name",
                 "email": "Email",
                 "phoneNum": "Phone Number",
                 "verificationCode": "Verification Code",
+                "sendVerificationCode": "Send Verification Code",
                 "verify": "Verify",
                 "password": "Password",
                 "confirmPassword": "Confirm Password",
-                "iagree to the": "I agree to the",
-                "terms&Conditions": "Terms & Conditions",
+                "iagreetothe": "I agree to the ",
+                "termsConditions": "Terms & Conditions",
                 "privacyPolicy": "Privacy Policy"
 
             }
         ]
+
        
         
         

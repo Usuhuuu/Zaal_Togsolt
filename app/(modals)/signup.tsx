@@ -12,11 +12,10 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
 import Constants from "expo-constants";
 import Colors from "@/constants/Colors"; // Assuming Colors is defined properly
-import { defaultStyles } from "@/constants/Styles"; // Assuming Styles is defined
 import { axiosInstanceRegular } from "./functions/axiosInstanc";
+import { useTranslation } from "react-i18next";
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl ?? "https://localhost:443";
 
@@ -39,6 +38,9 @@ const Page = () => {
   const [verificationCompleted, setVerificationCompleted] = useState(false);
   const [isItPossible, setIsItPossible] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const { t } = useTranslation();
+  const registerDetail: any = t("Register", { returnObjects: true });
+  const register = registerDetail[0];
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -150,7 +152,7 @@ const Page = () => {
           <View style={styles.inputContainer}>
             <TextInput
               autoCapitalize="none"
-              placeholder="User ID"
+              placeholder={register.userID}
               value={formData.user_id}
               onChangeText={(value) => handleInputChange("user_id", value)}
               clearTextOnFocus={true}
@@ -163,27 +165,27 @@ const Page = () => {
               style={styles.button}
               disabled={isItPossible}
             >
-              <Text style={styles.buttonText}>Check ID</Text>
+              <Text style={styles.buttonText}>{register.checkID}</Text>
             </TouchableOpacity>
           </View>
 
           {/* Name, Email Section */}
           <TextInput
-            placeholder="Last Name"
+            placeholder={register.lastName}
             value={formData.lastName}
             onChangeText={(value) => handleInputChange("lastName", value)}
             style={styles.inputField}
             placeholderTextColor={Colors.grey}
           />
           <TextInput
-            placeholder="First Name"
+            placeholder={register.firstName}
             value={formData.firstName}
             placeholderTextColor={Colors.grey}
             onChangeText={(value) => handleInputChange("firstName", value)}
             style={styles.inputField}
           />
           <TextInput
-            placeholder="Email"
+            placeholder={register.email}
             value={formData.email}
             onChangeText={(value) => handleInputChange("email", value)}
             style={styles.inputField}
@@ -193,21 +195,23 @@ const Page = () => {
           {/* Phone Verification Section */}
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder="Phone Number"
+              placeholder={register.phoneNum}
               value={formData.phoneNumber}
               onChangeText={(value) => handleInputChange("phoneNumber", value)}
               style={styles.inputFieldRightPhone}
               placeholderTextColor={Colors.grey}
             />
             <TouchableOpacity onPress={handleSendMSJ} style={styles.button}>
-              <Text style={styles.buttonText}>Send Verification Code</Text>
+              <Text style={styles.buttonText}>
+                {register.sendVerificationCode}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Verification Code Section */}
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder="Verification Code"
+              placeholder={register.verificationCode}
               value={formData.verificationCode}
               onChangeText={(value) =>
                 handleInputChange("verificationCode", value)
@@ -219,14 +223,14 @@ const Page = () => {
               onPress={() => setVerificationCompleted(true)}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Verify</Text>
+              <Text style={styles.buttonText}>{register.verify}</Text>
             </TouchableOpacity>
           </View>
 
           {/* Password and Confirm Password */}
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder="Password"
+              placeholder={register.password}
               secureTextEntry={passwordHide}
               value={formData.password}
               onChangeText={(value) => handleInputChange("password", value)}
@@ -250,7 +254,7 @@ const Page = () => {
 
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder="Confirm Password"
+              placeholder={register.confirmPassword}
               secureTextEntry={passwordHide}
               value={formData.confirm_password}
               onChangeText={(value) =>
@@ -285,14 +289,14 @@ const Page = () => {
                 color={formData.agree_terms ? Colors.primary : "red"}
               />
               <Text style={styles.checkboxText}>
-                I agree to the{" "}
+                {register.iagreetothe}
                 <Text
                   style={styles.link}
                   onPress={() =>
                     Linking.openURL("https://your-terms-and-conditions-url.com")
                   }
                 >
-                  Terms and Conditions
+                  {register.termsConditions}
                 </Text>
               </Text>
             </TouchableOpacity>
@@ -316,7 +320,7 @@ const Page = () => {
                     Linking.openURL("https://your-privacy-policy-url.com")
                   }
                 >
-                  Privacy Policy
+                  {register.privacyPolicy}
                 </Text>
               </Text>
             </TouchableOpacity>
@@ -331,7 +335,7 @@ const Page = () => {
             {loading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>Register</Text>
+              <Text style={styles.submitButtonText}>{register.register}</Text>
             )}
           </TouchableOpacity>
         </View>

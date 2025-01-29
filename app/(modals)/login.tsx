@@ -9,8 +9,7 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from "react-native";
-import { Ionicons, Zocial } from "@expo/vector-icons";
-import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import Colors from "@/constants/Colors";
@@ -24,11 +23,15 @@ import {
   statusCodes,
 } from "@react-native-google-signin/google-signin";
 import * as Sentry from "@sentry/react-native";
-import { useNavigation } from "@react-navigation/native";
-import axiosInstance, { axiosInstanceRegular } from "./functions/axiosInstanc";
+import { axiosInstanceRegular } from "./functions/axiosInstanc";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 const Page = () => {
+  const { t } = useTranslation();
+  const loginDetails: any = t("login", { returnObjects: true });
+  const login = loginDetails[0];
+
   const apiUrl =
     Constants.expoConfig?.extra?.apiUrl ||
     "https://8f9e-118-176-174-110.ngrok-free.app";
@@ -252,7 +255,7 @@ const Page = () => {
         <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder="Email"
+            placeholder={login.email}
             value={email}
             onChangeText={setEmail}
             style={styles.input}
@@ -262,7 +265,7 @@ const Page = () => {
         <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder="Password"
+            placeholder={login.password}
             secureTextEntry={passwordHide}
             value={password}
             onChangeText={setPassword}
@@ -283,20 +286,20 @@ const Page = () => {
         <View style={styles.verificationContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder="Phone Number"
+            placeholder={login.phoneNum}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             style={styles.input}
             placeholderTextColor={Colors.grey}
           />
           <TouchableOpacity style={styles.verifyButton} onPress={mobileVerify}>
-            <Text style={styles.verifyButtonText}>Verify</Text>
+            <Text style={styles.verifyButtonText}>{login.verify}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder="Verification Code"
+            placeholder={login.verifyCode}
             value={verifyCode}
             onChangeText={setVerifyCode}
             style={styles.input}
@@ -306,7 +309,7 @@ const Page = () => {
             style={styles.verifyButton}
             onPress={mobileVerifyCheck}
           >
-            <Text style={styles.verifyButtonText}>Check Code</Text>
+            <Text style={styles.verifyButtonText}>{login.CheckCode}</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity
@@ -317,7 +320,7 @@ const Page = () => {
           {loading ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.buttonText}>{login.login}</Text>
           )}
         </TouchableOpacity>
         <View style={styles.separatorView}>
@@ -326,20 +329,20 @@ const Page = () => {
           <View style={styles.separatorLine} />
         </View>
         <View style={styles.socialButtons}>
-          <TouchableOpacity style={styles.btnOutline}>
-            <Zocial name="guest" size={24} style={styles.btnIcon} />
-            <Text style={styles.btnOutlineText}>Login as Guest</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.btnOutline} onPress={signup_google}>
             <Ionicons name="logo-google" size={24} style={styles.btnIcon} />
-            <Text style={styles.btnOutlineText}>Continue with Google</Text>
+            <Text style={styles.btnOutlineText}>
+              {login.continuewithgoogle}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.btnOutline}
             onPress={loginWithFacebook}
           >
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
-            <Text style={styles.btnOutlineText}>Continue with Facebook</Text>
+            <Text style={styles.btnOutlineText}>
+              {login.continuewithfacebook}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleAppleLogin()}

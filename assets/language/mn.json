@@ -1,0 +1,108 @@
+{
+    "type": "mn",
+    "name": "Монгол",
+    "author": "Zaal Togsolt",
+    "version": "1.0.0",
+    "data": {
+        "home": "Нүүр хуудас",
+        "together": "Хамтдаа",
+        "order": "Захиалга",
+        "profile": "Профайл",
+        "settings": [
+            {
+                "settingsDetails": "Тохиргоо",
+                "iconLocationSettings": "assets/icons/settings.png",
+                "settingSubtitle": "Таны тохиргоог энд шинэчлэх боломжтой",
+                "preferences": [
+                    {
+                        "headerPreferences": "Тохиргоонууд",
+                        "language": "Хэл",
+                        "iconLocationSettings": "globe",
+                        "theme": "Thema",
+                        "iconLocationTheme": "moon",
+                        "notification": "Мэдэгдэл",
+                        "iconLocationNotification": "notifications",
+                        "about": "Тухай",
+                        "iconLocationAbout": "information-circle"
+                    }
+                ],
+                "helpSupport": [
+                    {
+                        "helpSupport": "Тусламж & Дэмжлэг",
+                        "contractUs": "Бидэнтэй Холбогдох",
+                        "iconLocationContractUs": "mail",
+                        "FAQ": "Түгээмэл Асуултууд",
+                        "iconLocationFAQ": "help-circle",
+                        "termsConditions": "Terms & Conditions",
+                        "iconLocationTerms&Conditions": "document",
+                        "privacyPolicy": "Privacy Policy",
+                        "iconLocationPrivacyPolicy": "lock-closed"
+                    }
+                ],
+                "socialMedia": [
+                    {
+                        "socialMedia": "Нийгмийн сүлжээ",
+                        "facebook": "Facebook",
+                        "iconLocationFacebook": "logo-facebook",
+                        "twitter": "Twitter",
+                        "iconLocationTwitter": "logo-twitter",
+                        "instagram": "Instagram",
+                        "iconLocationInstagram": "logo-instagram"
+                    }
+                ],
+                "accountDetails": [
+                    {
+                        "account": "Таны Account",
+                        "profile": "Профайл",
+                        "iconLocationProfile": "person",
+                        "changePassword": "Нууц үг солих",
+                        "iconLocationChangePassword": "lock-closed",
+                        "deleteAccount": "Account устгах",
+                        "iconLocationdeleteAccount": "trash"
+                    }
+                ]
+            }
+        ],
+        "sportTextIcons": [
+            { "name": "Сагсан бөмбөг", "icon": "basketball" },
+            { "name": "Хөл бөмбөг", "icon": "football" },
+            { "name": "Волейбол", "icon": "volleyball" },
+            { "name": "Теннис", "icon": "tennis" },
+            { "name": "Боулинг", "icon": "bowling" },
+            { "name": "Гольф", "icon": "golf" }
+        ],
+        "login": [
+            {
+                "login": "Нэвтрэх",
+                "email": "Имэйл & Хэрэглэгчийн ID",
+                "password": "Нууц үг",
+                "phoneNum": "Утасны дугаар",
+                "verify": "Шалгах",
+                "verifyCode": "Баталгаажуулах код",
+                "CheckCode": "шалгах код",
+                "forgotPassword": "Нууц үг мартсан",
+                "continuewithgoogle": "Google-р нэвтрэх",
+                "continuewithfacebook": "Facebook-р нэвтрэх"
+            }
+        ],
+        "Register": [
+            {
+                "register": "Бүртгүүлэх",
+                "userID": "Хэрэглэгчийн ID",
+                "checkID": "ID шалгах",
+                "lastName": "Овог",
+                "firstName": "Нэр",
+                "email": "Имэйл",
+                "phoneNum": "Утасны дугаар",
+                "verificationCode": "Баталгаажуулах код",
+                "sendVerificationCode": "Баталгаажуулах код илгээх",
+                "verify": "Шалгах",
+                "password": "Нууц үг",
+                "confirmPassword": "Нууц үгээ баталгаажуулах",
+                "iagreetothe": "Би ",
+                "termsConditions": "Нууцлал ба нөхцлүүд",
+                "privacyPolicy": "Нууцлалын бодлого"
+            }
+        ]
+    }
+}

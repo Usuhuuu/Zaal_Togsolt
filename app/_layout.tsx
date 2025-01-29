@@ -1,3 +1,5 @@
+import "../utils/i18";
+import "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
@@ -5,17 +7,15 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, ReactNode, useState } from "react";
 import { TouchableOpacity, View, Text, Alert } from "react-native";
-import "react-native-reanimated";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
 import * as Notifications from "expo-notifications";
+import { LanguageProvider } from "./settings/settings_pages/Languages";
 
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
 });
-
-// Prevent splash screen auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
 
 export { ErrorBoundary } from "expo-router";
@@ -24,7 +24,7 @@ export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-// Define a type for the error boundary props
+// Error Boundary Component
 interface CustomErrorBoundaryProps {
   error?: Error;
   children: ReactNode;
@@ -33,7 +33,7 @@ interface CustomErrorBoundaryProps {
 function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
   useEffect(() => {
     if (error) {
-      Sentry.captureException(error); // Log boundary error to Sentry
+      Sentry.captureException(error);
     }
   }, [error]);
 
@@ -48,42 +48,16 @@ function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
   return <>{children}</>;
 }
 
-function RootLayout() {
-  // Call useFonts at the top level
-  const [loaded, error] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    ...FontAwesome.font,
-  });
-
-  useEffect(() => {
-    if (error) {
-      Sentry.captureException(error); // Log font load errors to Sentry
-      console.error("Error loading fonts:", error);
-      throw error;
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-const NotificationPermissions = async () => {
-  const [notificatonToken, setNotificatonToken] = useState<string | null>(null);
+// Fix: Notification Permissions as a React Hook
+function useNotificationPermissions() {
+  const [notificationToken, setNotificationToken] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const getPermissions = async () => {
       const { status } = await Notifications.getPermissionsAsync();
       if (status !== "granted") {
-        // Request permissions if not granted
         const { status: newStatus } =
           await Notifications.requestPermissionsAsync();
         if (newStatus !== "granted") {
@@ -95,24 +69,53 @@ const NotificationPermissions = async () => {
       }
       const token = await Notifications.getExpoPushTokenAsync();
       console.log("Expo push token: ", token);
-      setNotificatonToken(token.data);
+      setNotificationToken(token.data);
     };
 
     getPermissions();
 
-    const comingNotification = Notifications.addNotificationReceivedListener(
+    const notificationListener = Notifications.addNotificationReceivedListener(
       (notification) => {
         console.log("Notification received", notification);
       }
     );
+
     return () => {
-      comingNotification.remove();
+      notificationListener.remove();
     };
   }, []);
-};
-useEffect(() => {
-  NotificationPermissions();
-}, []);
+
+  return notificationToken;
+}
+
+function RootLayout() {
+  const [loaded, error] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    ...FontAwesome.font,
+  });
+
+  useEffect(() => {
+    if (error) {
+      Sentry.captureException(error);
+      console.error("Error loading fonts:", error);
+      throw error;
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  useNotificationPermissions();
+
+  if (!loaded) {
+    return null;
+  }
+
+  return <RootLayoutNav />;
+}
 
 function RootLayoutNav() {
   const router = useRouter();
@@ -123,27 +126,24 @@ function RootLayoutNav() {
       <Stack.Screen
         name="(modals)/login"
         options={{
-          title: `Burtguuleh`,
-          presentation: `modal`,
+          title: "Burtguuleh",
+          presentation: "modal",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.replace("/(tabs)/profile")}>
               <Ionicons name="arrow-back" size={28} />
             </TouchableOpacity>
           ),
-          headerStyle: {
-            backgroundColor: Colors.primary, // Background color of the header
-          },
-          headerTitleStyle: {},
-          headerTintColor: Colors.light, // Text color of the header
+          headerStyle: { backgroundColor: Colors.primary },
+          headerTintColor: Colors.light,
         }}
       />
-      <Stack.Screen name="listing/[id]" options={{ headerTitle: ` ` }} />
+      <Stack.Screen name="listing/[id]" options={{ headerTitle: " " }} />
       <Stack.Screen
         name="(modals)/sags"
         options={{
-          title: `sags`,
-          presentation: `transparentModal`,
-          animation: `fade`,
+          title: "sags",
+          presentation: "transparentModal",
+          animation: "fade",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons name="close-outline" size={28} />
@@ -155,7 +155,7 @@ function RootLayoutNav() {
         name="listing/notification"
         options={{
           headerShown: true,
-          title: `Мэдэгдэлүүд`,
+          title: "Мэдэгдэлүүд",
           headerTitleStyle: { fontSize: 28, color: Colors.primary },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
@@ -164,11 +164,10 @@ function RootLayoutNav() {
           ),
         }}
       />
-
       <Stack.Screen
         name="listing/friendRequest"
         options={{
-          title: `Friend Request`,
+          title: "Friend Request",
           headerTitleStyle: { fontSize: 25, color: Colors.primary },
           headerShown: true,
           headerLeft: () => (
@@ -185,6 +184,8 @@ function RootLayoutNav() {
 // Wrap the entire app in Sentry and Error Boundary
 export default Sentry.wrap(() => (
   <CustomErrorBoundary>
-    <RootLayout />
+    <LanguageProvider>
+      <RootLayout />
+    </LanguageProvider>
   </CustomErrorBoundary>
 ));

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Image, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Image, Text, TouchableOpacity, Alert } from "react-native";
 import { Tabs } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Colors from "@/constants/Colors";
@@ -17,9 +17,11 @@ import { useNavigation } from "@react-navigation/native";
 import ProfileNotification from "@/components/profileScreens/drawerScreen/notification";
 import ProfileStatistical from "@/components/profileScreens/contractorScreen/statistical";
 import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScreen";
+import { useTranslation } from "react-i18next";
 
 // Create a Drawer Navigator
 const Drawer = createDrawerNavigator();
+const { t } = useTranslation();
 const TabsLayout = () => (
   <Tabs
     screenOptions={{
@@ -46,7 +48,7 @@ const TabsLayout = () => (
     <Tabs.Screen
       name="index"
       options={{
-        tabBarLabel: "Undsen Tses", // Home Tab
+        tabBarLabel: t("home"),
         header: () => (
           <ExploreHeader
             onCategoryChanged={(category) => console.log(category)}
@@ -65,7 +67,7 @@ const TabsLayout = () => (
     <Tabs.Screen
       name="inbox"
       options={{
-        tabBarLabel: "Hamtdaa", // Inbox Tab
+        tabBarLabel: t("together"),
         tabBarIcon: () => (
           <Image
             source={require("../../assets/tab-icons/teamwork.png")}
@@ -79,7 +81,7 @@ const TabsLayout = () => (
     <Tabs.Screen
       name="explore"
       options={{
-        tabBarLabel: "Zahialga", // Explore Tab
+        tabBarLabel: `${t("order")}`, // Explore Tab
         tabBarIcon: () => (
           <Image
             source={require("../../assets/tab-icons/order.png")}
@@ -93,7 +95,7 @@ const TabsLayout = () => (
     <Tabs.Screen
       name="profile"
       options={{
-        tabBarLabel: "minii huudas", // Profile Tab
+        tabBarLabel: `${t("profile")}`, // Profile Tab
         tabBarIcon: () => (
           <Image
             source={require("../../assets/tab-icons/athlete.png")}

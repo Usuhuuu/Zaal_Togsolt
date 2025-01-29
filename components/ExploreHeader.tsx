@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StatusBar,
   View,
@@ -7,51 +7,37 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Href, Link, router, useNavigation } from "expo-router"; // Import useNavigation
-import { DrawerActions } from "@react-navigation/native"; // Import DrawerActions
+import { Href, router, useNavigation } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
+import "@/utils/i18";
 
-const categories = [
-  {
-    name: "Sags",
-    source: require("../assets/sport-icons/test_icons/basketball.png"),
-  },
-  {
-    name: "Volley-ball",
-    source: require("../assets/sport-icons/test_icons/volleyball.png"),
-  },
-  {
-    name: "Hol-Bombog",
-    source: require("../assets/sport-icons/test_icons/football.png"),
-  },
-  {
-    name: "Tennis",
-    source: require("../assets/sport-icons/test_icons/tennis.png"),
-  },
-  {
-    name: "Bowling",
-    source: require("../assets/sport-icons/test_icons/bowling.png"),
-  },
-  {
-    name: "Golf",
-    source: require("../assets/sport-icons/test_icons/golf.png"),
-  },
-];
+const { t } = useTranslation();
+const sportDetail: any = t("sportTextIcons", { returnObjects: true });
+
+const iconMap: { [key: string]: any } = {
+  basketball: require("../assets/sport-icons/test_icons/basketball.png"),
+  football: require("../assets/sport-icons/test_icons/football.png"),
+  volleyball: require("../assets/sport-icons/test_icons/volleyball.png"),
+  tennis: require("../assets/sport-icons/test_icons/tennis.png"),
+  bowling: require("../assets/sport-icons/test_icons/bowling.png"),
+  golf: require("../assets/sport-icons/test_icons/golf.png"),
+};
 
 interface Props {
   onCategoryChanged: (category: string) => void;
 }
-
 const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
   const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-
   const navigation = useNavigation(); // Initialize navigation hook
 
   const selectCategory = (index: number) => {
@@ -66,12 +52,11 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
       );
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onCategoryChanged(categories[index].name);
+    onCategoryChanged(sportDetail[index].name);
   };
 
-  // Function to open the drawer
   const openDrawer = () => {
-    navigation.dispatch(DrawerActions.openDrawer()); // Dispatch the openDrawer action
+    navigation.dispatch(DrawerActions.openDrawer());
   };
 
   return (
@@ -114,7 +99,6 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
               />
             </TouchableOpacity>
 
-            {/* The button to open the drawer */}
             <TouchableOpacity style={styles.notification} onPress={openDrawer}>
               {/* <Image
                 source={require("../assets/images/category.png")}
@@ -133,7 +117,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollViewContent}
           >
-            {categories.map((item, index) => (
+            {sportDetail.map((item: any, index: any) => (
               <TouchableOpacity
                 key={index}
                 //ref={(el) => (itemsRef.current[index] = el)}
@@ -146,7 +130,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
               >
                 <View style={styles.iconContainer}>
                   <Image
-                    source={item.source}
+                    source={iconMap[item.icon]}
                     style={{ width: 25, height: 25 }}
                   />
                 </View>

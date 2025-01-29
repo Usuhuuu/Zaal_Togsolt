@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import {
   View,
@@ -15,8 +9,6 @@ import {
   TouchableOpacity,
   Share,
   Modal,
-  StatusBar,
-  SafeAreaView,
   ImageBackground,
   ActivityIndicator,
 } from "react-native";
@@ -56,7 +48,6 @@ const DetailsPage = () => {
   const [iconsOverflow, setIconsOverflow] = useState(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const [today, setToday] = useState<moment.Moment>(moment());
-  const [pendingTime, setPendingTime] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
