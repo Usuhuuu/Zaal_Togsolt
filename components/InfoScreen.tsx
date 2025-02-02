@@ -7,7 +7,6 @@ const InfoScreen = ({ data = [] }) => {
   return (
     <View style={styles.container}>
       <Text>Info Screen</Text>
-      <Text>{`Data Length: ${data?.length || 0}`}</Text>
     </View>
   );
 };

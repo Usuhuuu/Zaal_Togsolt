@@ -23,18 +23,18 @@ import Animated, {
   useScrollViewOffset,
 } from "react-native-reanimated";
 import { defaultStyles } from "@/constants/Styles";
-import axios from "axios";
-import Constants from "expo-constants";
 import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/functions/savedhalls";
 import { useRouter } from "expo-router";
 import moment from "moment";
 import { throttle } from "lodash";
+import { axiosInstanceRegular } from "../(modals)/functions/axiosInstanc";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
 const bottompadding = width * 0.1;
+
 const ScheduleScreen = () => (
   <View style={styles.modalContent}>
     <Text>This is the schedule screen!</Text>
@@ -77,16 +77,11 @@ const DetailsPage = () => {
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-  const apiUrl =
-    Constants.expoConfig?.extra?.apiUrl ||
-    "https://8f9e-118-176-174-110.ngrok-free.app";
-
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
 
-    // Change footer background color based on scroll position
-    const newColor = Math.max(0, Math.min(1, 1 - scrollY / 200)); // Adjust 200 as needed for effect
-    setFooterBgColor(`rgba(255, 255, 255, ${newColor})`); // Update the footer background color
+    const newColor = Math.max(0, Math.min(1, 1 - scrollY / 200));
+    setFooterBgColor(`rgba(255, 255, 255, ${newColor})`);
   };
 
   const shareListing = async () => {
@@ -101,7 +96,6 @@ const DetailsPage = () => {
   };
 
   const handleViewReviews = () => {
-    // Pass the listing id to the reviews page as a dynamic route
     router.push(
       `/listing/ZaalReview?reviews=${listing.number_of_reviews}&rating=${listing.review_scores_rating}`
     );
@@ -118,9 +112,7 @@ const DetailsPage = () => {
     { start_time: "20:00", end_time: "22:00" },
     { start_time: "22:00", end_time: "24:00" },
   ];
-  const [availableTimes, setAvailableTimes] = useState(baseTimeSlots); // Initialize with baseTimeSlots
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
-  const [isAvailable, setIsAvailable] = useState(true);
   const [zahialgaBtn, setZahialgaBtn] = useState(false);
   const [fetchCount, setFetchCount] = useState(0);
 
@@ -134,10 +126,9 @@ const DetailsPage = () => {
       console.log(zaalniID);
 
       // Simulating a data fetch
-      const response = await axios.get(`${apiUrl}/timeslotscheck`, {
+      axiosInstanceRegular;
+      const response = await axiosInstanceRegular.get("/timeslotscheck", {
         params: { zaalniID: tempZaal, odor },
-        timeout: 1000,
-        withCredentials: true,
       });
 
       if (!response.data.available && response.data.not_possible_time !== "") {
@@ -155,9 +146,10 @@ const DetailsPage = () => {
     } catch (err) {
       console.error(err);
     } finally {
-      setIsLoading(false); // Hide loading indicator after data is fetched
+      setIsLoading(false);
     }
   }, 1000);
+
   useEffect(() => {
     dateSlotGiver(moment());
   }, []);
@@ -166,7 +158,6 @@ const DetailsPage = () => {
     console.log(`Time slot pressed: ${timeSlot}`);
     setZahialgaBtn(true);
   };
-  // Define the TimeSlot component outside of the OrderScreen to avoid redefinition
   type TimeSlotProps = {
     timeString: string;
     isDisabled: boolean;
@@ -246,7 +237,6 @@ const DetailsPage = () => {
                   (time: any) =>
                     time.time === timeString && time.status.includes("Pending")
                 );
-
                 return (
                   <TimeSlot
                     key={index}

@@ -51,6 +51,8 @@ const Page = () => {
   const [passwordHide, setPasswordHide] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [isItApple, setIsITApple] = useState(false);
+  const [isitGoogle, setIsItGoogle] = useState(false);
+
   useEffect(() => {
     if (Platform.OS === "ios") {
       setIsITApple(true);
@@ -121,18 +123,19 @@ const Page = () => {
       Alert.alert("Error", "Failed to verify the code");
     }
   };
+
+  const requestTracking = async () => {
+    const { status } = await requestTrackingPermissionsAsync();
+    Settings.initializeSDK();
+    if (status == "granted") {
+      await Settings.setAdvertiserTrackingEnabled(true);
+    }
+  };
   useEffect(() => {
-    const requestTracking = async () => {
-      const { status } = await requestTrackingPermissionsAsync();
-
-      Settings.initializeSDK();
-
-      if (status === "granted") {
-        await Settings.setAdvertiserTrackingEnabled(true);
-      }
-    };
-    requestTracking();
-  }, []);
+    if (isitGoogle) {
+      requestTracking();
+    }
+  }, [isitGoogle]);
 
   const loginWithFacebook = async () => {
     try {

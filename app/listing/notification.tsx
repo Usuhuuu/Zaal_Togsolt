@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Platform,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -76,7 +75,6 @@ const NotificationScreen = () => {
     } else if (error) {
       console.error("Error fetching user friend data:", error);
     }
-
     //setIsitLoading(isLoading);
   });
 

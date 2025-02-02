@@ -24,7 +24,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     i18n.on("languageChanged", (lng) => {
-      setLanguage(lng); // Update state when language changes
+      setLanguage(lng);
     });
   }, []);
 

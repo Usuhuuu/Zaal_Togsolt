@@ -75,7 +75,6 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       }
     };
 
-    // Call the function inside useEffect without conditionally rendering the hook
     requestLocationPermission();
   }, []);
 

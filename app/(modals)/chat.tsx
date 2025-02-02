@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,14 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
-import { auth_Refresh_Function } from "./functions/refresh";
-import { throttle } from "lodash";
 import Constants from "expo-constants";
+import useSWR from "swr";
+import { normalFetch } from "./functions/UserProfile";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ||
@@ -38,75 +38,29 @@ const ChatComponent: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [currentGroupId, setCurrentGroupId] = useState<string | null>(null);
-  const [isItLoading, setIsItLoading] = useState<boolean>(false);
-  const [shouldFetch, setShouldFetch] = useState(true);
 
   const socketRef = useRef<Socket | null>(null);
 
-  const fetchChatGroups = useCallback(
-    throttle(async (retries = 3) => {
-      if (isItLoading) return;
-      setIsItLoading(true);
-      try {
-        const token: any = await SecureStore.getItemAsync("Tokens");
-        if (!token) {
-          setShouldFetch(false);
-          Alert.alert("No token found.");
-          Sentry.captureException("No token found.");
-        }
-        const { accessToken, refreshToken } = JSON.parse(token);
-        const response = await axios.get(`${apiUrl}/chat/check`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          withCredentials: true,
-          timeout: 5000,
-        });
-        if (response.data.auth) {
-          setChatGroups(
-            response.data.chatGroupIDs.map((groupId: any) => ({ groupId }))
-          );
-          setShouldFetch(false);
-        } else {
-          const new_access_token = await auth_Refresh_Function(
-            refreshToken,
-            apiUrl
-          );
-          if (new_access_token) {
-            await SecureStore.setItemAsync(
-              "Tokens",
-              JSON.stringify({ accessToken: new_access_token, refreshToken })
-            );
-            const retryResponse = await axios.get(`${apiUrl}/chat/check`, {
-              headers: { Authorization: `Bearer ${new_access_token}` },
-              withCredentials: true,
-              timeout: 5000,
-            });
-            if (retryResponse.data.auth) {
-              setChatGroups(
-                retryResponse.data.chatGroupIDs.map((groupId: any) => ({
-                  groupId,
-                }))
-              );
-              setShouldFetch(false);
-            }
-          }
-        }
-      } catch (error) {
-        if (retries > 0) {
-          fetchChatGroups(retries - 1);
-        } else {
-          console.error("Error fetching chat groups:", error);
-          Sentry.captureException(error);
-        }
-      }
-    }, 5000),
-    [isItLoading]
-  );
+  const {
+    data: chatData,
+    error: chatError,
+    isLoading,
+  } = useSWR("group_chat", {
+    fetcher: () => normalFetch("/chat/check"),
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    shouldRetryOnError: true,
+    errorRetryCount: 3,
+  });
 
   useEffect(() => {
-    if (shouldFetch) {
-      fetchChatGroups();
+    if (chatData) {
+      setChatGroups(chatData.chatGroupIDs.map((groupId: any) => ({ groupId })));
+    } else if (chatError) {
+      console.error("Error fetching chat groups:", chatError);
+      Sentry.captureException(chatError);
     }
-  }, [shouldFetch]);
+  }, []);
 
   const chatInit = async (groupId: string) => {
     try {
@@ -172,43 +126,51 @@ const ChatComponent: React.FC = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <Text style={styles.title}>Chat Groups</Text>
-      <FlatList
-        data={chatGroups}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.groupItem}
-            onPress={() => chatInit(item.groupId)}
-          >
-            <Text style={styles.groupText}>{item.groupId}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.groupId}
-      />
-
-      {currentGroupId && (
-        <View style={styles.chatContainer}>
-          <Text style={styles.subtitle}>Chat Messages</Text>
+      {isLoading ? (
+        <View>
+          <ActivityIndicator size={"large"} />
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.title}>Chat Groups</Text>
           <FlatList
-            data={messages}
+            data={chatGroups}
             renderItem={({ item }) => (
-              <View style={styles.messageContainer}>
-                <Text style={styles.messageText}>{item.message}</Text>
-              </View>
+              <TouchableOpacity
+                style={styles.groupItem}
+                onPress={() => chatInit(item.groupId)}
+              >
+                <Text style={styles.groupText}>{item.groupId}</Text>
+              </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.timestamp.toString()}
-            style={styles.messagesList}
+            keyExtractor={(item) => item.groupId}
           />
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={newMessage}
-              onChangeText={setNewMessage}
-              placeholder="Type your message"
-              maxLength={2000}
-            />
-            <Button title="Send" onPress={() => sendMessage(newMessage)} />
-          </View>
+
+          {currentGroupId && (
+            <View style={styles.chatContainer}>
+              <Text style={styles.subtitle}>Chat Messages</Text>
+              <FlatList
+                data={messages}
+                renderItem={({ item }) => (
+                  <View style={styles.messageContainer}>
+                    <Text style={styles.messageText}>{item.message}</Text>
+                  </View>
+                )}
+                keyExtractor={(item) => item.timestamp.toString()}
+                style={styles.messagesList}
+              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={newMessage}
+                  onChangeText={setNewMessage}
+                  placeholder="Type your message"
+                  maxLength={2000}
+                />
+                <Button title="Send" onPress={() => sendMessage(newMessage)} />
+              </View>
+            </View>
+          )}
         </View>
       )}
     </KeyboardAvoidingView>

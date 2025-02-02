@@ -9,7 +9,7 @@ const apiUrl =
   "https://8f9e-118-176-174-110.ngrok-free.app";
 
 // Create the main axios instance for normal requests
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: apiUrl,
   timeout: 5000,
   withCredentials: true,

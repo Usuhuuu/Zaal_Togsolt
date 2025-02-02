@@ -47,47 +47,6 @@ function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
 
   return <>{children}</>;
 }
-
-// Fix: Notification Permissions as a React Hook
-function useNotificationPermissions() {
-  const [notificationToken, setNotificationToken] = useState<string | null>(
-    null
-  );
-
-  useEffect(() => {
-    const getPermissions = async () => {
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== "granted") {
-        const { status: newStatus } =
-          await Notifications.requestPermissionsAsync();
-        if (newStatus !== "granted") {
-          Alert.alert(
-            "You need to enable permissions to receive notifications!"
-          );
-          return;
-        }
-      }
-      const token = await Notifications.getExpoPushTokenAsync();
-      console.log("Expo push token: ", token);
-      setNotificationToken(token.data);
-    };
-
-    getPermissions();
-
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notification received", notification);
-      }
-    );
-
-    return () => {
-      notificationListener.remove();
-    };
-  }, []);
-
-  return notificationToken;
-}
-
 function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -100,15 +59,10 @@ function RootLayout() {
       console.error("Error loading fonts:", error);
       throw error;
     }
-  }, [error]);
-
-  useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
-
-  useNotificationPermissions();
+  }, [error, loaded]);
 
   if (!loaded) {
     return null;

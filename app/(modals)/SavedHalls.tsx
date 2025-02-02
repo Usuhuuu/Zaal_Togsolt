@@ -1,27 +1,29 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
-import { useSavedHalls } from "@/app/(modals)/functions/savedhalls"; // Import the hook to access the context
-import { Hall } from "@/app/(modals)/functions/savedhalls"; // Ensure this path is correct
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+import { useSavedHalls } from "@/app/(modals)/functions/savedhalls";
+import { Hall } from "@/app/(modals)/functions/savedhalls";
 
 const SavedHalls: React.FC = () => {
-  const { savedHalls, removeHall } = useSavedHalls(); // Destructure savedHalls and removeHall from the context
+  const { savedHalls, removeHall } = useSavedHalls();
 
-  // Debugging: Log savedHalls data to ensure it's being populated
+  const hallsToRender = Array.isArray(savedHalls) ? savedHalls : [];
   useEffect(() => {
     console.log("Saved Halls:", savedHalls);
-  }, [savedHalls]);
-
-  // Debugging: Ensure that the Hall objects have correct structure
-  useEffect(() => {
-    if (savedHalls.length > 0) {
-      console.log("First Hall object:", savedHalls[0]);
-    }
   }, [savedHalls]);
 
   const renderItem = ({ item }: { item: Hall }) => (
     <View style={styles.hallItem}>
       <Text style={styles.hallName}>{item.name}</Text>
-      <TouchableOpacity onPress={() => removeHall(item.id)} style={styles.removeButton}>
+      <TouchableOpacity
+        onPress={() => removeHall(item.id)}
+        style={styles.removeButton}
+      >
         <Text style={styles.removeButtonText}>Remove</Text>
       </TouchableOpacity>
     </View>
@@ -30,7 +32,7 @@ const SavedHalls: React.FC = () => {
   return (
     <View style={styles.modalContent}>
       <Text style={styles.header}>Saved Halls</Text>
-      {savedHalls.length === 0 ? (
+      {hallsToRender.length == 0 ? (
         <Text>No halls saved!</Text>
       ) : (
         <FlatList
@@ -45,37 +47,37 @@ const SavedHalls: React.FC = () => {
 
 const styles = StyleSheet.create({
   modalContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   hallItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
     padding: 10,
     borderWidth: 1,
     borderRadius: 5,
-    width: '100%',
+    width: "100%",
   },
   hallName: {
     flex: 1,
     fontSize: 18,
   },
   removeButton: {
-    backgroundColor: 'red',
+    backgroundColor: "red",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   removeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
 });
 

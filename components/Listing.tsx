@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   StyleSheet,
-  FlatList,
   Text,
   Image,
   ActivityIndicator,
@@ -15,13 +14,11 @@ import { Link, useRouter } from "expo-router";
 import { Listing } from "@/interfaces/listing";
 import { MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import BottomSheet, {
+import {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
 } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
-
-const { width } = Dimensions.get("window");
 
 interface Props {
   listings: Listing[];
@@ -36,7 +33,6 @@ const ListingComponent = ({ listings: items, category, refresh }: Props) => {
 
   useEffect(() => {
     setLoading(true);
-    // Simulate data fetch
     setTimeout(() => {
       setLoading(false);
     }, 200);

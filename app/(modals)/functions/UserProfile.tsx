@@ -3,7 +3,6 @@ import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 
 export const fetchRoleAndProfil = async (path: String) => {
-  router;
   const token = await SecureStore.getItemAsync("Tokens");
   if (!token) {
     throw new Error("No token found pisda");
@@ -17,5 +16,19 @@ export const fetchRoleAndProfil = async (path: String) => {
   } catch (err) {
     console.log(err);
     throw new Error("Failed to fetch role and profile data");
+  }
+};
+
+export const normalFetch = async (url: string) => {
+  const token = await SecureStore.getItemAsync("Tokens");
+  if (!token) {
+    throw new Error("No token found pisda");
+  }
+  try {
+    const response = await axiosInstance.get(url);
+    return response.data;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to fetch data");
   }
 };
