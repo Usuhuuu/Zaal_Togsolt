@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 20,
     elevation: 10,
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: Colors.light,
     elevation: 10,
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 5,
     elevation: 10,
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,

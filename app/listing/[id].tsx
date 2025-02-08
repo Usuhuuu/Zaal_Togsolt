@@ -11,6 +11,7 @@ import {
   Modal,
   ImageBackground,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import listingsData from "@/assets/Data/airbnb-listings.json";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -69,11 +70,11 @@ const DetailsPage = () => {
 
     const hall = { id: listing.id, name: listing.name };
     addHall(hall);
-    alert("Hall saved!");
+    Alert.alert("Hall saved!");
   };
 
   const { id } = useLocalSearchParams();
-  const listing = (listingsData as any[]).find((item) => item.id === id);
+  const listing = (listingsData as any[]).find((item) => item.id == id);
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
@@ -116,21 +117,15 @@ const DetailsPage = () => {
   const [zahialgaBtn, setZahialgaBtn] = useState(false);
   const [fetchCount, setFetchCount] = useState(0);
 
-  const dateSlotGiver = throttle(async (date: any) => {
-    setIsLoading(true); // Show loading indicator
+  const dateSlotGiver = async (date: any) => {
+    setIsLoading(true);
     try {
       const odor = date.toISOString().split("T")[0];
       setToday(odor);
       const zaalniID = zaalFormData.zaalId;
-      if (fetchCount > 5) return;
-      console.log(zaalniID);
-
-      // Simulating a data fetch
-      axiosInstanceRegular;
       const response = await axiosInstanceRegular.get("/timeslotscheck", {
         params: { zaalniID: tempZaal, odor },
       });
-
       if (!response.data.available && response.data.not_possible_time !== "") {
         const notPossibleTime = response.data.not_possible_time.orderedTime.map(
           (result: any) => ({
@@ -148,8 +143,7 @@ const DetailsPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, 1000);
-
+  };
   useEffect(() => {
     dateSlotGiver(moment());
   }, []);

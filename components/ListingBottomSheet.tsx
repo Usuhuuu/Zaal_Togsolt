@@ -1,45 +1,44 @@
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native'; // Import the Text component
-import React, { useMemo, useRef, useState } from 'react';
-import Listings from '@/components/Listing';
-import BottomSheet from '@gorhom/bottom-sheet'; // Ensure this is the correct import
-import { Listing } from '@/interfaces/listing';
-import Colors from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import React, { useMemo, useRef, useState } from "react";
+import Listings from "@/components/Listing";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Listing } from "@/interfaces/listing";
+import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 
 interface ListingBottomSheetProps {
   listing: Listing[];
   category: string;
 }
 const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
-  const bottomSheetRef = useRef<BottomSheet>(null); // Correctly type the ref
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const [refresh ,setrefresh] = useState<number>(0);
+  const [refresh, setrefresh] = useState<number>(0);
 
-  const showMap = ()=>{
+  const showMap = () => {
     bottomSheetRef.current?.collapse();
     setrefresh(refresh + 1);
-}
-
-  const snapPoints = useMemo(() => ['9%', '90%'], []);
+  };
+  const snapPoints = useMemo(() => ["9%", "90%"], []);
 
   return (
-    <BottomSheet 
-    ref={bottomSheetRef} 
-    snapPoints={snapPoints}
-     handleIndicatorStyle={{
-      backgroundColor: Colors.primary, // Change color
-        width: 60,                         
+    <BottomSheet
+      ref={bottomSheetRef}
+      snapPoints={snapPoints}
+      handleIndicatorStyle={{
+        backgroundColor: Colors.primary, // Change color
+        width: 60,
         borderRadius: 2,
-
-    }}
-        style={styles.sheetContainer}>
+      }}
+      style={styles.sheetContainer}
+    >
       <View style={styles.contentContainer}>
-        <Listings listings={listing} category={category} refresh={refresh}/>
+        <Listings listings={listing} category={category} refresh={refresh} />
         <View style={styles.absoluteBtn}>
-            <TouchableOpacity onPress={showMap} style={styles.btn}>
-                <Text style={styles.btnText}>Map</Text>
-                <Ionicons name="map" size={20} color="white" />
-            </TouchableOpacity>
+          <TouchableOpacity onPress={showMap} style={styles.btn}>
+            <Text style={styles.btnText}>Map</Text>
+            <Ionicons name="map" size={20} color="white" />
+          </TouchableOpacity>
         </View>
       </View>
     </BottomSheet>
@@ -52,39 +51,39 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   absoluteBtn: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
-    alignSelf: 'center',
-    width: '90%',
+    alignSelf: "center",
+    width: "90%",
   },
   btn: {
     backgroundColor: Colors.primary,
     borderRadius: 10,
     height: 50,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
     gap: 8,
-    shadowColor: '#000',
+
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5, // For Android shadow
   },
   btnText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   sheetContainer: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: Colors.white,
-    shadowColor: '#000',
+
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -96,8 +95,8 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     marginTop: 8,
-    alignSelf: 'center',
-    shadowColor: '#000',
+    alignSelf: "center",
+
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,

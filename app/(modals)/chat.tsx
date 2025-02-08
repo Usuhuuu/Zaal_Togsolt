@@ -202,7 +202,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     marginHorizontal: 16,
     borderRadius: 10,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -221,7 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -234,7 +233,7 @@ const styles = StyleSheet.create({
     maxWidth: "75%",
     alignSelf: "flex-start",
     backgroundColor: "#e0f7fa",
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -266,7 +265,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 16,
     backgroundColor: "#fff",
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -277,7 +276,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 20,
     marginLeft: 8,
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 4,

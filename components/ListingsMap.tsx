@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // For Android shadow
-    shadowColor: "#000", // For iOS shadow
+    // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // For Android shadow
-    shadowColor: "#000", // For iOS shadow
+    // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,

@@ -1,13 +1,30 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { getLocales } from 'expo-localization';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import en from "../assets/language/en.json";
 import mn from "../assets/language/mn.json";
 import kr from "../assets/language/kr.json";
 
 const locales = getLocales(); 
-const language = locales[0]?.languageCode;
+const language: string = locales[0]?.languageCode ?? "en";
+
+
+
+const getLanguageFromStorage = async () => {
+  try{
+    const storedLanguage = await AsyncStorage.getItem("language");
+    if(storedLanguage){
+      return storedLanguage;
+    }
+    const locales = getLocales();
+    const language:string = locales[0]?.languageCode ?? "en";
+    return language;
+  }catch(err){
+    console.log(err);
+  }
+}
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -15,7 +32,7 @@ i18n.use(initReactI18next).init({
     mn: { translation: mn.data },
     kr: { translation: kr.data }
   },
-  lng: "en", 
+  lng: language, 
   fallbackLng: "en", 
   interpolation: {
     escapeValue: false,

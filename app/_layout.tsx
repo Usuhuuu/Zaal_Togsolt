@@ -9,7 +9,6 @@ import React, { useEffect, ReactNode, useState } from "react";
 import { TouchableOpacity, View, Text, Alert } from "react-native";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
-import * as Notifications from "expo-notifications";
 import { LanguageProvider } from "./settings/settings_pages/Languages";
 
 Sentry.init({

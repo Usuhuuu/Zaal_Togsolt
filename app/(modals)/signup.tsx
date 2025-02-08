@@ -12,12 +12,9 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import Colors from "@/constants/Colors"; // Assuming Colors is defined properly
 import { axiosInstanceRegular } from "./functions/axiosInstanc";
 import { useTranslation } from "react-i18next";
-
-const API_URL = Constants.expoConfig?.extra?.apiUrl ?? "https://localhost:443";
 
 const Page = () => {
   const [formData, setFormData] = useState({
