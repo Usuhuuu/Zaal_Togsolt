@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "./settings_pages/Languages";
+import i18n from "@/utils/i18";
 
 const { t } = useTranslation();
 
@@ -133,13 +133,21 @@ const Sections = [
 
 const ProfileSettings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [languageKey, setLanguageKey] = useState(0);
 
-  const { changeLanguage } = useLanguage();
+  const { language, changeLanguage } = useLanguage();
+
+  const handleLng = (lang: string) => {
+    changeLanguage(lang);
+    setLanguageKey((prev) => prev + 1);
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light }}>
+    <>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
+        style={{ flex: 1, backgroundColor: Colors.light }}
       >
         <View style={styles.header}>
           <Text style={styles.title}>{settings?.settingsDetails}</Text>
@@ -186,19 +194,25 @@ const ProfileSettings: React.FC = () => {
             <Text style={styles.modalTitle}>Select Language</Text>
             <TouchableOpacity
               style={styles.modalContent}
-              onPress={() => changeLanguage("en")}
+              onPress={() => {
+                changeLanguage("en");
+                setModalVisible(false);
+              }}
             >
               <Text>🇺🇸 English</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalContent}
-              onPress={() => changeLanguage("mn")}
+              onPress={() => {
+                changeLanguage("mn");
+                setModalVisible(false);
+              }}
             >
               <Text>🇲🇳 Монгол хэл</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalContent}
-              onPress={() => changeLanguage("kr")}
+              onPress={() => handleLng("kr")}
             >
               <Text>🇰🇷 한국어</Text>
             </TouchableOpacity>
@@ -213,7 +227,7 @@ const ProfileSettings: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 };
 

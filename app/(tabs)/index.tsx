@@ -35,7 +35,7 @@ const Page = () => {
           header: () => <ExploreHeader onCategoryChanged={onDataChanged} />,
         }}
       />
-      {/*<Listing listings={items} category={category} />*/}
+      {/* <Listing listings={items} category={category} /> */}
       <ListingsMap listings={listingsDataGeo as FeatureCollection} />
       <ListingBottomSheet listing={items} category={category} />
     </GestureHandlerRootView>

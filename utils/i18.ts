@@ -6,11 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import en from "../assets/language/en.json";
 import mn from "../assets/language/mn.json";
 import kr from "../assets/language/kr.json";
+import { useState } from "react";
 
 const locales = getLocales(); 
 const language: string = locales[0]?.languageCode ?? "en";
-
-
 
 const getLanguageFromStorage = async () => {
   try{
@@ -22,10 +21,10 @@ const getLanguageFromStorage = async () => {
     const language:string = locales[0]?.languageCode ?? "en";
     return language;
   }catch(err){
-    console.log(err);
+    console.log("Error loading language:", err);
+    return "en"; 
   }
 }
-
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en.data },
@@ -38,12 +37,5 @@ i18n.use(initReactI18next).init({
     escapeValue: false,
   },
   compatibilityJSON: 'v4'
-}).then(() => {
-  i18n.on("languageChanged", (lng) => {
-    console.log("Language changed to: ", lng);
-  });
-});
-
-
-
+})
 export default i18n;

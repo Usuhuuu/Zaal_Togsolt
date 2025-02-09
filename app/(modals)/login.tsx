@@ -52,6 +52,7 @@ const Page = () => {
   const [isVerified, setIsVerified] = useState(false);
   const [isItApple, setIsITApple] = useState(false);
   const [isitGoogle, setIsItGoogle] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
     if (Platform.OS === "ios") {
@@ -61,7 +62,6 @@ const Page = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-
     try {
       const response = await axiosInstanceRegular.post("/login", {
         email,
@@ -77,6 +77,7 @@ const Page = () => {
         );
         Alert.alert("Login Success");
         router.push("/");
+        setShouldRender(true);
       } else {
         setEr("Login failed");
         Alert.alert(er);

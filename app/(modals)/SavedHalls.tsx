@@ -28,11 +28,10 @@ const SavedHalls: React.FC = () => {
       </TouchableOpacity>
     </View>
   );
-
   return (
     <View style={styles.modalContent}>
       <Text style={styles.header}>Saved Halls</Text>
-      {hallsToRender.length == 0 ? (
+      {hallsToRender?.length == 0 ? (
         <Text>No halls saved!</Text>
       ) : (
         <FlatList

@@ -112,7 +112,7 @@ const ListingComponent = ({ listings: items, category, refresh }: Props) => {
       </Link>
 
       <View style={styles.categoryContainer}>
-        {["oirhon", "shildeg", "zovloh"].map((label) => (
+        {["oirhon", "shildeg", "zovloh"]?.map((label) => (
           <CategoryButton key={label} label={label} />
         ))}
       </View>

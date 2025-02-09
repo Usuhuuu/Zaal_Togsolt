@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import i18n from "@/utils/i18";
+import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
 
 interface LanguageContextProps {
@@ -9,24 +9,30 @@ interface LanguageContextProps {
 
 const LanguageContext = createContext<LanguageContextProps>({
   language: i18n.language,
-  changeLanguage: () => {},
+  changeLanguage: (lang: string) => {},
 });
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [language, setLanguage] = useState(i18n.language);
+  const [isLanguageChanged, setIsLanguageChanged] = useState(false);
 
   const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-    setLanguage(lang); // This forces a re-render
+    if (lang !== language) {
+      i18n.changeLanguage(lang);
+      setLanguage(lang);
+      setIsLanguageChanged(true); // Mark language as changed
+    }
   };
 
   useEffect(() => {
-    i18n.on("languageChanged", (lng) => {
-      setLanguage(lng);
-    });
-  }, []);
+    if (isLanguageChanged) {
+      // Wait for the re-render to complete
+      setIsLanguageChanged(false); // Reset state after the re-render
+      console.log("Language changed and component re-rendered:", language);
+    }
+  }, [language, isLanguageChanged]);
 
   return (
     <LanguageContext.Provider value={{ language, changeLanguage }}>

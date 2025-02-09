@@ -18,6 +18,7 @@ import ProfileNotification from "@/components/profileScreens/drawerScreen/notifi
 import ProfileStatistical from "@/components/profileScreens/contractorScreen/statistical";
 import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScreen";
 import { useTranslation } from "react-i18next";
+import ProfileSettings from "../settings/profileSettings";
 
 // Create a Drawer Navigator
 const Drawer = createDrawerNavigator();
@@ -290,7 +291,36 @@ const Layout = () => {
             options={{
               drawerLabel: "Statistics",
               headerShown: true,
-              drawerIcon: () => <Ionicons name="checkmark-circle" />,
+              drawerIcon: () => (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={28}
+                  color={Colors.primary}
+                />
+              ),
+              headerLeft: () => (
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={28}
+                    color={Colors.primary}
+                    style={{
+                      marginLeft: 15,
+                    }}
+                  />
+                </TouchableOpacity>
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Settings"
+            component={ProfileSettings}
+            options={{
+              drawerLabel: "Settings",
+              headerShown: true,
+              drawerIcon: () => (
+                <Ionicons name="settings" size={28} color={Colors.primary} />
+              ),
               headerLeft: () => (
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                   <Ionicons

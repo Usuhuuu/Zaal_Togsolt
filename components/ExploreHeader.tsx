@@ -117,7 +117,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollViewContent}
           >
-            {sportDetail.map((item: any, index: any) => (
+            {sportDetail?.map((item: any, index: any) => (
               <TouchableOpacity
                 key={index}
                 //ref={(el) => (itemsRef.current[index] = el)}

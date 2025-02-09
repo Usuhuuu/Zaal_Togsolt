@@ -15,7 +15,6 @@ const ProfileAdmin: React.FC<ProfileAdminProps> = ({
   copyToClipboard,
   formData,
 }) => {
-  const [notificationData, setNotificationData] = useState<Array<String>>([]);
   const sendNotification = async () => {
     try {
       const response = await axiosInstance.post("/auth/send-notification", {});

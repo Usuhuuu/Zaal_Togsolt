@@ -7,7 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "lint": "eslint ."
   },
   "jest": {
     "preset": "jest-expo"
@@ -29,6 +30,7 @@
     "axios": "^1.7.2",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
+    "eslint-plugin-react-compiler": "^19.0.0-beta-714736e-20250131",
     "expo": "~51.0.38",
     "expo-apple-authentication": "~6.4.2",
     "expo-application": "~5.9.1",
@@ -79,7 +81,7 @@
     "semver": "^7.6.3",
     "send": "^0.19.0",
     "socket.io-client": "^4.8.1",
-    "swr": "^2.3.0",
+    "swr": "^2.3.2",
     "xml2js": "^0.6.2",
     "zaalproject": "file:"
   },
@@ -91,6 +93,7 @@
     "@types/react": "~18.2.79",
     "@types/react-i18next": "^7.8.3",
     "@types/react-native": "^0.73.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
     "jest": "^29.7.0",
     "jest-expo": "^51.0.4",
     "react-test-renderer": "18.2.0",

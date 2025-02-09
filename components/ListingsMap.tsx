@@ -122,7 +122,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
         clusterColor=""
         renderCluster={renderCluster}
       >
-        {listings.features.map((item: ListingGeo) => (
+        {listings.features?.map((item: ListingGeo) => (
           <Marker
             key={item.properties.id}
             onPress={() => onMarkerSelected(item)}

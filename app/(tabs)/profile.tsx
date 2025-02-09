@@ -32,10 +32,6 @@ const Profile: React.FC = () => {
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
-  const [roleFetched, setRoleFetched] = useState<boolean>(false);
-  const apiUrl =
-    Constants.expoConfig?.extra?.apiUrl ??
-    "https://8f9e-118-176-174-110.ngrok-free.app";
 
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),

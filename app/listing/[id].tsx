@@ -29,7 +29,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/functions/savedhalls";
 import { useRouter } from "expo-router";
 import moment from "moment";
-import { throttle } from "lodash";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstanc";
 
 const { width } = Dimensions.get("window");
@@ -115,7 +114,6 @@ const DetailsPage = () => {
   ];
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
   const [zahialgaBtn, setZahialgaBtn] = useState(false);
-  const [fetchCount, setFetchCount] = useState(0);
 
   const dateSlotGiver = async (date: any) => {
     setIsLoading(true);
@@ -126,18 +124,6 @@ const DetailsPage = () => {
       const response = await axiosInstanceRegular.get("/timeslotscheck", {
         params: { zaalniID: tempZaal, odor },
       });
-      if (!response.data.available && response.data.not_possible_time !== "") {
-        const notPossibleTime = response.data.not_possible_time.orderedTime.map(
-          (result: any) => ({
-            time: result.time,
-            status: result.status,
-          })
-        );
-        setFetchCount((prev) => prev + 1);
-        setUnavailableTimes(notPossibleTime);
-      } else {
-        setUnavailableTimes([]);
-      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -220,7 +206,7 @@ const DetailsPage = () => {
             />
             <View style={styles.LLR_style}>
               {/* Render available and unavailable time slots */}
-              {baseTimeSlots.map((timeSlot, index) => {
+              {baseTimeSlots?.map((timeSlot, index) => {
                 const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
                 const isDisabled = unavailableTimes.some(
                   (time: any) =>

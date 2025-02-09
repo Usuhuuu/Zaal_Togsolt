@@ -105,7 +105,7 @@ const Page = () => {
         phoneNumber: formData.phoneNumber,
       });
 
-      if (response.status === 200) {
+      if (response.status == 200) {
         setVerificationCompleted(true);
         Alert.alert("Success", "Verification code sent.");
       } else {

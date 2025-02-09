@@ -50,7 +50,6 @@ const notificationsData = [
 ];
 const NotificationScreen = () => {
   const [userData, setUserData] = useState<string>("");
-  const [isitLoading, setIsitLoading] = useState<boolean>(true);
   const navigation = useNavigation();
 
   const handleNotificationPress = (message: string) => {

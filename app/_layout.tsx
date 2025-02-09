@@ -1,4 +1,4 @@
-import "../utils/i18";
+import "@/utils/i18";
 import "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -10,14 +10,13 @@ import { TouchableOpacity, View, Text, Alert } from "react-native";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
 import { LanguageProvider } from "./settings/settings_pages/Languages";
+export { ErrorBoundary } from "expo-router";
 
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
 });
 SplashScreen.preventAutoHideAsync();
-
-export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",

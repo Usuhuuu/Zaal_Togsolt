@@ -90,8 +90,8 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
         <ScrollView style={style.subContainer}>
           <View style={style.requestContainer}>
             <Text style={style.sectionTitle}>Friend Requests</Text>
-            {userRequestData.length > 0 ? (
-              userRequestData.map((item, index) => (
+            {userRequestData?.length > 0 ? (
+              userRequestData?.map((item, index) => (
                 <View style={style.requestSubContainer}>
                   <Text style={style.requestItem} key={index}>
                     {item}
@@ -120,8 +120,8 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
           </View>
           <View style={style.friendContainer}>
             <Text style={style.sectionTitle}>Friends List</Text>
-            {friendData.length > 0 ? (
-              friendData.map((item, index) => (
+            {friendData?.length > 0 ? (
+              friendData?.map((item, index) => (
                 <Text style={style.requestItem} key={index}>
                   {item}
                 </Text>
