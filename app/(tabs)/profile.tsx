@@ -1,33 +1,16 @@
 import React, { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  Modal,
-  ImageBackground,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import ProfileHeader from "@/components/ProfileHeader";
+import { SafeAreaView, StyleSheet, View, Text } from "react-native";
 import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
-import ProfileData from "@/components/profileData";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
-import Constants from "expo-constants";
-import Team from "@/components/clans";
 import { useRouter, Href } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 // Import SavedHalls component
-import SavedHalls from "@/app/(modals)/SavedHalls";
 import useSWR from "swr";
 import ContractorPage from "@/components/profileScreens/contractor";
 import ProfileAdmin from "@/components/profileScreens/admin";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../(modals)/functions/store";
-import * as SecureStorage from "expo-secure-store";
+import NormalUser from "@/components/profileScreens/normalUser";
 
 const Profile: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -36,10 +19,12 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
 
-  const dispatch = useDispatch();
-  const loginStatusState = useSelector(
-    (state: RootState) => state.authStatus.isitLogined
-  );
+  const { t } = useTranslation();
+  const drawerDef: any = t("RolePage", { returnObjects: true });
+  const drawer = Array.isArray(drawerDef) ? drawerDef[0] : [];
+  const userRoleLng = drawer?.userRole[0];
+  const adminRoleLng = drawer?.adminRole[0];
+  const contractorRoleLng = drawer?.contractorRole[0];
 
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),
@@ -59,7 +44,6 @@ const Profile: React.FC = () => {
     } else if (error) {
       console.log("Error fetching role and profile data:", error);
       router.replace("/login");
-    } else if (loginStatusState == true) {
     }
     // Set loading state based on isLoading
     setLoading(isLoading);
@@ -69,18 +53,6 @@ const Profile: React.FC = () => {
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(formData);
-  };
-
-  const handleBackPress = () => {
-    console.log("Back button pressed");
-  };
-
-  const handleSharePress = () => {
-    console.log("Share button pressed");
-  };
-
-  const handleSettingsPress = () => {
-    console.log("Settings button pressed");
   };
 
   const openModal = () => {
@@ -126,82 +98,10 @@ const Profile: React.FC = () => {
           {/* Regular User Role */}
           {userRole === "user" && (
             <>
-              <LinearGradient
-                colors={[Colors.primary, Colors.light]}
-                start={[0, 0]}
-                end={[0, 1.2]}
-                locations={[0, 1]}
-                style={styles.background}
+              <NormalUser
+                copyToClipboard={copyToClipboard}
+                formData={formData}
               />
-              <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.titleBar}>
-                  <TouchableOpacity onPress={handleBackPress}>
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={handleSharePress}>
-                    <Ionicons name="share-social" size={24} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      router.push(
-                        "/settings/profileSettings" as Href<"/settings/profileSettings">
-                      )
-                    }
-                  >
-                    <Ionicons name="settings" size={24} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-
-                <ProfileHeader
-                  copyToClipboard={copyToClipboard}
-                  profileImageUri="https://example.com/profile.jpg"
-                  firstName={formData.firstName}
-                  unique_user_ID={formData.unique_user_ID}
-                />
-                <Team />
-                <ProfileData />
-
-                {/* Button to open modal */}
-                <View style={styles.saved}>
-                  <TouchableOpacity
-                    style={styles.savedBackground}
-                    onPress={openModal}
-                  >
-                    <ImageBackground
-                      source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
-                      resizeMode="cover"
-                      borderRadius={20} // Rounded corners
-                      style={styles.savedBackground}
-                    >
-                      <Text style={styles.savedText}>Saved Records</Text>
-                      <ImageBackground
-                        source={require("@/assets/images/saved.png")} // Replace with your image path
-                        style={styles.savedicon}
-                      />
-                    </ImageBackground>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-
-              {/* Modal */}
-              <Modal
-                visible={modalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={closeModal}
-              >
-                <View style={styles.modalOverlay}>
-                  <View style={styles.modalContent}>
-                    <SavedHalls />
-                    <TouchableOpacity
-                      onPress={closeModal}
-                      style={styles.closeButton}
-                    >
-                      <Text style={styles.closeButtonText}>Close</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </Modal>
             </>
           )}
         </>

@@ -8,6 +8,7 @@
         "together": "Хамтдаа",
         "order": "Захиалга",
         "profile": "Профайл",
+        "notificationText": "Мэдэгдэлүүд",
         "settings": [
             {
                 "settingsDetails": "Тохиргоо",
@@ -58,7 +59,9 @@
                         "changePassword": "Нууц үг солих",
                         "iconLocationChangePassword": "lock-closed",
                         "deleteAccount": "Account устгах",
-                        "iconLocationdeleteAccount": "trash"
+                        "iconLocationdeleteAccount": "trash",
+                        "iconLocationLogout": "log-out",
+                        "logout": "Account Гарах"
                     }
                 ]
             }
@@ -103,6 +106,70 @@
                 "termsConditions": "Нууцлал ба нөхцлүүд",
                 "privacyPolicy": "Нууцлалын бодлого"
             }
-        ]
+        ],
+        "DrawerScreen": [
+            {
+            "userDrawer": [
+                {
+                "home": "Нүүр хуудас",
+                "news": "Мэдээ",
+                "academy": "Академи",
+                "settings": "Тохиргоо"
+                }
+            ],
+            "adminDrawer": [
+                {
+                "adminPage": "Нүүр хуудас",
+                "userInfo": "Хэрэглэгчийн мэдээлэл",
+                "news": "Мэдээ",
+                "notificationPage": "Мэдэгдлийн хуудас",
+                "settings": "Тохиргоо"
+                }
+            ],
+            "contractorDrawer": [
+                {
+                "contractorPage": "Нүүр хуудас",
+                "userInfo": "Хэрэглэгчийн мэдээлэл",
+                "news": "Мэдээ",
+                "statisticalPage": "Статистикийн хуудас",
+                "notificationPage": "Мэдэгдлийн хуудас",
+                "settings": "Тохиргоо"
+                }
+            ]
+            }
+        ],
+        "RolePage":[{
+            "userRole":[
+                {
+                    "dashboard":"Хэрэглэгчийн хяналтын самбар"
+                }
+            ],
+            "adminRole":[
+                {
+                    "dashboard": "Админы Хяналтын самбар"
+                }
+            ],
+            "contractorRole":[
+                {
+                    "dashboard":"Хяналтын самбар"
+                }
+            ]
+        }],
+        "NotificationPage":{
+            "friendRequest":"Найзын хүсэлт",
+            "noFriendRequest":"Найзын хүсэлт байхгүй",
+            "ReceivedFriendRequest":"Хүлээн авсан найзын хүсэлт",
+            "noFriends":"Найз байхгүй",
+            "accept":"Зөвшөөрөх",
+            "reject":"Татгалзах",
+            "friendList":"Найзын жагсаалт"
+        },
+        "userLogout":{
+            "logoutAlert":"Гарах",
+            "logoutMessage": "Та гарахдаа итгэлтэй байна уу?",
+            "yes": "Тийм",
+            "cancel": "Үгүй"
+        }
+
     }
 }

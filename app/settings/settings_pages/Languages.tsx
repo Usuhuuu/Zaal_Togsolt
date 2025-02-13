@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface LanguageContextProps {
   language: string;
@@ -12,17 +13,18 @@ const LanguageContext = createContext<LanguageContextProps>({
   changeLanguage: (lang: string) => {},
 });
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const LanguageProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const [language, setLanguage] = useState<string>(i18n.language);
   const [isLanguageChanged, setIsLanguageChanged] = useState<boolean>(false);
 
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = async (lang: string) => {
     if (lang !== language) {
       i18n.changeLanguage(lang);
       setLanguage(lang);
-      setIsLanguageChanged(true); // Mark language as changed
+      setIsLanguageChanged(true);
+      await AsyncStorage.setItem("language", lang);
     }
   };
 

@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "./settings_pages/Languages";
 import i18n from "@/utils/i18";
 import * as SecureStorage from "expo-secure-store";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import {
   RootState,
@@ -25,34 +25,7 @@ import {
 const ProfileSettings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  const dispatch = useDispatch<AppDispatch>();
-  const loginOutState = useSelector(
-    (state: RootState) => state.authStatus.isitLogined
-  );
-
-  const { changeLanguage } = useLanguage();
-
-  const handleLng = (lang: string) => {
-    changeLanguage(lang);
-    i18n.changeLanguage(lang);
-    setModalVisible(false);
-  };
-  const logout = async () => {
-    try {
-      await SecureStorage.deleteItemAsync("Tokens").then((state) => {
-        setIsLoggedIn(false);
-        dispatch(loginoutState());
-        console.log(state);
-        Alert.alert("Logged out");
-        router.replace("/");
-      });
-      console.log(loginOutState);
-      //router.replace("/login");
-    } catch (err) {
-      console.log("Error logging out:", err);
-    }
-  };
+  const router = useRouter();
 
   const { t } = useTranslation();
   const settingsDet: any = t("settings", { returnObjects: true });
@@ -82,7 +55,7 @@ const ProfileSettings: React.FC = () => {
         {
           id: "notifications",
           icon: "notifications",
-          label: `${preferences.notifications}`,
+          label: `${preferences.notification}`,
           type: "toggle",
         },
         {
@@ -176,6 +149,39 @@ const ProfileSettings: React.FC = () => {
     },
   ];
 
+  const dispatch = useDispatch<AppDispatch>();
+  const loginOutState = useSelector(
+    (state: RootState) => state.authStatus.isitLogined
+  );
+
+  const { changeLanguage } = useLanguage();
+
+  const handleLng = (lang: string) => {
+    changeLanguage(lang);
+    i18n.changeLanguage(lang);
+    setModalVisible(false);
+  };
+  const logout = async () => {
+    await SecureStorage.deleteItemAsync("Tokens").then((state) => {
+      setIsLoggedIn(false);
+      console.log(state);
+    });
+    dispatch(loginoutState());
+    console.log(loginOutState);
+    Alert.alert(t("userLogout.logoutAlert"), t("userLogout.logoutMessage"), [
+      {
+        text: t("userLogout.cancel"),
+        style: "cancel",
+      },
+      {
+        text: t("userLogout.yes"),
+        onPress: () => {
+          router.navigate("/");
+        },
+      },
+    ]);
+  };
+
   return (
     <>
       <ScrollView
@@ -211,7 +217,7 @@ const ProfileSettings: React.FC = () => {
                 >
                   <View style={styles.row}>
                     <Ionicons name={icon as any} color={"#616161"} size={24} />
-                    <Text style={styles.rowlabel}>{label}</Text>
+                    <Text style={styles.rowlabel}> {label}</Text>
                   </View>
                 </TouchableOpacity>
               </View>

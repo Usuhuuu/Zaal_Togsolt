@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import React, { useMemo, useState } from "react";
 import { Stack } from "expo-router";
 import ExploreHeader from "@/components/ExploreHeader";
@@ -14,16 +14,9 @@ interface FeatureCollection {
 }
 
 const Page = () => {
-  // Load data
   const listingsData = require("@/assets/Data/airbnb-listings.json");
-
-  // State management for category
   const [category, setCategory] = useState<string>("Sags");
-
-  // Memoized items
-  const items = useMemo(() => {
-    return listingsData.filter((item: any) => item.category === category);
-  }, [category]);
+  const items = useMemo(() => listingsData as any[], []);
   // Category change handler
   const onDataChanged = (category: string) => {
     console.log(`CHANGED_`, category);
@@ -37,7 +30,7 @@ const Page = () => {
           header: () => <ExploreHeader onCategoryChanged={onDataChanged} />,
         }}
       />
-      {/* <Listing listings={items} category={category} /> */}
+      {/*<Listing listings={items} category={category} />*/}
       <ListingsMap listings={listingsDataGeo as FeatureCollection} />
       <ListingBottomSheet listing={items} category={category} />
     </GestureHandlerRootView>

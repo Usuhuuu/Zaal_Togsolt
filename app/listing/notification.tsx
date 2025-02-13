@@ -14,6 +14,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
 import { Href, router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 const notificationsData = [
   {
@@ -49,6 +50,7 @@ const notificationsData = [
 ];
 const NotificationScreen = () => {
   const [userData, setUserData] = useState<string>("");
+  const { t } = useTranslation();
 
   const handleNotificationPress = (message: string) => {
     alert(`Та дарахад: ${message}`);
@@ -66,6 +68,7 @@ const NotificationScreen = () => {
     errorRetryCount: 3,
     dedupeInterval: 10000,
   });
+
   useEffect(() => {
     if (userFriendData) {
       setUserData(userFriendData);
@@ -94,7 +97,9 @@ const NotificationScreen = () => {
                 source={{ uri: "https://via.placeholder.com/40" }}
                 style={styles.avatar}
               />
-              <Text style={styles.texts}>Friend Request</Text>
+              <Text style={styles.texts}>
+                {t("NotificationPage.friendRequest")}
+              </Text>
               <Ionicons
                 name="chevron-forward"
                 size={20}

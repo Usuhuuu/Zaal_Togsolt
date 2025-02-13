@@ -15,7 +15,6 @@ import ExploreHeader from "@/components/ExploreHeader"; // Import your ExploreHe
 import InfoScreen from "@/components/InfoScreen"; // Example drawer screen
 import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
-import MainSettings from "../settings/mainSettings";
 import useSWR from "swr";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,13 +23,11 @@ import ProfileStatistical from "@/components/profileScreens/contractorScreen/sta
 import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScreen";
 import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { RootState, store } from "../(modals)/functions/store";
+import { Provider } from "react-redux";
+import { store } from "../(modals)/functions/store";
 
 // Create a Drawer Navigator
-
 const TabsLayout = () => {
-  const Drawer = createDrawerNavigator();
   const { t } = useTranslation();
   return (
     <>
@@ -123,44 +120,77 @@ const TabsLayout = () => {
   );
 };
 
-const drawerScreens: any = {
-  user: [
-    { name: "Home", component: TabsLayout, icon: "home" },
-    { name: "Medeelel", component: InfoScreen, icon: "newspaper" },
-    { name: "Surgalt", component: Dtraining, icon: "newspaper" },
-    { name: "Tohirgoo", component: MainSettings, icon: "settings" },
-  ],
-  admin: [
-    { name: "Admin Dashboard", component: TabsLayout, icon: "home" },
-    { name: "Personal Info", component: UserInfoScreen, icon: "person" },
-    {
-      name: "Notification Manager",
-      component: ProfileNotification,
-      icon: "notifications",
-    },
-  ],
-  contractor: [
-    { name: "Home", component: TabsLayout, icon: "home" },
-    {
-      name: "Statistics",
-      component: ProfileStatistical,
-      icon: "checkmark-circle",
-    },
-    { name: "Settings", component: ProfileSettings, icon: "settings" },
-  ],
-};
-
 const Layout = () => {
-  const [userRole, setUserRole] = useState<string>("user");
-  const [isitLoading, setIsitLoading] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string>("default");
 
   const Drawer = createDrawerNavigator();
   const { t } = useTranslation();
+  const drawerDef: any = t("DrawerScreen", { returnObjects: true });
+  const drawer = Array.isArray(drawerDef) ? drawerDef[0] : [];
+  const userDrawerLng = drawer?.userDrawer[0];
+  const adminDrawerLng = drawer?.adminDrawer[0];
+  const contractorDrawerLng = drawer?.contractorDrawer[0];
 
-  const dispatch = useDispatch();
-  const loginInState = useSelector(
-    (state: RootState) => state.authStatus.isitLogined
-  );
+  const drawerScreens: any = {
+    default: [
+      { name: userDrawerLng.home, component: TabsLayout, icon: "home" },
+      {
+        name: userDrawerLng.settings,
+        component: ProfileSettings,
+        icon: "settings",
+      },
+    ],
+    user: [
+      { name: userDrawerLng.home, component: TabsLayout, icon: "home" },
+      { name: userDrawerLng.news, component: InfoScreen, icon: "newspaper" },
+      { name: userDrawerLng.academy, component: Dtraining, icon: "newspaper" },
+      {
+        name: userDrawerLng.settings,
+        component: ProfileSettings,
+        icon: "settings",
+      },
+    ],
+    admin: [
+      { name: adminDrawerLng.adminPage, component: TabsLayout, icon: "home" },
+      {
+        name: adminDrawerLng.userInfo,
+        component: UserInfoScreen,
+        icon: "person",
+      },
+      {
+        name: adminDrawerLng.notificationPage,
+        component: ProfileNotification,
+        icon: "notifications",
+      },
+      {
+        name: adminDrawerLng.settings,
+        component: ProfileSettings,
+        icon: "settings",
+      },
+    ],
+    contractor: [
+      {
+        name: contractorDrawerLng.contractorPage,
+        component: TabsLayout,
+        icon: "home",
+      },
+      {
+        name: contractorDrawerLng.statisticalPage,
+        component: ProfileStatistical,
+        icon: "checkmark-circle",
+      },
+      {
+        name: contractorDrawerLng.userInfo,
+        component: UserInfoScreen,
+        icon: "person",
+      },
+      {
+        name: contractorDrawerLng.settings,
+        component: ProfileSettings,
+        icon: "settings",
+      },
+    ],
+  };
 
   const {
     data: userData,
@@ -191,9 +221,11 @@ const Layout = () => {
       </View>
     );
   }
+  const noHeadRender = ["Home", "Нүүр хуудас", "홈"];
 
   const renderScreens = () => {
-    return drawerScreens[userRole]?.map(
+    const screensToRender = drawerScreens[userRole] || drawerScreens.default;
+    return screensToRender?.map(
       ({
         name,
         component,
@@ -209,7 +241,7 @@ const Layout = () => {
           component={component}
           options={{
             drawerLabel: name,
-            headerShown: name == "Home" ? false : true,
+            headerShown: noHeadRender.includes(name) ? false : true,
             drawerIcon: () => (
               <Ionicons
                 name={icon as keyof typeof Ionicons.glyphMap}

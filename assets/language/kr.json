@@ -8,6 +8,7 @@
         "together": "함께",
         "order": "주문",
         "profile": "마이패이즈",
+        "notificationText": "알림",
         "settings": [
             {
                 "settingsDetails": "설정",
@@ -58,12 +59,13 @@
                         "changePassword": "비밀번호 변경",
                         "iconLocationChangePassword": "lock-closed",
                         "deleteAccount": "계정 삭제",
-                        "iconLocationdeleteAccount": "trash"
+                        "iconLocationdeleteAccount": "trash",
+                        "iconLocationLogout": "log-out",
+                        "logout": "로그아웃"
                     }
                 ]
             }
         ],
-
         "sportTextIcons": [
             { "name": "농구", "icon": "basketball" },
             { "name": "축구", "icon": "football" },
@@ -104,6 +106,69 @@
                 "termsConditions": "이용 약관",
                 "privacyPolicy": "개인정보 보호정책"
             }
-        ]
+        ],
+        "DrawerScreen":[{
+            "userDrawer":[
+                {
+                    "home":"홈",
+                    "news":"뉴스",
+                    "academy":"학원",
+                    "settings":"설정"
+                }
+            ],
+            "adminDrawer":[
+                {
+                    "adminPage":"홈",
+                    "userInfo":"사용자 정보",
+                    "news":"뉴스",
+                    "notificationPage":"알림 페이지",
+                    "settings":"설정"
+                }
+
+            ],
+            "contractorDrawer":[
+                {
+                    "contractorPage":"홈",
+                    "userInfo":"사용자 정보",
+                    "news":"뉴스",
+                    "statisticalPage":"통계 페이지",
+                    "notificationPage":"알림 페이지",
+                    "settings":"설정"
+                }
+            ]
+        }],
+        "RolePage":[{
+            "userRole":[
+                {
+                    "dashboard":"사용자 패이즈"
+                }
+            ],
+            "adminRole":[
+                {
+                    "dashboard":"관리자 패이즈"
+                }
+            ],
+            "contractorRole":[
+                {
+                    "dashboard":"계약자 패이즈"
+                }
+            ]
+        }],
+        "NotificationPage":{
+            "friendRequest":"친구 요청",
+            "noFriendRequest":"친구 요청 없음",
+            "ReceivedFriendRequest":"받은 친구 요청",
+            "noFriends":"친구 없음",
+            "accept":"수락",
+            "reject":"거절",
+            "friendList":"친구 목록"
+        },
+        "userLogout":{
+            "logoutAlert":"로그아웃",
+            "logoutMessage":"로그아웃 하시겠습니까?",
+            "yes":"예",
+            "cancel":"아니요"
+        }
+
     }
 }

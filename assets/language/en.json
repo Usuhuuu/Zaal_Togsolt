@@ -105,10 +105,68 @@
                 "privacyPolicy": "Privacy Policy"
 
             }
-        ]
+        ],
+        "DrawerScreen":[{
+            "userDrawer":[
+                {
+                    "home":"Home",
+                    "news":"News",
+                    "academy":"Academy",
+                    "settings":"Settings"
+                }
+            ],
+            "adminDrawer":[
+                {
+                    "adminPage":"Home",
+                    "userInfo":"User Information",
+                    "news":"News",
+                    "notificationPage":"Notification Page",
+                    "settings":"Settings"
+                }
 
-       
-        
-        
+            ],
+            "contractorDrawer":[
+                {
+                    "contractorPage":"Home",
+                    "userInfo":"User Information",
+                    "news":"News",
+                    "statisticalPage":"Statistical Page",
+                    "notificationPage":"Notification Page",
+                    "settings":"Settings"
+                }
+            ]
+        }],
+        "RolePage":[{
+            "userRole":[
+                {
+                    "dashboard":"User Dashboard"
+                }
+            ],
+            "adminRole":[
+                {
+                    "dashboard":"Admin Dashboard"
+                }
+            ],
+            "contractorRole":[
+                {
+                    "dashboard":"Contractor Dashboard"
+                }
+            ]
+        }],
+        "NotificationPage":{
+            "friendRequest":"Friend Request",
+            "noFriendRequest":"No Friend Request",
+            "ReceivedFriendRequest":"Received Friend Request",
+            "noFriends":"No Friends",
+            "accept":"Accept",
+            "reject":"Reject",
+            "friendList":"Friend List"
+        },
+        "userLogout":{
+            "logoutAlert":"Logout",
+            "logoutMessage":"Are you sure you want to logout?",
+            "cancel":"Cancel",
+            "yes":"Yes"
+        }
     }
 }

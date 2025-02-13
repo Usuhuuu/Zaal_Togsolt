@@ -72,6 +72,7 @@ export default {
       "expo-secure-store",
       "expo-localization",
       'expo-notifications',
+
       ["@react-native-google-signin/google-signin", {
         iosUrlScheme: 'com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6' || `${process.env.GOOGLE_URL}`,
       }],

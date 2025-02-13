@@ -237,6 +237,7 @@ const DetailsPage = () => {
       </View>
     );
   };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: "",

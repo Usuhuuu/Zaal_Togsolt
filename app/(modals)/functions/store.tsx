@@ -7,6 +7,7 @@ const localLng = Localization.getLocales()[0].languageCode;
 const initState = {
   isitLogined: false,
   lngCode: localLng,
+  forceUpdate: 0,
 };
 
 // Language slice
@@ -34,19 +35,28 @@ const authStatus = createSlice({
   },
 });
 
-export const resetUserState = () => ({
-  type: "RESET_USER_STATE",
+// Reset user state
+const resetSlice = createSlice({
+  name: "reset",
+  initialState: initState,
+  reducers: {
+    triggerReRender: (state) => {
+      state.forceUpdate++;
+    },
+  },
 });
 
 // Export actions
 export const { loginedState, loginoutState } = authStatus.actions;
 export const { changeLanguageState } = languageSlice.actions;
+export const { triggerReRender } = resetSlice.actions;
 
 // Create store
 export const store = configureStore({
   reducer: {
     authStatus: authStatus.reducer,
     language: languageSlice.reducer,
+    reset: resetSlice.reducer,
   },
 });
 

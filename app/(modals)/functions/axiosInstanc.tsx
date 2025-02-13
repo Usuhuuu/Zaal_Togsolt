@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
-import { auth_Refresh_Function } from "./refresh";
+import { Alert } from "react-native";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
@@ -47,6 +47,7 @@ axiosInstance.interceptors.response.use(
     if (
       error.response &&
       error.response.status == 401 &&
+      error.response.data.success == false &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
@@ -54,7 +55,26 @@ axiosInstance.interceptors.response.use(
       if (token) {
         const { refreshToken } = JSON.parse(token);
         try {
-          const newAccessToken = await auth_Refresh_Function(refreshToken);
+          const newAccessToken = await axiosInstance.post("/refresh", {
+            refreshToken,
+          });
+          if (newAccessToken.status == 401 && !newAccessToken.data.success) {
+            await SecureStore.deleteItemAsync("Tokens");
+            Alert.alert(`${newAccessToken.data.message}`);
+          } else if (
+            newAccessToken.status == 403 &&
+            !newAccessToken.data.success
+          ) {
+            throw new Error(`${newAccessToken.data.message}`);
+          } else if (newAccessToken.data.success) {
+            await SecureStore.setItemAsync(
+              "Tokens",
+              JSON.stringify({
+                accessToken: newAccessToken.data.accessToken,
+                refreshToken,
+              })
+            );
+          }
           if (newAccessToken) {
             await SecureStore.setItemAsync(
               "Tokens",

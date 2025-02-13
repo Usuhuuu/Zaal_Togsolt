@@ -38,13 +38,11 @@ const Page = () => {
   const [password, setPassword] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [verifyCode, setVerifyCode] = useState<string>("");
-  const [er, setEr] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [passwordHide, setPasswordHide] = useState<boolean>(true);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [isitGoogle, setIsItGoogle] = useState<boolean>(false);
-  const [loginedOrNot, setLoginedOrNot] = useState<boolean>(false);
   const [key, setKey] = useState<number>(0);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -74,19 +72,20 @@ const Page = () => {
             refreshToken: response.data.refreshToken,
           })
         ).then(() => {
-          setLoginedOrNot(true);
-          dispatch(loginedState());
           Alert.alert("Login Success", "Moving to the main page?", [
             {
               text: "No",
               style: "cancel",
+              onPress: () => {
+                router.replace("/");
+                console.log(loginInState);
+                dispatch(loginedState());
+              },
             },
             {
               text: "Yes",
               style: "default",
-              onPress: () => {
-                router.replace("/(tabs)/profile");
-              },
+              onPress: () => router.replace("/profile"),
             },
           ]);
         });
@@ -103,9 +102,6 @@ const Page = () => {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    console.log("Login state changed:", loginInState);
-  }, [loginInState]); // Logs whenever login state changes
 
   const handlePasswordToggle = () => {
     setPasswordHide(!passwordHide);

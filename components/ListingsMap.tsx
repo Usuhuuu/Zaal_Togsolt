@@ -33,8 +33,7 @@ const INITIAL_REGION = {
 };
 
 const ListingsMap = memo(({ listings }: ListingsMapProps) => {
-  const [hasLocationPermission, setHasLocationPermission] =
-    useState<boolean>(false);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -76,6 +75,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       }
     };
 
+    // Call the function inside useEffect without conditionally rendering the hook
     requestLocationPermission();
   }, []);
 
@@ -107,7 +107,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       <MapViewClustering
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
-        provider={Platform.OS == "android" ? PROVIDER_GOOGLE : undefined}
+        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
         showsUserLocation={hasLocationPermission}
         showsMyLocationButton={false} // Disable default button
         initialRegion={
@@ -123,7 +123,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
         clusterColor=""
         renderCluster={renderCluster}
       >
-        {listings.features?.map((item: ListingGeo) => (
+        {listings.features.map((item: ListingGeo) => (
           <Marker
             key={item.properties.id}
             onPress={() => onMarkerSelected(item)}
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // For Android shadow
-    // For iOS shadow
+    shadowColor: "#000", // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5, // For Android shadow
-    // For iOS shadow
+    shadowColor: "#000", // For iOS shadow
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,

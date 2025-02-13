@@ -12,6 +12,7 @@ import useSWR, { mutate } from "swr";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
 import Colors from "@/constants/Colors";
 import axiosInstance from "../(modals)/functions/axiosInstanc";
+import { useTranslation } from "react-i18next";
 
 interface friendRequestProps {
   copyToClipboard: () => void;
@@ -22,6 +23,7 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
   const [friendData, setFriendData] = useState<string[]>([]);
   const [userRequestData, setUserRequestData] = useState<string[]>([]);
   const [isitLoading, setIsitLoading] = useState<boolean>(false);
+  const { t } = useTranslation();
 
   const handleAccept = async (friend_ID: string) => {
     try {
@@ -89,7 +91,9 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
       ) : (
         <ScrollView style={style.subContainer}>
           <View style={style.requestContainer}>
-            <Text style={style.sectionTitle}>Friend Requests</Text>
+            <Text style={style.sectionTitle}>
+              {t("NotificationPage.friendRequest")}
+            </Text>
             {userRequestData?.length > 0 ? (
               userRequestData?.map((item, index) => (
                 <View style={style.requestSubContainer}>
@@ -101,7 +105,7 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
                     onPress={() => handleAccept(item)}
                   >
                     <Text style={{ fontSize: 18, color: Colors.light }}>
-                      Accept
+                      {t("NotificationPage.accept")}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -109,17 +113,21 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
                     onPress={() => handleCancel(item)}
                   >
                     <Text style={{ fontSize: 18, color: Colors.light }}>
-                      Cancel
+                      {t("NotificationPage.reject")}
                     </Text>
                   </TouchableOpacity>
                 </View>
               ))
             ) : (
-              <Text style={style.requestItem}>No friend requests</Text>
+              <Text style={style.requestItem}>
+                {t("NotificationPage.noFriendRequest")}
+              </Text>
             )}
           </View>
           <View style={style.friendContainer}>
-            <Text style={style.sectionTitle}>Friends List</Text>
+            <Text style={style.sectionTitle}>
+              {t("NotificationPage.friendList")}
+            </Text>
             {friendData?.length > 0 ? (
               friendData?.map((item, index) => (
                 <Text style={style.requestItem} key={index}>
@@ -127,7 +135,9 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
                 </Text>
               ))
             ) : (
-              <Text style={style.requestItem}>No friends</Text>
+              <Text style={style.requestItem}>
+                {t("NotificationPage.friendList")}
+              </Text>
             )}
           </View>
         </ScrollView>

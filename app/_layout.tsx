@@ -14,7 +14,10 @@ export { ErrorBoundary } from "expo-router";
 
 import { Provider } from "react-redux";
 import { store } from "./(modals)/functions/store";
+import { useTranslation } from "react-i18next";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+SplashScreen.preventAutoHideAsync();
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
@@ -70,7 +73,7 @@ function RootLayout() {
     if (error) {
       Sentry.captureException(error);
       console.error("Error loading fonts:", error);
-      setFontError(true); // Set font error state
+      setFontError(true);
       Alert.alert("Error loading fonts", "Please try again later");
     }
     if (loaded) {
@@ -92,6 +95,7 @@ function RootLayout() {
 
 function RootLayoutNav() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <Stack>
@@ -128,7 +132,8 @@ function RootLayoutNav() {
         name="listing/notification"
         options={{
           headerShown: true,
-          title: "Мэдэгдэлүүд",
+          title: `${t("notificationText")}`,
+
           headerTitleStyle: { fontSize: 28, color: Colors.primary },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>

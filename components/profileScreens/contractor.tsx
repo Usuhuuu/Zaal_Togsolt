@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "@/constants/Colors";
 import { useDrawerStatus } from "@react-navigation/drawer";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 interface ContractorPageProps {
   copyToClipboard: () => void;
   formData: String;
@@ -24,10 +25,17 @@ const ContractorPage: React.FC<ContractorPageProps> = ({
     }
   };
   const navigation = useNavigation();
-  const isDrawerOpen = useDrawerStatus();
   const openDrawer = () => {
-    navigation.dispatch(DrawerActions.openDrawer()); // Dispatch the openDrawer action
+    navigation.dispatch(DrawerActions.openDrawer());
   };
+
+  const { t } = useTranslation();
+  const drawerDef: any = t("RolePage", { returnObjects: true });
+  const drawer = JSON.stringify(drawerDef) ? drawerDef[0] : [];
+
+  const userRoleLng = drawer?.userRole[0];
+  const adminRoleLng = drawer?.adminRole[0];
+  const contractorRoleLng = drawer?.contractorRole[0];
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -35,7 +43,7 @@ const ContractorPage: React.FC<ContractorPageProps> = ({
         <TouchableOpacity onPress={openDrawer}>
           <Ionicons name="menu" size={28} color={Colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Contractor Dashboard</Text>
+        <Text style={styles.headerText}>{contractorRoleLng.dashboard}</Text>
         <TouchableOpacity onPress={openDrawer}>
           <Image
             style={{

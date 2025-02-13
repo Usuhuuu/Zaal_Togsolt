@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   StyleSheet,
+  FlatList,
   Text,
   Image,
   ActivityIndicator,
@@ -14,7 +15,7 @@ import { Link, useRouter } from "expo-router";
 import { Listing } from "@/interfaces/listing";
 import { MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import {
+import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
 } from "@gorhom/bottom-sheet";
@@ -27,7 +28,7 @@ interface Props {
 }
 
 const ListingComponent = ({ listings: items, category, refresh }: Props) => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
   const router = useRouter();
 
@@ -112,7 +113,7 @@ const ListingComponent = ({ listings: items, category, refresh }: Props) => {
       </Link>
 
       <View style={styles.categoryContainer}>
-        {["oirhon", "shildeg", "zovloh"]?.map((label) => (
+        {["oirhon", "shildeg", "zovloh"].map((label) => (
           <CategoryButton key={label} label={label} />
         ))}
       </View>
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 20,
     overflow: "hidden",
-
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
