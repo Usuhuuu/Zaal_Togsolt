@@ -12,11 +12,13 @@ import Colors from "@/constants/Colors";
 import { LanguageProvider } from "./settings/settings_pages/Languages";
 export { ErrorBoundary } from "expo-router";
 
+import { Provider } from "react-redux";
+import { store } from "./(modals)/functions/store";
+
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
 });
-SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
@@ -31,39 +33,58 @@ interface CustomErrorBoundaryProps {
 function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
   useEffect(() => {
     if (error) {
-      Sentry.captureException(error);
+      if (
+        error instanceof TypeError &&
+        error.message.includes("Cannot read property 'length'")
+      ) {
+        console.log("Suppressed error: ", error);
+        Sentry.captureException(error);
+      } else {
+        Sentry.captureException(error);
+      }
     }
   }, [error]);
 
   if (error) {
+    // Show an error message if an error is caught in the boundary
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Something went wrong. Please restart the app.</Text>
+        <Text style={{ color: "red", fontSize: 18 }}>
+          Something went wrong!
+        </Text>
       </View>
     );
   }
 
   return <>{children}</>;
 }
+
 function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
+  const [fontError, setFontError] = useState<boolean>(false);
 
   useEffect(() => {
     if (error) {
       Sentry.captureException(error);
       console.error("Error loading fonts:", error);
-      throw error;
+      setFontError(true); // Set font error state
+      Alert.alert("Error loading fonts", "Please try again later");
     }
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [error, loaded]);
 
-  if (!loaded) {
-    return null;
+  if (!loaded || fontError) {
+    // Show a loading/fallback UI if fonts are still loading or if there's an error
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return <RootLayoutNav />;
@@ -81,8 +102,8 @@ function RootLayoutNav() {
           title: "Burtguuleh",
           presentation: "modal",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.replace("/(tabs)/profile")}>
-              <Ionicons name="arrow-back" size={28} />
+            <TouchableOpacity onPress={() => router.replace("/")}>
+              <Ionicons name="arrow-back" size={28} color={Colors.light} />
             </TouchableOpacity>
           ),
           headerStyle: { backgroundColor: Colors.primary },
@@ -132,12 +153,13 @@ function RootLayoutNav() {
     </Stack>
   );
 }
-
 // Wrap the entire app in Sentry and Error Boundary
 export default Sentry.wrap(() => (
-  <CustomErrorBoundary>
-    <LanguageProvider>
-      <RootLayout />
-    </LanguageProvider>
-  </CustomErrorBoundary>
+  <Provider store={store}>
+    <CustomErrorBoundary>
+      <LanguageProvider>
+        <RootLayout />
+      </LanguageProvider>
+    </CustomErrorBoundary>
+  </Provider>
 ));

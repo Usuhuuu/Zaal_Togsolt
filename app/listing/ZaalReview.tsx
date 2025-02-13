@@ -11,7 +11,7 @@ import Colors from "@/constants/Colors"; // Import your colors
 
 const ReviewUpdateScreen = () => {
   const { reviews, rating } = useLocalSearchParams(); // Destructure the reviews and rating from the query params
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [ratingState, setRating] = useState(
     Math.floor((parseInt(Array.isArray(rating) ? rating[0] : rating) || 0) / 20)
   ); // Parse the rating and convert it to a value from 1 to 5

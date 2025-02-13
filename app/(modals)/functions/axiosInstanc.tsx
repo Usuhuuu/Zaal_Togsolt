@@ -1,8 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-import { auth_Refresh_Function } from "./refresh";
 import Constants from "expo-constants";
-import { config } from "process";
+import { auth_Refresh_Function } from "./refresh";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
@@ -55,10 +54,7 @@ axiosInstance.interceptors.response.use(
       if (token) {
         const { refreshToken } = JSON.parse(token);
         try {
-          const newAccessToken = await auth_Refresh_Function(
-            refreshToken,
-            apiUrl
-          );
+          const newAccessToken = await auth_Refresh_Function(refreshToken);
           if (newAccessToken) {
             await SecureStore.setItemAsync(
               "Tokens",

@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import React, { useMemo, useState } from "react";
 import { Stack } from "expo-router";
 import ExploreHeader from "@/components/ExploreHeader";
@@ -21,7 +21,9 @@ const Page = () => {
   const [category, setCategory] = useState<string>("Sags");
 
   // Memoized items
-  const items = useMemo(() => listingsData as any[], []);
+  const items = useMemo(() => {
+    return listingsData.filter((item: any) => item.category === category);
+  }, [category]);
   // Category change handler
   const onDataChanged = (category: string) => {
     console.log(`CHANGED_`, category);

@@ -8,139 +8,173 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "./settings_pages/Languages";
 import i18n from "@/utils/i18";
-
-const { t } = useTranslation();
-
-const settingsDet: any = t("settings", { returnObjects: true });
-const settings = Array.isArray(settingsDet) ? settingsDet[0] : {};
-
-const preferences = settings?.preferences[0] || [];
-const helpSupport = settings?.helpSupport[0] || [];
-const accountSupport = settings?.accountDetails[0] || [];
-const socialMedia = settings?.socialMedia[0] || [];
-
-const Sections = [
-  {
-    header: `${preferences.headerPreferences}`,
-    items: [
-      {
-        id: "language",
-        icon: `${preferences.iconLocationSettings}`,
-        label: `${preferences.language}`,
-        type: "select",
-      },
-      {
-        id: "theme",
-        icon: `${preferences.iconLocationTheme}`,
-        label: `${preferences.theme}`,
-        type: "select",
-      },
-      {
-        id: "notifications",
-        icon: "notifications",
-        label: `${preferences.notifications}`,
-        type: "toggle",
-      },
-      {
-        id: "about",
-        icon: `${preferences.iconLocationAbout}`,
-        label: preferences.about,
-        type: "link",
-      },
-    ],
-  },
-  {
-    header: `${helpSupport.helpSupport}`,
-    items: [
-      {
-        id: "contact",
-        icon: `${helpSupport.iconLocationContractUs}`,
-        label: `${helpSupport.contractUs}`,
-        type: "link",
-      },
-      {
-        id: "faq",
-        icon: `${helpSupport.iconLocationFAQ}`,
-        label: `${helpSupport.FAQ}`,
-        type: "link",
-      },
-      {
-        id: "terms",
-        icon: "document",
-        label: `${helpSupport.termsConditions}`,
-        type: "link",
-      },
-      {
-        id: "privacy",
-        icon: `${helpSupport.iconLocationPrivacyPolicy}`,
-        label: `${helpSupport.privacyPolicy}`,
-        type: "link",
-      },
-    ],
-  },
-  {
-    header: `${accountSupport.account}`,
-    items: [
-      {
-        id: "profile",
-        icon: `${accountSupport.iconLocationProfile}`,
-        label: `${accountSupport.profile}`,
-        type: "link",
-      },
-      {
-        id: "password",
-        icon: `${accountSupport.iconLocationChangePassword}`,
-        label: `${accountSupport.changePassword}`,
-        type: "link",
-      },
-      {
-        id: "delete",
-        icon: `${accountSupport.iconLocationdeleteAccount}`,
-        label: `${accountSupport.deleteAccount}`,
-        type: "link",
-      },
-    ],
-  },
-  {
-    header: socialMedia.socialMedia,
-    items: [
-      {
-        id: "facebook",
-        icon: `${socialMedia.iconLocationFacebook}`,
-        label: `${socialMedia.facebook}`,
-        type: "link",
-      },
-      {
-        id: "twitter",
-        icon: `${socialMedia.iconLocationTwitter}`,
-        label: `${socialMedia.twitter}`,
-        type: "link",
-      },
-      {
-        id: "instagram",
-        icon: `${socialMedia.iconLocationInstagram}`,
-        label: `${socialMedia.instagram}`,
-        type: "link",
-      },
-    ],
-  },
-];
+import * as SecureStorage from "expo-secure-store";
+import { router } from "expo-router";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  RootState,
+  AppDispatch,
+  loginoutState,
+} from "@/app/(modals)/functions/store";
 
 const ProfileSettings: React.FC = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [languageKey, setLanguageKey] = useState(0);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const { language, changeLanguage } = useLanguage();
+  const dispatch = useDispatch<AppDispatch>();
+  const loginOutState = useSelector(
+    (state: RootState) => state.authStatus.isitLogined
+  );
+
+  const { changeLanguage } = useLanguage();
 
   const handleLng = (lang: string) => {
     changeLanguage(lang);
-    setLanguageKey((prev) => prev + 1);
+    i18n.changeLanguage(lang);
+    setModalVisible(false);
   };
+  const logout = async () => {
+    try {
+      await SecureStorage.deleteItemAsync("Tokens").then((state) => {
+        setIsLoggedIn(false);
+        dispatch(loginoutState());
+        console.log(state);
+        Alert.alert("Logged out");
+        router.replace("/");
+      });
+      console.log(loginOutState);
+      //router.replace("/login");
+    } catch (err) {
+      console.log("Error logging out:", err);
+    }
+  };
+
+  const { t } = useTranslation();
+  const settingsDet: any = t("settings", { returnObjects: true });
+  const settings = Array.isArray(settingsDet) ? settingsDet[0] : [];
+
+  const preferences = settings?.preferences[0] || [];
+  const helpSupport = settings?.helpSupport[0] || [];
+  const accountSupport = settings?.accountDetails[0] || [];
+  const socialMedia = settings?.socialMedia[0] || [];
+
+  const Sections = [
+    {
+      header: `${preferences.headerPreferences}`,
+      items: [
+        {
+          id: "language",
+          icon: `${preferences.iconLocationSettings}`,
+          label: `${preferences.language}`,
+          type: "select",
+        },
+        {
+          id: "theme",
+          icon: `${preferences.iconLocationTheme}`,
+          label: `${preferences.theme}`,
+          type: "select",
+        },
+        {
+          id: "notifications",
+          icon: "notifications",
+          label: `${preferences.notifications}`,
+          type: "toggle",
+        },
+        {
+          id: "about",
+          icon: `${preferences.iconLocationAbout}`,
+          label: preferences.about,
+          type: "link",
+        },
+      ],
+    },
+    {
+      header: `${helpSupport.helpSupport}`,
+      items: [
+        {
+          id: "contact",
+          icon: `${helpSupport.iconLocationContractUs}`,
+          label: `${helpSupport.contractUs}`,
+          type: "link",
+        },
+        {
+          id: "faq",
+          icon: `${helpSupport.iconLocationFAQ}`,
+          label: `${helpSupport.FAQ}`,
+          type: "link",
+        },
+        {
+          id: "terms",
+          icon: "document",
+          label: `${helpSupport.termsConditions}`,
+          type: "link",
+        },
+        {
+          id: "privacy",
+          icon: `${helpSupport.iconLocationPrivacyPolicy}`,
+          label: `${helpSupport.privacyPolicy}`,
+          type: "link",
+        },
+      ],
+    },
+    {
+      header: `${accountSupport.account}`,
+      items: [
+        {
+          id: "profile",
+          icon: `${accountSupport.iconLocationProfile}`,
+          label: `${accountSupport.profile}`,
+          type: "link",
+        },
+        {
+          id: "password",
+          icon: `${accountSupport.iconLocationChangePassword}`,
+          label: `${accountSupport.changePassword}`,
+          type: "link",
+        },
+        {
+          id: "delete",
+          icon: `${accountSupport.iconLocationdeleteAccount}`,
+          label: `${accountSupport.deleteAccount}`,
+          type: "link",
+        },
+        {
+          id: "logout",
+          icon: `${accountSupport.iconLocationLogout}`,
+          label: `${accountSupport.logout}`,
+          type: "link",
+        },
+      ],
+    },
+    {
+      header: socialMedia.socialMedia,
+      items: [
+        {
+          id: "facebook",
+          icon: `${socialMedia.iconLocationFacebook}`,
+          label: `${socialMedia.facebook}`,
+          type: "link",
+        },
+        {
+          id: "twitter",
+          icon: `${socialMedia.iconLocationTwitter}`,
+          label: `${socialMedia.twitter}`,
+          type: "link",
+        },
+        {
+          id: "instagram",
+          icon: `${socialMedia.iconLocationInstagram}`,
+          label: `${socialMedia.instagram}`,
+          type: "link",
+        },
+      ],
+    },
+  ];
 
   return (
     <>
@@ -170,6 +204,8 @@ const ProfileSettings: React.FC = () => {
                   onPress={() => {
                     if (id == "language") {
                       setModalVisible(true);
+                    } else if (id == "logout") {
+                      logout();
                     }
                   }}
                 >
@@ -212,7 +248,9 @@ const ProfileSettings: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalContent}
-              onPress={() => handleLng("kr")}
+              onPress={() => {
+                handleLng("kr");
+              }}
             >
               <Text>🇰🇷 한국어</Text>
             </TouchableOpacity>

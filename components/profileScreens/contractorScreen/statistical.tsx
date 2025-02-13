@@ -18,7 +18,7 @@ interface ProfileStatisticalProps {
 
 const ProfileStatistical = ({ data = [] }) => {
   const [value, setValue] = useState<string[]>([]);
-  const [isFocus, setIsFocus] = useState(false);
+  const [isFocus, setIsFocus] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({});
   const [reallySend, setReallySend] = useState<boolean>(false);
   const renderLabel = () => {

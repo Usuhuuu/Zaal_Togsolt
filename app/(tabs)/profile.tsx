@@ -25,6 +25,9 @@ import SavedHalls from "@/app/(modals)/SavedHalls";
 import useSWR from "swr";
 import ContractorPage from "@/components/profileScreens/contractor";
 import ProfileAdmin from "@/components/profileScreens/admin";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../(modals)/functions/store";
+import * as SecureStorage from "expo-secure-store";
 
 const Profile: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -32,6 +35,11 @@ const Profile: React.FC = () => {
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
+
+  const dispatch = useDispatch();
+  const loginStatusState = useSelector(
+    (state: RootState) => state.authStatus.isitLogined
+  );
 
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),
@@ -49,8 +57,9 @@ const Profile: React.FC = () => {
       setFormData(data.profileData);
       setUserRole(data.role);
     } else if (error) {
-      console.error("Error fetching role and profile data:", error);
-      router.push("/login");
+      console.log("Error fetching role and profile data:", error);
+      router.replace("/login");
+    } else if (loginStatusState == true) {
     }
     // Set loading state based on isLoading
     setLoading(isLoading);

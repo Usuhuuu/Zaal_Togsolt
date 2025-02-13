@@ -42,13 +42,14 @@ const ScheduleScreen = () => (
 );
 
 const DetailsPage = () => {
-  const [isScheduleVisible, setIsScheduleVisible] = useState(false);
-  const [isOrderScreenVisible, setIsOrderScreenVisible] = useState(false);
+  const [isScheduleVisible, setIsScheduleVisible] = useState<boolean>(false);
+  const [isOrderScreenVisible, setIsOrderScreenVisible] =
+    useState<boolean>(false);
   const [infoHeight, setInfoHeight] = useState(0);
-  const [iconsOverflow, setIconsOverflow] = useState(false);
+  const [iconsOverflow, setIconsOverflow] = useState<boolean>(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const [today, setToday] = useState<moment.Moment>(moment());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const zaalFormData = {
@@ -113,7 +114,7 @@ const DetailsPage = () => {
     { start_time: "22:00", end_time: "24:00" },
   ];
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
-  const [zahialgaBtn, setZahialgaBtn] = useState(false);
+  const [zahialgaBtn, setZahialgaBtn] = useState<boolean>(false);
 
   const dateSlotGiver = async (date: any) => {
     setIsLoading(true);
@@ -191,13 +192,16 @@ const DetailsPage = () => {
           <>
             <CalendarStrip
               style={styles.calendars}
-              scrollerPaging={true}
               daySelectionAnimation={{
                 type: "background",
                 duration: 200,
                 highlightColor: Colors.primary,
+                animType: "timing",
+                animUpdateType: "timing",
+                animProperty: "backgroundColor",
+                animSpringDamping: 1,
               }}
-              selectedDate={today}
+              selectedDate={today.toDate()}
               onDateSelected={(date: any) => dateSlotGiver(date)}
               calendarAnimation={{ type: "sequence", duration: 5 }}
               dateNumberStyle={{ fontSize: 18, fontWeight: "400" }}
@@ -233,7 +237,6 @@ const DetailsPage = () => {
       </View>
     );
   };
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: "",

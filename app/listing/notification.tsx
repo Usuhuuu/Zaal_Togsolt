@@ -13,7 +13,6 @@ import Colors from "@/constants/Colors";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
-import { useNavigation } from "@react-navigation/native";
 import { Href, router } from "expo-router";
 
 const notificationsData = [
@@ -50,7 +49,6 @@ const notificationsData = [
 ];
 const NotificationScreen = () => {
   const [userData, setUserData] = useState<string>("");
-  const navigation = useNavigation();
 
   const handleNotificationPress = (message: string) => {
     alert(`Та дарахад: ${message}`);

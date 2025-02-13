@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import en from "../assets/language/en.json";
 import mn from "../assets/language/mn.json";
 import kr from "../assets/language/kr.json";
-import { useState } from "react";
+import {  useState } from "react";
 
 const locales = getLocales(); 
 const language: string = locales[0]?.languageCode ?? "en";
@@ -25,6 +25,7 @@ const getLanguageFromStorage = async () => {
     return "en"; 
   }
 }
+
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en.data },

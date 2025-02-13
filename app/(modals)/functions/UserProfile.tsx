@@ -7,6 +7,7 @@ export const fetchRoleAndProfil = async (path: String) => {
   if (!token) {
     throw new Error("No token found pisda");
   }
+
   try {
     const response = await axiosInstance.get(`/auth/profile_${path}`);
     return {

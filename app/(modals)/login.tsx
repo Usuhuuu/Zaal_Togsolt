@@ -10,7 +10,6 @@ import {
   ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import Colors from "@/constants/Colors";
 import { AccessToken, Settings, LoginManager } from "react-native-fbsdk-next";
@@ -26,36 +25,36 @@ import * as Sentry from "@sentry/react-native";
 import { axiosInstanceRegular } from "./functions/axiosInstanc";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useSelector, useDispatch } from "react-redux";
+import type { AppDispatch } from "./functions/store";
+import { RootState, loginedState } from "./functions/store";
 
 const Page = () => {
   const { t } = useTranslation();
   const loginDetails: any = t("login", { returnObjects: true });
   const login = loginDetails[0];
 
-  const apiUrl =
-    Constants.expoConfig?.extra?.apiUrl ||
-    "https://8f9e-118-176-174-110.ngrok-free.app";
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [verifyCode, setVerifyCode] = useState<string>("");
+  const [er, setEr] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [passwordHide, setPasswordHide] = useState<boolean>(true);
+  const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [isItApple, setIsITApple] = useState<boolean>(false);
+  const [isitGoogle, setIsItGoogle] = useState<boolean>(false);
+  const [loginedOrNot, setLoginedOrNot] = useState<boolean>(false);
+  const [key, setKey] = useState<number>(0);
 
-  if (!apiUrl) {
-    Sentry.captureException(
-      "API_URL is not defined in the environment variables"
-    );
-  }
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [verifyCode, setVerifyCode] = useState("");
-  const [er, setEr] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [passwordHide, setPasswordHide] = useState(true);
-  const [isVerified, setIsVerified] = useState(false);
-  const [isItApple, setIsITApple] = useState(false);
-  const [isitGoogle, setIsItGoogle] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const loginInState = useSelector((state: RootState) => {
+    console.log("useSelector detected state:", state.authStatus.isitLogined);
+    return state.authStatus.isitLogined;
+  });
 
   useEffect(() => {
-    if (Platform.OS === "ios") {
+    if (Platform.OS == "ios") {
       setIsITApple(true);
     }
   }, []);
@@ -67,20 +66,35 @@ const Page = () => {
         email,
         userPassword: password,
       });
-      if (response.status == 200) {
+      if (response.data.success) {
         await SecureStore.setItemAsync(
           "Tokens",
           JSON.stringify({
             accessToken: response.data.accessToken,
             refreshToken: response.data.refreshToken,
           })
-        );
-        Alert.alert("Login Success");
-        router.push("/");
-        setShouldRender(true);
-      } else {
-        setEr("Login failed");
-        Alert.alert(er);
+        ).then(() => {
+          setLoginedOrNot(true);
+          dispatch(loginedState());
+          Alert.alert("Login Success", "Moving to the main page?", [
+            {
+              text: "No",
+              style: "cancel",
+            },
+            {
+              text: "Yes",
+              style: "default",
+              onPress: () => {
+                router.replace("/(tabs)/profile");
+              },
+            },
+          ]);
+        });
+        console.log(loginInState);
+      } else if (!response.data.userNotFound && !response.data.success) {
+        Alert.alert(`${response.data.message}`);
+      } else if (response.status == 404) {
+        Alert.alert("Check your internet connection");
       }
     } catch (err) {
       console.log(err);
@@ -89,6 +103,9 @@ const Page = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    console.log("Login state changed:", loginInState);
+  }, [loginInState]); // Logs whenever login state changes
 
   const handlePasswordToggle = () => {
     setPasswordHide(!passwordHide);
@@ -140,7 +157,6 @@ const Page = () => {
 
   const loginWithFacebook = async () => {
     try {
-      Alert.alert(`${apiUrl}`);
       const result = await LoginManager.logInWithPermissions([
         "public_profile",
         "email",
@@ -318,7 +334,10 @@ const Page = () => {
         </View>
         <TouchableOpacity
           style={[styles.button, styles.loginBtn]}
-          onPress={handleSubmit}
+          onPress={() => {
+            handleSubmit();
+            setKey((k) => k + 1);
+          }}
           disabled={loading}
         >
           {loading ? (

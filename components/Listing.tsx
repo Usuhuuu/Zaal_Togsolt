@@ -27,7 +27,7 @@ interface Props {
 }
 
 const ListingComponent = ({ listings: items, category, refresh }: Props) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
   const router = useRouter();
 

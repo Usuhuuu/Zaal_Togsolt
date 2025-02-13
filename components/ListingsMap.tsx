@@ -33,7 +33,8 @@ const INITIAL_REGION = {
 };
 
 const ListingsMap = memo(({ listings }: ListingsMapProps) => {
-  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+  const [hasLocationPermission, setHasLocationPermission] =
+    useState<boolean>(false);
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -106,7 +107,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       <MapViewClustering
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
-        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
+        provider={Platform.OS == "android" ? PROVIDER_GOOGLE : undefined}
         showsUserLocation={hasLocationPermission}
         showsMyLocationButton={false} // Disable default button
         initialRegion={

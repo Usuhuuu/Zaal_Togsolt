@@ -30,11 +30,13 @@ const Page = () => {
     agree_privacy: false,
     is_adult: false,
   });
-  const [loading, setLoading] = useState(false);
-  const [passwordHide, setPasswordHide] = useState(true);
-  const [verificationCompleted, setVerificationCompleted] = useState(false);
-  const [isItPossible, setIsItPossible] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [passwordHide, setPasswordHide] = useState<boolean>(true);
+  const [verificationCompleted, setVerificationCompleted] =
+    useState<boolean>(false);
+  const [isItPossible, setIsItPossible] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+
   const { t } = useTranslation();
   const registerDetail: any = t("Register", { returnObjects: true });
   const register = registerDetail[0];

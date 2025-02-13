@@ -1,31 +1,18 @@
-import Constants from "expo-constants";
-import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
+import { axiosInstanceRegular } from "./axiosInstanc";
 
-export const auth_Refresh_Function = async (
-  refreshToken: string,
-  url: string
-) => {
+export const auth_Refresh_Function = async (refreshToken: string) => {
   try {
-    // Making the request to refresh the access token
-    const refreshTokenAuth = await axios.post(
-      `${url}/refresh`,
-      {},
-      {
-        headers: { refresh: refreshToken },
-        timeout: 5000,
-        withCredentials: true,
-      }
-    );
-    // Handling different HTTP status codes
+    const refreshTokenAuth = await axiosInstanceRegular.post("/refresh", {
+      headers: { refresh: refreshToken },
+    });
     const data = refreshTokenAuth.data;
-    if (refreshTokenAuth.status === 401) {
-      await SecureStore.deleteItemAsync("Token"); // Clear expired tokens
-      Alert.alert("User needs to log in again.");
-    } else if (refreshTokenAuth.status === 403) {
-      // Invalid refresh token
-      throw new Error("Refresh token is invalid.");
+    if (refreshTokenAuth.status == 401 && !data.success) {
+      await SecureStore.deleteItemAsync("Token");
+      Alert.alert(`${data.message}`);
+    } else if (refreshTokenAuth.status == 403 && !data.success) {
+      throw new Error(`${data.message}`);
     } else if (data.authAccess) {
       // Successful refresh, store the new access token
       const new_access_token = data.accessToken;
@@ -37,5 +24,3 @@ export const auth_Refresh_Function = async (
     throw new Error("Failed to refresh token. Please try again later.");
   }
 };
-
-module.exports = { auth_Refresh_Function };

@@ -3,9 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "@/constants/Colors";
-import { useNavigation } from "@react-navigation/native";
 import { useDrawerStatus } from "@react-navigation/drawer";
-import { DrawerActions } from "@react-navigation/native";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
 interface ContractorPageProps {
   copyToClipboard: () => void;
   formData: String;

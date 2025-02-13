@@ -37,7 +37,7 @@ const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<ChatGroup[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [currentGroupId, setCurrentGroupId] = useState<string | null>(null);
+  const [currentGroupId, setCurrentGroupId] = useState<string>("");
 
   const socketRef = useRef<Socket | null>(null);
 

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Href, router, useNavigation } from "expo-router";
@@ -18,9 +17,6 @@ import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import "@/utils/i18";
-
-const { t } = useTranslation();
-const sportDetail: any = t("sportTextIcons", { returnObjects: true });
 
 const iconMap: { [key: string]: any } = {
   basketball: require("../assets/sport-icons/test_icons/basketball.png"),
@@ -39,6 +35,9 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const navigation = useNavigation(); // Initialize navigation hook
+
+  const { t } = useTranslation();
+  const sportDetail: any = t("sportTextIcons", { returnObjects: true });
 
   const selectCategory = (index: number) => {
     const selected = itemsRef.current[index];

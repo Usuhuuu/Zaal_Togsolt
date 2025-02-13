@@ -58,7 +58,9 @@
                 "changePassword": "Change Password",
                 "iconLocationChangePassword": "lock-closed",
                 "deleteAccount": "Delete Account",
-                "iconLocationdeleteAccount": "trash"
+                "iconLocationdeleteAccount": "trash",
+                "iconLocationLogout": "log-out",
+                "logout": "Logout"
                 }
             ]
         }],
