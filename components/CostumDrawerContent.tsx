@@ -1,60 +1,189 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground } from "react-native";
-import { DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from "react-native";
+import {
+  DrawerContentScrollView,
+  DrawerItemList,
+} from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/Colors";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useTranslation } from "react-i18next";
+import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { loginedState, RootState } from "@/app/(modals)/functions/store";
+import useSWR from "swr";
+import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
 
 const CustomDrawerContent = (props: any) => {
-    const {top, bottom} = useSafeAreaInsets();
-    const router = useRouter();
-    const handleLoginPress = () => {
-        router.replace("/"); // Navigate to the login page
-      };
+  interface UserData {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    unique_user_ID: string;
+  }
+
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const { bottom } = useSafeAreaInsets();
+  const { t } = useTranslation();
+
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const loginState = useSelector(
+    (state: RootState) => state.authStatus.isitLogined
+  );
+
+  const { data, error, isLoading } = useSWR("RoleAndProfile_main", {
+    fetcher: () => fetchRoleAndProfil("main"),
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    dedupingInterval: 10000,
+    errorRetryInterval: 4000,
+    errorRetryCount: 3,
+  });
+  const width = Dimensions.get("window").width;
+
+  useEffect(() => {
+    if (data) {
+      const parsedData =
+        typeof data.profileData == "string"
+          ? JSON.parse(data.profileData)
+          : data.profileData;
+      setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
+      dispatch(loginedState());
+    } else if (error) {
+      console.log("Error fetching user data:", error);
+    }
+  }, [data, error]);
   return (
-    <View style={{flex:1}}>
-    <DrawerContentScrollView {...props} contentContainerStyle={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <Image
-          source={require("@/assets/images/profileIcons/profile.png")} // Replace with your profile image
-          style={styles.profileImage}
-        />
-        <Text style={styles.profileName}>Ner</Text>
-      </View>
-      <DrawerItemList {...props} />
-      <View style={styles.log}>
-        <DrawerItem label={'Burtguuleh'} onPress={handleLoginPress}
-         labelStyle={styles.drawerItemLabel1} // Style the label text
-         style={styles.footerButton} // Style the overall item container
-        />
-        <DrawerItem label={'Garah'} onPress={handleLoginPress}
-         labelStyle={styles.drawerItemLabel} // Style the label text
-         style={styles.footerButton} // Style the overall item container
-        />
-            
-        </View>
+    <View style={{ flex: 1, backgroundColor: Colors.light, maxWidth: "100%" }}>
+      <DrawerContentScrollView
+        {...props}
+        contentContainerStyle={styles.container}
+      >
+        {!loginState ? (
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.headerTouchable}>
+              <Image
+                source={{
+                  uri: "https://via.placeholder.com/150",
+                }}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerTouchable}
+              onPress={() => router.replace("/login")}
+            >
+              <Text style={styles.headerText}>{t("aboutUs.login")}</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerText}>&</Text>
+            <TouchableOpacity style={styles.headerTouchable}>
+              <Text style={styles.headerText}>{t("aboutUs.register")}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.headerTouchable}>
+              <Image
+                source={{ uri: "https://via.placeholder.com/150" }}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
+            <View style={{ width: width / 2.2 }}>
+              <Text
+                style={{
+                  color: Colors.primary,
+                  fontSize: 20,
+                  fontWeight: "bold",
+                }}
+              >
+                {userData?.unique_user_ID}
+              </Text>
+              <Text style={styles.userDataContainer}>{userData?.email}</Text>
+            </View>
+          </View>
+        )}
+        <DrawerItemList {...props} />
       </DrawerContentScrollView>
+      <View>
+        <View style={styles.log}>
+          <View style={styles.logInside}>
+            <TouchableOpacity style={styles.logInsideTouchable}>
+              <Ionicons name="people" size={24} color="#78909C" />
+              <Text style={styles.logText}>{t("aboutUs.aboutUs")}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.logInside}>
+            <TouchableOpacity style={styles.logInsideTouchable}>
+              <Ionicons name="help" size={24} color="#78909C" />
+              <Text style={styles.logText}>{t("aboutUs.helps")}</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={[styles.footer, { paddingBottom: 20 + bottom }]}>
-            <FontAwesome name="copyright" size={24} color="black" />
-            <Text  style={styles.rightsText}>All rights reserved</Text>
+          <View style={styles.logInside}>
+            <TouchableOpacity style={styles.logInsideTouchable}>
+              <AntDesign name="customerservice" size={24} color="#78909C" />
+              <Text style={styles.logText}>{t("aboutUs.contactUs")}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
+        <View style={{ padding: 20, backgroundColor: "#ECEFF1" }}>
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 30,
+            }}
+          >
+            <FontAwesome name="facebook-official" size={27} color="#78909C" />
+            <FontAwesome name="instagram" size={27} color="#78909C" />
+            <Fontisto name="email" size={27} color="#78909C" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: 20 + bottom, backgroundColor: "#ECEFF1" },
+        ]}
+      >
+        <FontAwesome name="copyright" size={24} color="black" />
+        <Text style={styles.rightsText}>All rights reserved</Text>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: {},
   header: {
-    padding: 20,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.primary,
     alignItems: "center",
+    flexDirection: "row",
+    backgroundColor: Colors.light,
+    maxWidth: "100%",
+  },
+
+  headerTouchable: {
+    padding: 4,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "400",
+    color: Colors.primary,
+    fontFamily: "cursive",
   },
   profileImage: {
     width: 80,
@@ -63,6 +192,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: Colors.primary,
+  },
+  userDataContainer: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#9acffd",
   },
   profileName: {
     fontSize: 18,
@@ -78,28 +212,39 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   log: {
-    justifyContent: 'center', // Vertically center the DrawerItem
+    justifyContent: "center",
+    backgroundColor: "#ECEFF1",
+  },
+  logInside: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+  },
+  logInsideTouchable: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    flexDirection: "row",
+  },
+  logText: {
+    paddingHorizontal: 20,
+    color: "#78909C",
   },
   footerButton: {
-    marginVertical: 10, // Add spacing around the item
-    borderRadius: 8, // Optional: rounded corners
+    marginVertical: 10,
+    borderRadius: 8,
   },
   drawerItemLabel: {
-    fontWeight: 'bold', // Style the text
-    color: 'red', // Change the text color
+    fontWeight: "bold",
+    color: "#78909C",
   },
   drawerItemLabel1: {
-    fontWeight: 'bold', // Style the text
-    color: Colors.primary, // Change the text color
+    fontWeight: "bold",
+    color: Colors.primary,
   },
   rightsText: {
-    fontSize: 14,  // Font size for the text
-    color: '#888',  // Text color
-    marginLeft: 5,  // Space between the icon and the text
+    fontSize: 14,
+    color: "#888",
+    marginLeft: 5,
   },
-
 });
 
 export default CustomDrawerContent;

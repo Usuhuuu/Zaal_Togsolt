@@ -176,7 +176,7 @@ const ProfileSettings: React.FC = () => {
       {
         text: t("userLogout.yes"),
         onPress: () => {
-          router.navigate("/");
+          router.push("/login");
         },
       },
     ]);

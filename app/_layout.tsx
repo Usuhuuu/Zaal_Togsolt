@@ -15,7 +15,6 @@ export { ErrorBoundary } from "expo-router";
 import { Provider } from "react-redux";
 import { store } from "./(modals)/functions/store";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 Sentry.init({
@@ -103,15 +102,17 @@ function RootLayoutNav() {
       <Stack.Screen
         name="(modals)/login"
         options={{
-          title: "Burtguuleh",
-          presentation: "modal",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.replace("/")}>
-              <Ionicons name="arrow-back" size={28} color={Colors.light} />
-            </TouchableOpacity>
-          ),
-          headerStyle: { backgroundColor: Colors.primary },
-          headerTintColor: Colors.light,
+          headerTitle: "Burtguuleh",
+          headerTitleAlign: "left",
+          animation: "fade",
+          headerTintColor: Colors.primary,
+          headerRight: () => {
+            return (
+              <TouchableOpacity onPress={() => router.replace("/")}>
+                <Ionicons name="home" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            );
+          },
         }}
       />
       <Stack.Screen name="listing/[id]" options={{ headerTitle: " " }} />

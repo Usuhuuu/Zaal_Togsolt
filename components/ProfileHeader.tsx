@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { router } from "expo-router";
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -29,7 +30,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <Ionicons name="copy" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.friend}>
+          <TouchableOpacity
+            style={styles.friend}
+            onPress={() => router.push("/(tabs)/chat")}
+          >
             <Image
               source={require("@/assets/tab-icons/teamwork.png")}
               style={{ width: 20, height: 20 }}

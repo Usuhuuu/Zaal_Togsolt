@@ -55,38 +55,30 @@ axiosInstance.interceptors.response.use(
       if (token) {
         const { refreshToken } = JSON.parse(token);
         try {
-          const newAccessToken = await axiosInstance.post("/refresh", {
-            refreshToken,
-          });
-          if (newAccessToken.status == 401 && !newAccessToken.data.success) {
+          const newAccessToken = await axiosInstanceRegular.post(
+            "/auth/refresh",
+            {},
+            { headers: { Authorization: `Bearer ${refreshToken}` } }
+          );
+          if (newAccessToken.status == 400) {
             await SecureStore.deleteItemAsync("Tokens");
-            Alert.alert(`${newAccessToken.data.message}`);
+            Alert.alert(`${newAccessToken.data.message} pisda`);
           } else if (
-            newAccessToken.status == 403 &&
-            !newAccessToken.data.success
+            newAccessToken.status == 200 &&
+            newAccessToken.data.success
           ) {
-            throw new Error(`${newAccessToken.data.message}`);
-          } else if (newAccessToken.data.success) {
             await SecureStore.setItemAsync(
               "Tokens",
               JSON.stringify({
-                accessToken: newAccessToken.data.accessToken,
+                accessToken: newAccessToken.data.newAccessToken,
                 refreshToken,
               })
             );
-          }
-          if (newAccessToken) {
-            await SecureStore.setItemAsync(
-              "Tokens",
-              JSON.stringify({ accessToken: newAccessToken, refreshToken })
-            );
+
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return axiosInstance(originalRequest);
           }
-        } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
-          throw refreshError;
-        }
+        } catch (refreshError) {}
       }
     }
 

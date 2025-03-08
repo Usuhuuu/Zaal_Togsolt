@@ -47,7 +47,6 @@ const Page = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const loginInState = useSelector((state: RootState) => {
-    console.log("useSelector detected state:", state.authStatus.isitLogined);
     return state.authStatus.isitLogined;
   });
 
@@ -72,6 +71,7 @@ const Page = () => {
             refreshToken: response.data.refreshToken,
           })
         ).then(() => {
+          dispatch(loginedState());
           Alert.alert("Login Success", "Moving to the main page?", [
             {
               text: "No",
@@ -85,7 +85,7 @@ const Page = () => {
             {
               text: "Yes",
               style: "default",
-              onPress: () => router.replace("/profile"),
+              onPress: () => router.replace("/(tabs)/profile"),
             },
           ]);
         });

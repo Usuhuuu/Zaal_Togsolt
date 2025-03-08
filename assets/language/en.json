@@ -8,6 +8,9 @@
         "together":"Together",
         "order": "Order",
         "profile": "Profile",
+        "chat":"Chating Room",
+        "yes":"Yes",
+        "cancel":"Cancel",
         "settings": [
             {
             "settingsDetails": "Settings",
@@ -167,6 +170,26 @@
             "logoutMessage":"Are you sure you want to logout?",
             "cancel":"Cancel",
             "yes":"Yes"
+        },
+        "aboutUs":{
+            "login":"Login",
+            "register":"Register",
+            "aboutUs":"About Us",
+            "helps":"Help",
+            "contactUs":"Contact Us",
+            "termsConditions":"Terms & Conditions",
+            "privacyPolicy":"Privacy Policy"
+            
+        },
+        "userInfo":{
+            "userInfo":"User Information",
+            "firstName":"User First Name",
+            "lastName":"User Last Name",
+            "userName":"User Name",
+            "email":"Email",
+            "phoneNumber":"Phone Number",
+            "editProfile":"Edit Profile",
+            "saveProfile":"Save Edit"
         }
     }
 }

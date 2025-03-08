@@ -3,8 +3,7 @@ import { SafeAreaView, StyleSheet, View, Text } from "react-native";
 import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
-import { useRouter, Href } from "expo-router";
-import { useTranslation } from "react-i18next";
+import { useRouter } from "expo-router";
 
 // Import SavedHalls component
 import useSWR from "swr";
@@ -18,13 +17,6 @@ const Profile: React.FC = () => {
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
-
-  const { t } = useTranslation();
-  const drawerDef: any = t("RolePage", { returnObjects: true });
-  const drawer = Array.isArray(drawerDef) ? drawerDef[0] : [];
-  const userRoleLng = drawer?.userRole[0];
-  const adminRoleLng = drawer?.adminRole[0];
-  const contractorRoleLng = drawer?.contractorRole[0];
 
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),

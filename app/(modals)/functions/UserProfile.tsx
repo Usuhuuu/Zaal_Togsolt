@@ -1,6 +1,5 @@
 import axiosInstance from "./axiosInstanc";
 import * as SecureStore from "expo-secure-store";
-import { router } from "expo-router";
 
 export const fetchRoleAndProfil = async (path: String) => {
   const token = await SecureStore.getItemAsync("Tokens");
@@ -15,7 +14,7 @@ export const fetchRoleAndProfil = async (path: String) => {
       profileData: response.data.formData,
     };
   } catch (err) {
-    console.log(err);
+    console.log(err, "pisda");
     throw new Error("Failed to fetch role and profile data");
   }
 };

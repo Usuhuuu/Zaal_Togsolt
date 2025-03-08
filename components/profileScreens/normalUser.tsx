@@ -32,18 +32,12 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
 }) => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  const navigation = useNavigation();
-
   const handleBackPress = () => {
     console.log("Back button pressed");
   };
 
   const handleSharePress = () => {
     console.log("Share button pressed");
-  };
-
-  const handleSettingsPress = () => {
-    console.log("Settings button pressed");
   };
 
   const openModal = () => {
@@ -53,6 +47,7 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
   const closeModal = () => {
     setModalVisible(false); // Close the modal
   };
+  console.log(formData);
 
   return (
     <>
@@ -85,7 +80,7 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
         <ProfileHeader
           copyToClipboard={copyToClipboard}
           profileImageUri="https://example.com/profile.jpg"
-          firstName={formData[0].firstName}
+          firstName={formData[0]?.firstName}
           unique_user_ID={formData[0].unique_user_ID}
         />
         <Team />

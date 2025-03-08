@@ -17,7 +17,12 @@ import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
 import useSWR from "swr";
 import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Entypo,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import ProfileNotification from "@/components/profileScreens/drawerScreen/notification";
 import ProfileStatistical from "@/components/profileScreens/contractorScreen/statistical";
 import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScreen";
@@ -101,6 +106,44 @@ const TabsLayout = () => {
           }}
         />
         <Tabs.Screen
+          name="chat"
+          options={{
+            tabBarLabel: `${t("chat")}`,
+            tabBarIcon: () => (
+              <AntDesign name="message1" size={24} color={Colors.lightGrey} />
+            ),
+            headerShown: true,
+            headerTitle: t("chat"),
+            headerTitleStyle: { color: Colors.primary, fontSize: 24 },
+            headerTitleAlign: "left",
+            headerRight: () => {
+              return (
+                <View
+                  style={{ flexDirection: "row", marginHorizontal: 5, gap: 15 }}
+                >
+                  <TouchableOpacity>
+                    <MaterialCommunityIcons
+                      name="text-search"
+                      size={28}
+                      color={Colors.primary}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => console.log("Chat settings")}
+                  >
+                    <Entypo
+                      name="new-message"
+                      size={24}
+                      color={Colors.primary}
+                      style={{ marginRight: 10 }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              );
+            },
+          }}
+        />
+        <Tabs.Screen
           name="profile"
           options={{
             tabBarLabel: `${t("profile")}`, // Profile Tab
@@ -130,7 +173,6 @@ const Layout = () => {
   const userDrawerLng = drawer?.userDrawer[0];
   const adminDrawerLng = drawer?.adminDrawer[0];
   const contractorDrawerLng = drawer?.contractorDrawer[0];
-
   const drawerScreens: any = {
     default: [
       { name: userDrawerLng.home, component: TabsLayout, icon: "home" },
@@ -261,6 +303,21 @@ const Layout = () => {
                 />
               </TouchableOpacity>
             ),
+            headerRight:
+              name === contractorDrawerLng.userInfo
+                ? () => (
+                    <TouchableOpacity
+                      onPress={() => console.log("Edit Profile")}
+                    >
+                      <Ionicons
+                        name="create-outline"
+                        size={24}
+                        color={Colors.primary}
+                        style={{ marginRight: 15 }}
+                      />
+                    </TouchableOpacity>
+                  )
+                : undefined,
           }}
         />
       )

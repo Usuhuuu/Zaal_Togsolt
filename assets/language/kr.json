@@ -9,6 +9,8 @@
         "order": "주문",
         "profile": "마이패이즈",
         "notificationText": "알림",
+        "yes":"예",
+        "cancel":"취소",
         "settings": [
             {
                 "settingsDetails": "설정",
@@ -168,6 +170,20 @@
             "logoutMessage":"로그아웃 하시겠습니까?",
             "yes":"예",
             "cancel":"아니요"
+        },
+        "userInfo":{
+            "userInfo":"사용자 정보",
+            "firstName":"이름",
+            "lastName":"성",
+            "userName":"사용자 ID",
+            "email":"이메일",
+            "phoneNumber":"전화번호",
+            "address":"주소",
+            "city":"도시",
+            "zipCode":"우편번호",
+            "country":"국가",
+            "editProfile":"프로필 수정",
+            "saveProfile":"저장"
         }
 
     }
