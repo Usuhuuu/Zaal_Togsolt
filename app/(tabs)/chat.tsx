@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -33,8 +27,6 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { auth_Refresh_Function } from "../(modals)/functions/refresh";
-import axiosInstance from "../(modals)/functions/axiosInstanc";
 import axios from "axios";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
@@ -50,19 +42,6 @@ interface ChatGroup {
   groupId: string;
 }
 
-const reverseArray = (data: Message[]) => {
-  let first = 0;
-  let last = data.length - 1;
-  while (first < last) {
-    let temp = data[first];
-    data[first] = data[last];
-    data[last] = temp;
-    first++;
-    last--;
-  }
-  return data;
-};
-
 const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<ChatGroup[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -72,9 +51,9 @@ const ChatComponent: React.FC = () => {
   const [userDatas, setUserDatas] = useState<any>([]);
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadedOnce, setLoadedOnce] = useState(false);
 
   const socketRef = useRef<Socket | null>(null);
+  const flatListRef = useRef<FlatList | null>(null);
 
   const {
     data: chatData,
@@ -157,8 +136,7 @@ const ChatComponent: React.FC = () => {
               setLoading(false);
               return;
             }
-            const reversedMsj = reverseArray(message.messages);
-            setMessages((prevMsj) => [...reversedMsj, ...prevMsj]);
+            setMessages((prevMsj) => [...message.messages, ...prevMsj]);
             setCursor(message.nextCursor);
             setLoading(false);
           });
@@ -232,6 +210,7 @@ const ChatComponent: React.FC = () => {
     setMessages((prevMessages) => [newMessage, ...prevMessages]);
     console.log("newMessage", newMessage);
     socketRef.current.emit("sendMessage", newMessage);
+    flatListRef.current?.scrollToIndex({ index: 0, animated: true });
   };
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
@@ -283,29 +262,21 @@ const ChatComponent: React.FC = () => {
     [messages]
   );
   const loadOlderMsj = async () => {
-    if (!cursor || !socketRef.current || loading) return;
-
-    if (loadedOnce) {
-      return;
-    }
-    setLoading(true);
+    if (!socketRef.current?.connected || !cursor) return;
 
     socketRef.current?.emit("chatHistory", { timer: cursor });
-
-    socketRef.current?.on("chatHistory", (message, nextCursor) => {
+    socketRef.current?.once("chatHistory", (message) => {
       if (
         !message.messages ||
         message.messages.length === 0 ||
         message.nextCursor == null
       ) {
         setLoading(false);
-        setLoadedOnce(true);
         return;
       }
 
-      const reversedMsj = reverseArray(message.messages);
-      setMessages((prevMessages) => [...reversedMsj, ...prevMessages]);
-      setCursor(nextCursor);
+      setMessages((prevMessages) => [...prevMessages, ...message.messages]);
+      setCursor(message.nextCursor);
       setLoading(false);
     });
   };
@@ -425,7 +396,8 @@ const ChatComponent: React.FC = () => {
                     onEndReached={loadOlderMsj}
                     onEndReachedThreshold={0.2}
                     ListFooterComponent={loading ? <ActivityIndicator /> : null}
-                    //maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+                    ref={flatListRef}
+                    maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
                   />
 
                   <KeyboardAvoidingView
@@ -446,8 +418,8 @@ const ChatComponent: React.FC = () => {
                           value={newMessage}
                           onChangeText={setNewMessage}
                           maxLength={2000}
-                          placeholderTextColor={Colors.grey}
                           style={{ flex: 1 }}
+                          placeholderTextColor={Colors.grey}
                           clearTextOnFocus={false}
                           multiline
                         />
@@ -457,6 +429,7 @@ const ChatComponent: React.FC = () => {
                           color={Colors.grey}
                         />
                       </View>
+
                       <TouchableOpacity
                         style={styles.sendButton}
                         onPress={() => sendMessage(newMessage)}
@@ -554,7 +527,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignItems: "center",
   },
   sendButton: {
     padding: 12,
