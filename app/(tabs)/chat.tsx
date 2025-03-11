@@ -28,6 +28,9 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import axios from "axios";
+import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
+import ChildModal from "../(modals)/childModal";
+import { useTranslation } from "react-i18next";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -36,14 +39,34 @@ interface Message {
   groupId: string;
   message: string;
   timestamp: Date;
+  grouped?: boolean;
 }
 
-interface ChatGroup {
-  groupId: string;
-}
+const markGroupedMessages = (messages: Message[]) => {
+  if (!messages.length) return [];
+
+  let initMsj = parseISO(messages[0].timestamp.toString());
+  const markedMsj = messages.map((msj, index) => {
+    if (index === 0) {
+      return { ...msj, grouped: false };
+    }
+    const timeDiff = differenceInMinutes(
+      initMsj,
+      parseISO(msj.timestamp.toString())
+    );
+    if (timeDiff < 30) {
+      return { ...msj, grouped: true };
+    } else {
+      initMsj = parseISO(msj.timestamp.toString());
+      return { ...msj, grouped: false };
+    }
+  });
+
+  return markedMsj;
+};
 
 const ChatComponent: React.FC = () => {
-  const [chatGroups, setChatGroups] = useState<ChatGroup[]>([]);
+  const [chatGroups, setChatGroups] = useState<{ groupId: string }[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [currentGroupId, setCurrentGroupId] = useState<string>("");
@@ -51,14 +74,21 @@ const ChatComponent: React.FC = () => {
   const [userDatas, setUserDatas] = useState<any>([]);
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isitReady, setIsitReady] = useState<boolean>(false);
+  const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
+  const { t } = useTranslation();
+
+  const chatInitLang: any = t("chatRoom", { returnObjects: true });
+  const chatLang = chatInitLang[0];
 
   const {
     data: chatData,
     error: chatError,
-    isLoading,
+    isLoading: chatLoading,
   } = useSWR("group_chat", {
     fetcher: () => normalFetch("/auth/chatcheck"),
     revalidateOnFocus: false,
@@ -66,6 +96,7 @@ const ChatComponent: React.FC = () => {
     shouldRetryOnError: true,
     errorRetryCount: 3,
   });
+
   const {
     data: userData,
     error: userError,
@@ -81,10 +112,14 @@ const ChatComponent: React.FC = () => {
 
   useEffect(() => {
     if (chatData) {
-      setChatGroups(chatData.chatGroupIDs.map((groupId: any) => ({ groupId })));
+      setChatGroups(
+        chatData.chatGroupIDs.map((groupId: string) => ({ groupId }))
+      );
     } else if (chatError) {
       console.error("Error fetching chat groups:", chatError);
       Sentry.captureException(chatError);
+    } else if (chatLoading) {
+      setLoading(true);
     }
   }, [chatData, chatError]);
 
@@ -97,6 +132,8 @@ const ChatComponent: React.FC = () => {
       setUserDatas(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (userError) {
       Sentry.captureException(userError);
+    } else if (userLoading) {
+      setLoading(true);
     }
   }, [userData, userError]);
 
@@ -131,14 +168,15 @@ const ChatComponent: React.FC = () => {
           socketRef.current?.emit("chatHistory", { timer: Date.now() });
 
           socketRef.current?.once("chatHistory", (message) => {
-            setLoading(true);
+            setIsitReady(true);
             if (message.nextCursor == null) {
-              setLoading(false);
+              setIsitReady(false);
               return;
             }
+
             setMessages((prevMsj) => [...message.messages, ...prevMsj]);
             setCursor(message.nextCursor);
-            setLoading(false);
+            setIsitReady(false);
           });
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
@@ -152,7 +190,6 @@ const ChatComponent: React.FC = () => {
 
         // 🔹 Handle token expiration & reconnection
         socketRef.current.on("connect_error", async (error) => {
-          socketRef.current?.off("chatHistory");
           try {
             const res = await axios.post(
               `${apiUrl}/auth/refresh`,
@@ -172,6 +209,7 @@ const ChatComponent: React.FC = () => {
                   token: res.data.newAccessToken,
                 };
                 socketRef.current.connect();
+                socketRef.current?.off("chatHistory");
               }
             } else if (res.status == 400) {
               await SecureStore.deleteItemAsync("Tokens");
@@ -210,57 +248,91 @@ const ChatComponent: React.FC = () => {
     setMessages((prevMessages) => [newMessage, ...prevMessages]);
     console.log("newMessage", newMessage);
     socketRef.current.emit("sendMessage", newMessage);
-    flatListRef.current?.scrollToIndex({ index: 0, animated: true });
+    const indexMsj = messages.findIndex((msj) => msj === newMessage);
+    flatListRef.current?.scrollToIndex({ index: indexMsj, animated: true });
   };
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
   const { bottom } = useSafeAreaInsets();
 
-  const renderChatItem = useCallback(
-    ({ item }: { item: Message }) => {
+  const MemoizedChatItem = React.memo(
+    ({ item, userDatas }: { item: Message; userDatas: any }) => {
       return (
         <View style={{ marginVertical: 6 }}>
           {item.sender_unique_name === userDatas.unique_user_ID ? (
-            <View style={{ alignItems: "flex-end", marginVertical: 3 }}>
-              <Text
+            <View
+              style={[
+                styles.msjContainer,
+                { alignItems: "flex-end", marginVertical: 3 },
+              ]}
+            >
+              <View
                 style={[
-                  styles.messageText,
+                  styles.msjInside,
                   {
-                    shadowOffset: { width: -3, height: -3 },
-                    borderBottomRightRadius: 10,
-                    borderTopRightRadius: 10,
                     borderBottomLeftRadius: 10,
-                    borderWidth: 3,
+                    borderBottomRightRadius: 10,
+                    borderTopLeftRadius: 10,
+                    borderColor: Colors.lightGrey,
+                    backgroundColor: Colors.lightGrey,
+                    alignItems: "flex-end",
                   },
                 ]}
               >
-                {item.message}
-              </Text>
+                <Text
+                  style={[
+                    styles.messageText,
+                    { fontWeight: "500", alignItems: "center" },
+                  ]}
+                >
+                  {item.message}
+                </Text>
+              </View>
+              {!item.grouped && (
+                <Text style={{ color: Colors.dark, fontWeight: "200" }}>
+                  {formatDistanceToNow(item.timestamp, { addSuffix: true })}
+                </Text>
+              )}
             </View>
           ) : (
-            <View style={{ alignItems: "flex-start" }}>
-              <Text
+            <View style={[styles.msjContainer, { alignItems: "flex-start" }]}>
+              <View
                 style={[
-                  styles.messageText,
+                  styles.msjInside,
                   {
-                    backgroundColor: Colors.primary,
-                    color: Colors.light,
-                    borderRadius: 20,
-                    borderWidth: 3,
+                    borderBottomLeftRadius: 10,
+                    borderBottomRightRadius: 10,
+                    borderTopRightRadius: 10,
                     borderColor: Colors.primary,
+                    backgroundColor: Colors.primary,
                   },
                 ]}
               >
-                {item.message}
-              </Text>
+                <Text style={[styles.messageText, { color: Colors.light }]}>
+                  {item.message}
+                </Text>
+              </View>
+              {!item.grouped && (
+                <Text style={{ color: Colors.dark, fontWeight: "200" }}>
+                  {formatDistanceToNow(item.timestamp, { addSuffix: true })}
+                </Text>
+              )}
             </View>
           )}
         </View>
       );
     },
-    [messages]
+    (prevProps, nextProps) => prevProps.item === nextProps.item
   );
+
+  const renderChatItem = useCallback(
+    ({ item }: { item: Message }) => {
+      return <MemoizedChatItem item={item} userDatas={userDatas} />;
+    },
+    [userDatas]
+  );
+
   const loadOlderMsj = async () => {
     if (!socketRef.current?.connected || !cursor) return;
 
@@ -280,12 +352,12 @@ const ChatComponent: React.FC = () => {
       setLoading(false);
     });
   };
-
+  const markedMessages = markGroupedMessages(messages);
   return (
     <View style={[styles.container]}>
       {isLoading ? (
         <View>
-          <ActivityIndicator size={"large"} />
+          <ActivityIndicator color={Colors.primary} size={"large"} />
         </View>
       ) : (
         <View
@@ -309,143 +381,194 @@ const ChatComponent: React.FC = () => {
           />
         </View>
       )}
-      {chatData ? (
-        <>
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={readyToShow}
-            onRequestClose={() => {
-              if (socketRef.current?.connected) {
-                socketRef.current?.disconnect();
-              }
-              setReadyToShow(false);
-            }}
-            onDismiss={() => {
-              setMessages([]);
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={readyToShow}
+        style={{ zIndex: 1 }}
+        onRequestClose={() => {
+          if (socketRef.current?.connected) {
+            socketRef.current?.disconnect();
+          }
+          setReadyToShow(false);
+        }}
+        onDismiss={() => {
+          setMessages([]);
+        }}
+      >
+        {isitReady ? (
+          <ActivityIndicator color={Colors.primary} size={"large"} />
+        ) : (
+          <SafeAreaProvider
+            style={{
+              backgroundColor: "#fff",
             }}
           >
-            <SafeAreaProvider
+            <SafeAreaView
               style={{
-                backgroundColor: "#fff",
+                height: height,
+                width: width,
               }}
             >
-              <SafeAreaView
+              <View
                 style={{
-                  height: height,
-                  width: width,
+                  height: height - headerHeight,
+                  width: "95%",
+                  marginHorizontal: 10,
                 }}
               >
                 <View
                   style={{
-                    height: height - headerHeight,
-                    width: "95%",
-                    marginHorizontal: 10,
+                    height: headerHeight / 2,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingHorizontal: 16,
+                    borderBottomColor: "#ddd",
+                    borderBottomWidth: 1,
                   }}
                 >
-                  <View
-                    style={{
-                      height: headerHeight / 2,
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      paddingHorizontal: 16,
-                      borderBottomColor: "#ddd",
-                      borderBottomWidth: 1,
+                  <TouchableOpacity
+                    onPress={() => {
+                      setReadyToShow(false);
+                      if (socketRef.current) {
+                        socketRef.current?.disconnect();
+                        setTimeout(() => {
+                          if (!socketRef.current?.connected) {
+                          } else {
+                            console.log("Socket still connected");
+                          }
+                        }, 500);
+                      }
                     }}
                   >
-                    <TouchableOpacity
-                      onPress={() => {
-                        setReadyToShow(false);
-                        if (socketRef.current) {
-                          socketRef.current?.disconnect();
-                          setTimeout(() => {
-                            if (!socketRef.current?.connected) {
-                            } else {
-                              console.log("Socket still connected");
-                            }
-                          }, 500);
-                        }
-                      }}
-                    >
-                      <Ionicons name="chevron-back-outline" size={24} />
-                    </TouchableOpacity>
-                    <Text>{currentGroupId}</Text>
+                    <Ionicons
+                      name="chevron-back-outline"
+                      size={24}
+                      color={Colors.primary}
+                    />
+                  </TouchableOpacity>
+                  <Text style={{ color: Colors.primary, fontSize: 18 }}>
+                    {currentGroupId}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setChildModalVisible(true);
+                    }}
+                  >
+                    <AntDesign
+                      name="exclamationcircleo"
+                      size={24}
+                      color={Colors.primary}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={markedMessages}
+                  style={[
+                    {
+                      maxHeight: height - headerHeight - bottom - 80,
+                    },
+                  ]}
+                  renderItem={renderChatItem}
+                  keyExtractor={(item) =>
+                    item.timestamp
+                      ? item.timestamp.toString()
+                      : Math.random().toString()
+                  }
+                  inverted={true}
+                  onEndReached={loadOlderMsj}
+                  onEndReachedThreshold={0.2}
+                  ListFooterComponent={loading ? <ActivityIndicator /> : null}
+                  ref={flatListRef}
+                  maintainVisibleContentPosition={{
+                    minIndexForVisible: 0,
+                  }}
+                  initialNumToRender={markedMessages.length}
+                  maxToRenderPerBatch={20}
+                />
+                <KeyboardAvoidingView
+                  behavior={Platform.OS == "ios" ? "padding" : "height"}
+                  keyboardVerticalOffset={headerHeight / 2 + 10}
+                >
+                  <View style={[styles.inputContainer]}>
                     <TouchableOpacity>
                       <AntDesign
-                        name="exclamationcircleo"
+                        name="pluscircleo"
                         size={24}
-                        color="black"
+                        color={Colors.grey}
                       />
                     </TouchableOpacity>
-                  </View>
-                  <FlatList
-                    data={messages}
-                    style={[
-                      {
-                        maxHeight: height - headerHeight - bottom - 80,
-                      },
-                    ]}
-                    renderItem={renderChatItem}
-                    keyExtractor={(item) =>
-                      item.timestamp
-                        ? item.timestamp.toString()
-                        : Math.random().toString()
-                    }
-                    inverted={true}
-                    onEndReached={loadOlderMsj}
-                    onEndReachedThreshold={0.2}
-                    ListFooterComponent={loading ? <ActivityIndicator /> : null}
-                    ref={flatListRef}
-                    maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
-                  />
-
-                  <KeyboardAvoidingView
-                    behavior={Platform.OS == "ios" ? "padding" : "height"}
-                    keyboardVerticalOffset={headerHeight / 2 + 10}
-                  >
-                    <View style={[styles.inputContainer]}>
-                      <TouchableOpacity>
-                        <AntDesign
-                          name="pluscircleo"
-                          size={24}
-                          color={Colors.grey}
-                        />
-                      </TouchableOpacity>
-                      <View style={styles.input}>
-                        <TextInput
-                          placeholder="Enter Chat"
-                          value={newMessage}
-                          onChangeText={setNewMessage}
-                          maxLength={2000}
-                          style={{ flex: 1 }}
-                          placeholderTextColor={Colors.grey}
-                          clearTextOnFocus={false}
-                          multiline
-                        />
-                        <Entypo
-                          name="emoji-happy"
-                          size={24}
-                          color={Colors.grey}
-                        />
-                      </View>
-
-                      <TouchableOpacity
-                        style={styles.sendButton}
-                        onPress={() => sendMessage(newMessage)}
-                      >
-                        <Ionicons name="send" size={24} color={Colors.light} />
-                      </TouchableOpacity>
+                    <View style={styles.input}>
+                      <TextInput
+                        placeholder={chatInitLang.enterMessage}
+                        value={newMessage}
+                        onChangeText={setNewMessage}
+                        maxLength={2000}
+                        style={{ flex: 1 }}
+                        placeholderTextColor={Colors.grey}
+                        clearTextOnFocus={false}
+                        multiline
+                      />
+                      <Entypo
+                        name="emoji-happy"
+                        size={24}
+                        color={Colors.grey}
+                      />
                     </View>
-                  </KeyboardAvoidingView>
-                </View>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </Modal>
-        </>
-      ) : (
-        <ActivityIndicator size={"large"} />
-      )}
+
+                    <TouchableOpacity
+                      style={styles.sendButton}
+                      onPress={() => sendMessage(newMessage)}
+                    >
+                      <Ionicons name="send" size={24} color={Colors.light} />
+                    </TouchableOpacity>
+                  </View>
+                </KeyboardAvoidingView>
+              </View>
+            </SafeAreaView>
+          </SafeAreaProvider>
+        )}
+
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={childModalVisible}
+          style={{ zIndex: 2 }}
+        >
+          <SafeAreaProvider style={{ backgroundColor: "#fff" }}>
+            <SafeAreaView>
+              <View
+                style={{
+                  height: headerHeight / 2,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingHorizontal: 16,
+                  borderBottomColor: "#ddd",
+                  borderBottomWidth: 1,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    setChildModalVisible(false);
+                  }}
+                >
+                  <Ionicons
+                    name="chevron-back-outline"
+                    size={24}
+                    color={Colors.primary}
+                  />
+                </TouchableOpacity>
+                <Text style={{ fontSize: 24, color: Colors.primary }}>
+                  Group Chat Settings
+                </Text>
+              </View>
+              <ChildModal />
+            </SafeAreaView>
+          </SafeAreaProvider>
+        </Modal>
+      </Modal>
     </View>
   );
 };
@@ -496,10 +619,9 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   messageText: {
-    borderWidth: 3,
     padding: 10,
     maxWidth: "80%",
-    borderColor: Colors.lightGrey,
+    minWidth: "30%",
   },
   messagesList: {
     //height: Dimensions.get("window").height,
@@ -544,6 +666,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
     fontWeight: "bold",
+  },
+
+  msjContainer: {},
+  msjInside: {
+    flexDirection: "column",
+    borderWidth: 1,
+
+    padding: 5,
   },
 });
 

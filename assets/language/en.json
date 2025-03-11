@@ -190,6 +190,13 @@
             "phoneNumber":"Phone Number",
             "editProfile":"Edit Profile",
             "saveProfile":"Save Edit"
+        },
+        "chatRoom":{
+            "chatRoom": "Chat Room",
+            "sendMsj": "Send",
+            "message": "Message",
+            "noMessage": "No Message",
+            "enterMessage": "Enter Message"
         }
     }
 }
