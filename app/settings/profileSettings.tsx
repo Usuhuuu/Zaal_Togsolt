@@ -151,7 +151,6 @@ const ProfileSettings: React.FC = () => {
   const loginOutState = useSelector(
     (state: RootState) => state.authStatus.isitLogined
   );
-
   const { changeLanguage } = useLanguage();
 
   const handleLng = (lang: string) => {
