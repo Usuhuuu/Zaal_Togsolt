@@ -34,7 +34,6 @@ const ProfileSettings: React.FC = () => {
   const helpSupport = settings?.helpSupport[0] || [];
   const accountSupport = settings?.accountDetails[0] || [];
   const socialMedia = settings?.socialMedia[0] || [];
-
   const Sections = [
     {
       header: `${preferences.headerPreferences}`,
