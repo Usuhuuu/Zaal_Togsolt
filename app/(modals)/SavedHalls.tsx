@@ -37,7 +37,7 @@ const SavedHalls: React.FC = () => {
         <FlatList
           data={savedHalls}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()} // Ensure id is a string for the keyExtractor
+          keyExtractor={(item) => item.id.toString()}
         />
       )}
     </View>

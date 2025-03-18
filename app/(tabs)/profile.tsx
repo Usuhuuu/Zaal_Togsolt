@@ -12,7 +12,6 @@ import ProfileAdmin from "@/components/profileScreens/admin";
 import NormalUser from "@/components/profileScreens/normalUser";
 
 const Profile: React.FC = () => {
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({});
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
@@ -45,14 +44,6 @@ const Profile: React.FC = () => {
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(formData);
-  };
-
-  const openModal = () => {
-    setModalVisible(true); // Open the modal
-  };
-
-  const closeModal = () => {
-    setModalVisible(false); // Close the modal
   };
 
   if (isLoading) {

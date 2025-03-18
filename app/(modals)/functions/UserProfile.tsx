@@ -4,7 +4,7 @@ import * as SecureStore from "expo-secure-store";
 export const fetchRoleAndProfil = async (path: String) => {
   const token = await SecureStore.getItemAsync("Tokens");
   if (!token) {
-    throw new Error("No token found pisda");
+    throw new Error("Token not founded pisda");
   }
 
   try {
@@ -22,7 +22,7 @@ export const fetchRoleAndProfil = async (path: String) => {
 export const normalFetch = async (url: string) => {
   const token = await SecureStore.getItemAsync("Tokens");
   if (!token) {
-    throw new Error("No token found pisda");
+    throw new Error("Token not founded pisda");
   }
   try {
     const response = await axiosInstance.get(url);

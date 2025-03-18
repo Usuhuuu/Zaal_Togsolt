@@ -18,7 +18,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useTranslation } from "react-i18next";
 import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { loginedState, RootState } from "@/app/(modals)/functions/store";
+import { logininState, RootState } from "@/app/(modals)/functions/store";
 import useSWR from "swr";
 import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
 
@@ -59,7 +59,7 @@ const CustomDrawerContent = (props: any) => {
           ? JSON.parse(data.profileData)
           : data.profileData;
       setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
-      dispatch(loginedState());
+      dispatch(logininState({ isitLogined: true }));
     } else if (error) {
       console.log("Error fetching user data:", error);
     }

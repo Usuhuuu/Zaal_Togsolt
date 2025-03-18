@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   ListRenderItem,
   ImageBackground,
-  Dimensions,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { Listing } from "@/interfaces/listing";
@@ -27,7 +26,7 @@ interface Props {
   refresh: number;
 }
 
-const ListingComponent = ({ listings: items, category, refresh }: Props) => {
+const ListingComponent = ({ listings: items, category }: Props) => {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
   const router = useRouter();

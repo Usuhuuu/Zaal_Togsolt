@@ -1,65 +1,58 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import * as Localization from "expo-localization";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  configureStore,
+  createSlice,
+  combineReducers,
+  PayloadAction,
+} from "@reduxjs/toolkit";
+import { persistReducer, persistStore } from "redux-persist";
 
-const localLng = Localization.getLocales()[0].languageCode;
-
-// Define separate initial states
-const initState = {
-  isitLogined: false,
-  lngCode: localLng,
-  forceUpdate: 0,
+// Redux Persist Config
+const persistConfig = {
+  key: "root",
+  storage: AsyncStorage,
+  whitelist: ["authStatus"],
 };
 
-// Language slice
-const languageSlice = createSlice({
-  name: "language",
-  initialState: initState,
-  reducers: {
-    changeLanguageState: (state, action) => {
-      state.lngCode = action.payload.lngCode;
-    },
-  },
-});
-
-// Authentication slice
+// Authentication Slice
 const authStatus = createSlice({
   name: "authStatus",
-  initialState: initState,
+  initialState: { isitLogined: false },
   reducers: {
-    loginedState: (state) => {
-      state.isitLogined = true; // Direct mutation (handled by immer)
+    logininState: (state, action: PayloadAction<{ isitLogined: boolean }>) => {
+      state.isitLogined = action.payload.isitLogined;
     },
-    loginoutState: (state) => {
-      state.isitLogined = false;
+    logoutState: (state, action: PayloadAction<{ isitLogined: boolean }>) => {
+      state.isitLogined = action.payload.isitLogined;
     },
   },
 });
 
-// Reset user state
-const resetSlice = createSlice({
-  name: "reset",
-  initialState: initState,
-  reducers: {
-    triggerReRender: (state) => {
-      state.forceUpdate++;
-    },
-  },
+// Combine Reducers
+const rootReducer = combineReducers({
+  authStatus: authStatus.reducer,
 });
 
-// Export actions
-export const { loginedState, loginoutState } = authStatus.actions;
-export const { changeLanguageState } = languageSlice.actions;
-export const { triggerReRender } = resetSlice.actions;
+// Apply Persistor
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// Create store
+// Export Actions
+export const { logininState, logoutState } = authStatus.actions;
+
+// Create Redux Store
 export const store = configureStore({
-  reducer: {
-    authStatus: authStatus.reducer,
-    language: languageSlice.reducer,
-    reset: resetSlice.reducer,
-  },
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ["persist/PERSIST"],
+      },
+    }),
 });
 
-// Define types for useSelector and useDispatch
+// Create Persistor
+export const persistor = persistStore(store);
+
+// Define Types for useSelector & useDispatch
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

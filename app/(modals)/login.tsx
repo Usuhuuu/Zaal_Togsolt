@@ -27,7 +27,7 @@ import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch } from "./functions/store";
-import { RootState, loginedState } from "./functions/store";
+import { RootState, logininState } from "./functions/store";
 
 const Page = () => {
   const { t } = useTranslation();
@@ -71,7 +71,7 @@ const Page = () => {
             refreshToken: response.data.refreshToken,
           })
         ).then(() => {
-          dispatch(loginedState());
+          dispatch(logininState({ isitLogined: true }));
           Alert.alert("Login Success", "Moving to the main page?", [
             {
               text: "No",
@@ -79,7 +79,7 @@ const Page = () => {
               onPress: () => {
                 router.replace("/");
                 console.log(loginInState);
-                dispatch(loginedState());
+                dispatch(logininState({ isitLogined: false }));
               },
             },
             {

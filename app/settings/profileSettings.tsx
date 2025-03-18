@@ -19,12 +19,11 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   RootState,
   AppDispatch,
-  loginoutState,
+  logoutState,
 } from "@/app/(modals)/functions/store";
 
 const ProfileSettings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const router = useRouter();
 
   const { t } = useTranslation();
@@ -162,11 +161,7 @@ const ProfileSettings: React.FC = () => {
     setModalVisible(false);
   };
   const logout = async () => {
-    await SecureStorage.deleteItemAsync("Tokens").then((state) => {
-      setIsLoggedIn(false);
-      console.log(state);
-    });
-    dispatch(loginoutState());
+    await SecureStorage.deleteItemAsync("Tokens");
     console.log(loginOutState);
     Alert.alert(t("userLogout.logoutAlert"), t("userLogout.logoutMessage"), [
       {
@@ -176,7 +171,7 @@ const ProfileSettings: React.FC = () => {
       {
         text: t("userLogout.yes"),
         onPress: () => {
-          router.push("/login");
+          dispatch(logoutState({ isitLogined: false }));
         },
       },
     ]);

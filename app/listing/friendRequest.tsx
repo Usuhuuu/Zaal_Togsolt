@@ -14,12 +14,7 @@ import Colors from "@/constants/Colors";
 import axiosInstance from "../(modals)/functions/axiosInstanc";
 import { useTranslation } from "react-i18next";
 
-interface friendRequestProps {
-  copyToClipboard: () => void;
-  friendRequestData: Array<string>;
-}
-
-const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
+const FriendRequest = () => {
   const [friendData, setFriendData] = useState<string[]>([]);
   const [userRequestData, setUserRequestData] = useState<string[]>([]);
   const [isitLoading, setIsitLoading] = useState<boolean>(false);
@@ -79,15 +74,17 @@ const FriendRequest = ({ friendRequestData = [] }: friendRequestProps) => {
     } else if (error) {
       console.error("Error fetching user friend data:", error);
     }
-
-    // Set loading state
     setIsitLoading(isLoading);
   }, [data, error, isLoading]);
 
   return (
     <>
       {isitLoading ? (
-        <ActivityIndicator size="large" style={style.Container} />
+        <ActivityIndicator
+          size="large"
+          style={[style.Container]}
+          color={Colors.primary}
+        />
       ) : (
         <ScrollView style={style.subContainer}>
           <View style={style.requestContainer}>

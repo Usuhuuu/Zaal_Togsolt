@@ -29,7 +29,8 @@ import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScr
 import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
 import { Provider } from "react-redux";
-import { store } from "../(modals)/functions/store";
+import { persistor, store } from "../(modals)/functions/store";
+import { PersistGate } from "redux-persist/integration/react";
 
 // Create a Drawer Navigator
 const TabsLayout = () => {
@@ -155,7 +156,7 @@ const TabsLayout = () => {
                 accessibilityHint="Navigates to the profile screen"
               />
             ),
-            headerShown: false, // Hide header for profile screen
+            headerShown: false,
           }}
         />
       </Tabs>
@@ -234,27 +235,23 @@ const Layout = () => {
     ],
   };
 
-  const {
-    data: userData,
-    error: userError,
-    isLoading: userLoading,
-  } = useSWR("RoleAndProfile_main", {
-    fetcher: () => fetchRoleAndProfil("main"),
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-    dedupingInterval: 10000,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
-  });
+  const { data: userData, isLoading: userLoading } = useSWR(
+    "RoleAndProfile_main",
+    {
+      fetcher: () => fetchRoleAndProfil("main"),
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      dedupingInterval: 10000,
+      errorRetryInterval: 4000,
+      errorRetryCount: 3,
+    }
+  );
 
   useEffect(() => {
     if (userData) {
       setUserRole(userData.role);
     }
-    if (userError) {
-      console.log("Error fetching user data:", userError);
-    }
-  }, [userData, userError]);
+  }, [userData]);
 
   if (userLoading) {
     return (
@@ -326,23 +323,25 @@ const Layout = () => {
 
   return (
     <Provider store={store}>
-      <SavedHallsProvider>
-        <Drawer.Navigator
-          drawerContent={(props) => <CustomDrawerContent {...props} />}
-          screenOptions={{
-            drawerLabelStyle: {
-              marginLeft: -10,
-            },
-            drawerType: "slide",
-            headerShown: false,
-            drawerStyle: {
-              backgroundColor: "#eefafb",
-            },
-          }}
-        >
-          {renderScreens()}
-        </Drawer.Navigator>
-      </SavedHallsProvider>
+      <PersistGate loading={null} persistor={persistor}>
+        <SavedHallsProvider>
+          <Drawer.Navigator
+            drawerContent={(props) => <CustomDrawerContent {...props} />}
+            screenOptions={{
+              drawerLabelStyle: {
+                marginLeft: -10,
+              },
+              drawerType: "slide",
+              headerShown: false,
+              drawerStyle: {
+                backgroundColor: "#eefafb",
+              },
+            }}
+          >
+            {renderScreens()}
+          </Drawer.Navigator>
+        </SavedHallsProvider>
+      </PersistGate>
     </Provider>
   );
 };

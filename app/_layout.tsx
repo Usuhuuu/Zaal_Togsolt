@@ -6,15 +6,22 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, ReactNode, useState } from "react";
-import { TouchableOpacity, View, Text, Alert } from "react-native";
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
 import { LanguageProvider } from "./settings/settings_pages/Languages";
 export { ErrorBoundary } from "expo-router";
 
-import { Provider } from "react-redux";
-import { store } from "./(modals)/functions/store";
+import { Provider, useSelector } from "react-redux";
+import { persistor, RootState, store } from "./(modals)/functions/store";
 import { useTranslation } from "react-i18next";
+import { PersistGate } from "redux-persist/integration/react";
 
 SplashScreen.preventAutoHideAsync();
 Sentry.init({
@@ -67,6 +74,10 @@ function RootLayout() {
     ...FontAwesome.font,
   });
   const [fontError, setFontError] = useState<boolean>(false);
+
+  const loginStatus = useSelector(
+    (state: RootState) => state.authStatus.isitLogined
+  );
 
   useEffect(() => {
     if (error) {
@@ -162,10 +173,15 @@ function RootLayoutNav() {
 // Wrap the entire app in Sentry and Error Boundary
 export default Sentry.wrap(() => (
   <Provider store={store}>
-    <CustomErrorBoundary>
-      <LanguageProvider>
-        <RootLayout />
-      </LanguageProvider>
-    </CustomErrorBoundary>
+    <PersistGate
+      persistor={persistor}
+      loading={<ActivityIndicator size={24} color={Colors.primary} />}
+    >
+      <CustomErrorBoundary>
+        <LanguageProvider>
+          <RootLayout />
+        </LanguageProvider>
+      </CustomErrorBoundary>
+    </PersistGate>
   </Provider>
 ));

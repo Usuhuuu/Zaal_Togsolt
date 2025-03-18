@@ -56,97 +56,64 @@ const NotificationScreen = () => {
     alert(`Та дарахад: ${message}`);
   };
 
-  const {
-    data: userFriendData,
-    error,
-    isLoading,
-  } = useSWR("User_Friend", {
-    fetcher: () => fetchRoleAndProfil("friends"),
-    revalidateOnFocus: false,
-    shouldRetryOnError: true,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
-    dedupeInterval: 10000,
-  });
-
-  useEffect(() => {
-    if (userFriendData) {
-      setUserData(userFriendData);
-    } else if (error) {
-      console.error("Error fetching user friend data:", error);
-    }
-    //setIsitLoading(isLoading);
-  });
-
   return (
     <SafeAreaProvider>
-      {isLoading ? (
-        <ActivityIndicator size="large" style={styles.container} />
-      ) : (
-        <>
-          <View style={styles.container}>
-            <TouchableOpacity
-              style={[styles.buttons, { gap: 10 }]}
-              onPress={() =>
-                router.push(
-                  "/listing/friendRequest" as Href<"listing/friendRequest">
-                )
-              }
-            >
-              <Image
-                source={{ uri: "https://via.placeholder.com/40" }}
-                style={styles.avatar}
-              />
-              <Text style={styles.texts}>
-                {t("NotificationPage.friendRequest")}
-              </Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={Colors.primary}
-              />
-            </TouchableOpacity>
-
-            <FlatList
-              data={notificationsData}
-              contentContainerStyle={{
-                top: 10,
-                borderColor: Colors.primary,
-                borderTopWidth: 1,
-              }}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.notificationItem}
-                  onPress={() => handleNotificationPress(item.message)}
-                >
-                  <View style={styles.notificationContent}>
-                    <Image
-                      source={{ uri: item.avatar }}
-                      style={styles.avatar}
-                    />
-                    <View style={styles.notificationText}>
-                      <Text style={styles.notificationMessage}>
-                        {item.message}
-                      </Text>
-                      <Text style={styles.notificationTime}>{item.time}</Text>
-                    </View>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={20}
-                      color={Colors.primary}
-                    />
-                  </View>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item) => item.id}
+      <>
+        <View style={styles.container}>
+          <TouchableOpacity
+            style={[styles.buttons, { gap: 10 }]}
+            onPress={() =>
+              router.push(
+                "/listing/friendRequest" as Href<"listing/friendRequest">
+              )
+            }
+          >
+            <Image
+              source={{ uri: "https://via.placeholder.com/40" }}
+              style={styles.avatar}
             />
+            <Text style={styles.texts}>
+              {t("NotificationPage.friendRequest")}
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
+          </TouchableOpacity>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerButtonText}>google ad</Text>
-            </View>
+          <FlatList
+            data={notificationsData}
+            contentContainerStyle={{
+              top: 10,
+              borderColor: Colors.primary,
+              borderTopWidth: 1,
+            }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.notificationItem}
+                onPress={() => handleNotificationPress(item.message)}
+              >
+                <View style={styles.notificationContent}>
+                  <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                  <View style={styles.notificationText}>
+                    <Text style={styles.notificationMessage}>
+                      {item.message}
+                    </Text>
+                    <Text style={styles.notificationTime}>{item.time}</Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={Colors.primary}
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.id}
+          />
+
+          <View style={styles.footer}>
+            <Text style={styles.footerButtonText}>google ad</Text>
           </View>
-        </>
-      )}
+        </View>
+      </>
     </SafeAreaProvider>
   );
 };

@@ -31,6 +31,7 @@ import axios from "axios";
 import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
 import ChildModal from "../(modals)/childModal";
 import { useTranslation } from "react-i18next";
+import { error } from "console";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -86,18 +87,6 @@ const ChatComponent: React.FC = () => {
   const chatLang = chatInitLang[0];
 
   const {
-    data: chatData,
-    error: chatError,
-    isLoading: chatLoading,
-  } = useSWR("group_chat", {
-    fetcher: () => normalFetch("/auth/chatcheck"),
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    shouldRetryOnError: true,
-    errorRetryCount: 3,
-  });
-
-  const {
     data: userData,
     error: userError,
     isLoading: userLoading,
@@ -110,38 +99,55 @@ const ChatComponent: React.FC = () => {
     errorRetryCount: 3,
   });
 
+  const {
+    data: chatData,
+    error: chatError,
+    isLoading: chatLoading,
+  } = useSWR("group_chat", {
+    fetcher: () => normalFetch("/auth/chatcheck"),
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    shouldRetryOnError: true,
+    errorRetryCount: 3,
+  });
+
   useEffect(() => {
-    if (chatData) {
+    if (chatLoading) {
+      setLoading(true);
+    } else if (chatData && chatData.success) {
+      console.log(chatData);
       setChatGroups(
         chatData.chatGroupIDs.map((groupId: string) => ({ groupId }))
       );
     } else if (chatError) {
-      console.error("Error fetching chat groups:", chatError);
+      if (chatError.message === "Token not founded pisda") {
+        return Alert.alert("Login required.");
+      }
       Sentry.captureException(chatError);
-    } else if (chatLoading) {
-      setLoading(true);
     }
-  }, [chatData, chatError]);
+  }, [chatData, chatError, userLoading]);
 
   useEffect(() => {
-    if (userData) {
+    if (userLoading) {
+      setLoading(true);
+    } else if (userData) {
       const parsedData =
         typeof userData.profileData == "string"
           ? JSON.parse(userData.profileData)
           : userData.profileData;
       setUserDatas(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (userError) {
-      Sentry.captureException(userError);
-    } else if (userLoading) {
-      setLoading(true);
+      if (chatError.message === "Token not founded pisda") {
+        return Alert.alert("Login required.");
+      }
+      Sentry.captureException(chatError);
     }
-  }, [userData, userError]);
+  }, [userData, userError, userLoading]);
 
   const chatInit = async (groupId: string) => {
     try {
       setCurrentGroupId(groupId);
       const token = await SecureStore.getItemAsync("Tokens");
-
       if (!token) {
         Sentry.captureException("Token not found while joining group.");
         return Alert.alert("Login required to join group.");
@@ -180,6 +186,11 @@ const ChatComponent: React.FC = () => {
           });
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
+            if (data.groupId !== currentGroupId) return;
+
+            if (data.sender_unique_name === userDatas.unique_user_ID) {
+              return;
+            }
             setMessages((prevMessages) => [...prevMessages, data]);
           });
 
@@ -211,7 +222,7 @@ const ChatComponent: React.FC = () => {
                 socketRef.current.connect();
                 socketRef.current?.off("chatHistory");
               }
-            } else if (res.status == 400) {
+            } else if (res.status === 400) {
               await SecureStore.deleteItemAsync("Tokens");
               alert("Token has expired. Please login again.");
             }
@@ -246,11 +257,13 @@ const ChatComponent: React.FC = () => {
     };
 
     setMessages((prevMessages) => [newMessage, ...prevMessages]);
-    console.log("newMessage", newMessage);
     socketRef.current.emit("sendMessage", newMessage);
-    const indexMsj = messages.findIndex((msj) => msj === newMessage);
-    flatListRef.current?.scrollToIndex({ index: indexMsj, animated: true });
+    flatListRef.current?.scrollToIndex({
+      index: 0,
+      animated: true,
+    });
   };
+
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
@@ -259,7 +272,7 @@ const ChatComponent: React.FC = () => {
   const MemoizedChatItem = React.memo(
     ({ item, userDatas }: { item: Message; userDatas: any }) => {
       return (
-        <View style={{ marginVertical: 6 }}>
+        <View>
           {item.sender_unique_name === userDatas.unique_user_ID ? (
             <View
               style={[
@@ -267,6 +280,21 @@ const ChatComponent: React.FC = () => {
                 { alignItems: "flex-end", marginVertical: 3 },
               ]}
             >
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 5,
+                }}
+              >
+                {!item.grouped && (
+                  <Text style={{ color: Colors.dark, fontWeight: "200" }}>
+                    {formatDistanceToNow(item.timestamp, { addSuffix: true })}
+                  </Text>
+                )}
+              </View>
               <View
                 style={[
                   styles.msjInside,
@@ -276,7 +304,7 @@ const ChatComponent: React.FC = () => {
                     borderTopLeftRadius: 10,
                     borderColor: Colors.lightGrey,
                     backgroundColor: Colors.lightGrey,
-                    alignItems: "flex-end",
+                    alignItems: "center",
                   },
                 ]}
               >
@@ -289,14 +317,14 @@ const ChatComponent: React.FC = () => {
                   {item.message}
                 </Text>
               </View>
-              {!item.grouped && (
-                <Text style={{ color: Colors.dark, fontWeight: "200" }}>
-                  {formatDistanceToNow(item.timestamp, { addSuffix: true })}
-                </Text>
-              )}
             </View>
           ) : (
-            <View style={[styles.msjContainer, { alignItems: "flex-start" }]}>
+            <View
+              style={[
+                styles.msjContainer,
+                { alignItems: "flex-start", marginVertical: 3 },
+              ]}
+            >
               <View
                 style={[
                   styles.msjInside,
@@ -484,8 +512,10 @@ const ChatComponent: React.FC = () => {
                   maintainVisibleContentPosition={{
                     minIndexForVisible: 0,
                   }}
-                  initialNumToRender={markedMessages.length}
+                  initialNumToRender={20}
                   maxToRenderPerBatch={20}
+                  windowSize={10}
+                  removeClippedSubviews={true}
                 />
                 <KeyboardAvoidingView
                   behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -622,6 +652,7 @@ const styles = StyleSheet.create({
     padding: 10,
     maxWidth: "80%",
     minWidth: "30%",
+    justifyContent: "center",
   },
   messagesList: {
     //height: Dimensions.get("window").height,
@@ -672,7 +703,6 @@ const styles = StyleSheet.create({
   msjInside: {
     flexDirection: "column",
     borderWidth: 1,
-
     padding: 5,
   },
 });
