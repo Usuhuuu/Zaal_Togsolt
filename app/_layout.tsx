@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, ReactNode, useState } from "react";
 import {
   TouchableOpacity,
@@ -23,7 +22,6 @@ import { persistor, RootState, store } from "./(modals)/functions/store";
 import { useTranslation } from "react-i18next";
 import { PersistGate } from "redux-persist/integration/react";
 
-SplashScreen.preventAutoHideAsync();
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
@@ -85,9 +83,6 @@ function RootLayout() {
       console.error("Error loading fonts:", error);
       setFontError(true);
       Alert.alert("Error loading fonts", "Please try again later");
-    }
-    if (loaded) {
-      SplashScreen.hideAsync();
     }
   }, [error, loaded]);
 

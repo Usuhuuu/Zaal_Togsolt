@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import React from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
@@ -42,6 +42,7 @@ const Team: React.FC = () => {
       image: require("@/assets/images/zurag1.jpg"),
     },
   ];
+  const FlatListRef = useRef<FlatList | null>(null);
 
   const renderItem = ({
     item,
@@ -62,6 +63,7 @@ const Team: React.FC = () => {
       <Text style={styles.header}>Teams</Text>
       <FlatList
         data={team}
+        ref={(ref) => (FlatListRef.current = ref)}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         horizontal={true}

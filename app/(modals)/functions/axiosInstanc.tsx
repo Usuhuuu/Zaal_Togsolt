@@ -10,7 +10,7 @@ const apiUrl =
 // Create the main axios instance for normal requests
 export const axiosInstance = axios.create({
   baseURL: apiUrl,
-  timeout: 5000,
+  timeout: 1000,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export const axiosInstance = axios.create({
 
 export const axiosInstanceRegular = axios.create({
   baseURL: apiUrl,
-  timeout: 5000,
+  timeout: 1000,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

@@ -120,9 +120,8 @@ const ChatComponent: React.FC = () => {
         chatData.chatGroupIDs.map((groupId: string) => ({ groupId }))
       );
     } else if (chatError) {
-      if (chatError.message === "Token not founded pisda") {
-        return Alert.alert("Login required.");
-      }
+      console.log("Chat Error:", chatError);
+
       Sentry.captureException(chatError);
     }
   }, [chatData, chatError, userLoading]);
@@ -137,9 +136,9 @@ const ChatComponent: React.FC = () => {
           : userData.profileData;
       setUserDatas(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (userError) {
-      if (chatError.message === "Token not founded pisda") {
-        return Alert.alert("Login required.");
-      }
+      // if (chatError.message === "Token not founded pisda") {
+      //   return Alert.alert("Login required.");
+      // }
       Sentry.captureException(chatError);
     }
   }, [userData, userError, userLoading]);
