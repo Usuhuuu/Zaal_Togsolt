@@ -25,9 +25,7 @@ import * as Sentry from "@sentry/react-native";
 import { axiosInstanceRegular } from "./functions/axiosInstanc";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useSelector, useDispatch } from "react-redux";
-import type { AppDispatch } from "./functions/store";
-import { RootState, logininState } from "./functions/store";
+import { useAuth } from "./context/authContext";
 
 const Page = () => {
   const { t } = useTranslation();
@@ -44,11 +42,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [isitGoogle, setIsItGoogle] = useState<boolean>(false);
   const [key, setKey] = useState<number>(0);
-
-  const dispatch = useDispatch<AppDispatch>();
-  const loginInState = useSelector((state: RootState) => {
-    return state.authStatus.isitLogined;
-  });
+  const { logOut, logIn, isItLogined } = useAuth();
 
   useEffect(() => {
     if (Platform.OS == "ios") {
@@ -64,32 +58,19 @@ const Page = () => {
         userPassword: password,
       });
       if (response.data.success) {
-        await SecureStore.setItemAsync(
-          "Tokens",
-          JSON.stringify({
-            accessToken: response.data.accessToken,
-            refreshToken: response.data.refreshToken,
-          })
-        ).then(() => {
-          dispatch(logininState({ isitLogined: true }));
-          Alert.alert("Login Success", "Moving to the main page?", [
-            {
-              text: "No",
-              style: "cancel",
-              onPress: () => {
-                router.replace("/");
-                console.log(loginInState);
-                dispatch(logininState({ isitLogined: false }));
-              },
-            },
-            {
-              text: "Yes",
-              style: "default",
-              onPress: () => router.replace("/(tabs)/profile"),
-            },
-          ]);
-        });
-        console.log(loginInState);
+        try {
+          await SecureStore.setItemAsync(
+            "Tokens",
+            JSON.stringify({
+              accessToken: response.data.accessToken,
+              refreshToken: response.data.refreshToken,
+            })
+          );
+          logIn();
+        } catch (err) {
+          Sentry.captureException(err);
+        }
+        router.replace("..");
       } else if (!response.data.userNotFound && !response.data.success) {
         Alert.alert(`${response.data.message}`);
       } else if (response.status == 404) {
@@ -435,7 +416,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent background
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 5,
   },

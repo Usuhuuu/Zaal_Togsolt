@@ -36,7 +36,10 @@ const SavedHalls: React.FC = () => {
       ) : (
         <FlatList
           data={savedHalls}
-          renderItem={renderItem}
+          renderItem={({ item, index }) => {
+            console.log("index", index);
+            return renderItem({ item });
+          }}
           keyExtractor={(item) => item.id.toString()}
         />
       )}

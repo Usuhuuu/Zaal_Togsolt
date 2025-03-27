@@ -2,6 +2,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 import { Alert } from "react-native";
+import { fetch } from "react-native-ssl-pinning";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
@@ -29,7 +30,6 @@ export const axiosInstanceRegular = axios.create({
 axiosInstance.interceptors.request.use(
   async (config) => {
     const token = await SecureStore.getItemAsync("Tokens");
-
     if (token) {
       const { accessToken } = JSON.parse(token);
       config.headers.Authorization = `Bearer ${accessToken}`;

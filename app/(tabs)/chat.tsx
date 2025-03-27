@@ -115,7 +115,6 @@ const ChatComponent: React.FC = () => {
     if (chatLoading) {
       setLoading(true);
     } else if (chatData && chatData.success) {
-      console.log(chatData);
       setChatGroups(
         chatData.chatGroupIDs.map((groupId: string) => ({ groupId }))
       );
@@ -406,6 +405,7 @@ const ChatComponent: React.FC = () => {
             )}
             keyExtractor={(item) => item.groupId}
           />
+          <Text>sda</Text>
         </View>
       )}
       <Modal
@@ -644,7 +644,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.primary,
     textShadowColor: Colors.primary, // Adds text shadow
-    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   messageText: {
@@ -674,7 +673,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 16,
     backgroundColor: "#fff",
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
@@ -686,7 +684,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 25,
     marginLeft: 8,
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,

@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,20 +11,18 @@ import {
   Alert,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useLanguage } from "./settings_pages/Languages";
+import { useLanguage } from "../(modals)/context/Languages";
 import i18n from "@/utils/i18";
 import * as SecureStorage from "expo-secure-store";
-import { useRouter } from "expo-router";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  RootState,
-  AppDispatch,
-  logoutState,
-} from "@/app/(modals)/functions/store";
+import { useAuth } from "../(modals)/context/authContext";
+import { router } from "expo-router";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 
 const ProfileSettings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const router = useRouter();
+  const [forceRerender, setForceRerender] = useState(false);
+  const { logOut, isItLogined } = useAuth();
+  const routers = useNavigation;
 
   const { t } = useTranslation();
   const settingsDet: any = t("settings", { returnObjects: true });
@@ -147,11 +145,6 @@ const ProfileSettings: React.FC = () => {
     },
   ];
 
-  const dispatch = useDispatch<AppDispatch>();
-  const loginOutState = useSelector(
-    (state: RootState) => state.authStatus.isitLogined
-  );
-
   const { changeLanguage } = useLanguage();
 
   const handleLng = (lang: string) => {
@@ -159,9 +152,8 @@ const ProfileSettings: React.FC = () => {
     i18n.changeLanguage(lang);
     setModalVisible(false);
   };
-  const logout = async () => {
+  const logoutHandle = async () => {
     await SecureStorage.deleteItemAsync("Tokens");
-    console.log(loginOutState);
     Alert.alert(t("userLogout.logoutAlert"), t("userLogout.logoutMessage"), [
       {
         text: t("userLogout.cancel"),
@@ -170,7 +162,9 @@ const ProfileSettings: React.FC = () => {
       {
         text: t("userLogout.yes"),
         onPress: () => {
-          dispatch(logoutState({ isitLogined: false }));
+          logOut();
+          router.replace("..");
+          setForceRerender(!forceRerender);
         },
       },
     ]);
@@ -205,7 +199,7 @@ const ProfileSettings: React.FC = () => {
                     if (id == "language") {
                       setModalVisible(true);
                     } else if (id == "logout") {
-                      logout();
+                      logoutHandle();
                     }
                   }}
                 >

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,7 +14,7 @@ const LanguageContext = createContext<LanguageContextProps>({
 });
 
 export const LanguageProvider: React.FC<{
-  children: React.ReactNode;
+  children: ReactNode;
 }> = ({ children }) => {
   const [language, setLanguage] = useState<string>(i18n.language);
   const [isLanguageChanged, setIsLanguageChanged] = useState<boolean>(false);
@@ -35,4 +35,10 @@ export const LanguageProvider: React.FC<{
   );
 };
 
-export const useLanguage = () => useContext(LanguageContext);
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
+  return context;
+};

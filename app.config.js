@@ -112,16 +112,16 @@ export default {
             CFBundleURLTypes: [
               {
                 CFBundleURLSchemes: [
-                  "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6", // Google Sign-In URL scheme
-                  `fb${process.env.FACEBOOK_APP_ID}`, // Facebook login scheme
-                  "com.usuhbayr.zaalproject", // Your app's bundle identifier
-                  "exp+zaalproject", // Expo-specific URL scheme
+                  "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
+                  `fb${process.env.FACEBOOK_APP_ID}`,
+                  "com.usuhbayr.zaalproject",
+                  "exp+zaalproject",
                 ]
               }
             ],
             LSApplicationQueriesSchemes: [
               "google",
-              "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6", // Query for Google Sign-In
+              "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
             ],
           },
         },

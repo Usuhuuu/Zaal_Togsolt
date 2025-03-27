@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, View, Text } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
@@ -10,12 +16,16 @@ import useSWR from "swr";
 import ContractorPage from "@/components/profileScreens/contractor";
 import ProfileAdmin from "@/components/profileScreens/admin";
 import NormalUser from "@/components/profileScreens/normalUser";
+import { useAuth } from "../(modals)/context/authContext";
+import Page from "../(modals)/login";
 
 const Profile: React.FC = () => {
   const [formData, setFormData] = useState<any>({});
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
+  const [update, setUpdate] = useState<boolean>(false);
+  const { isItLogined } = useAuth();
 
   const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
     fetcher: () => fetchRoleAndProfil(path),
@@ -34,7 +44,6 @@ const Profile: React.FC = () => {
       setUserRole(data.role);
     } else if (error) {
       console.log("Error fetching role and profile data:", error);
-      router.replace("/login");
     }
     // Set loading state based on isLoading
     setLoading(isLoading);
@@ -52,39 +61,34 @@ const Profile: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ? (
-        <View>
-          <Text>Loading...</Text>
-        </View>
+      {!isItLogined ? (
+        <Page />
       ) : (
         <>
-          {/* Admin Role */}
-          {userRole === "admin" && (
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors.primary} />
+          ) : (
             <>
-              <ProfileAdmin
-                copyToClipboard={copyToClipboard}
-                formData={formData}
-              />
-            </>
-          )}
+              {userRole === "admin" && (
+                <ProfileAdmin
+                  copyToClipboard={copyToClipboard}
+                  formData={formData}
+                />
+              )}
 
-          {/* Contractor Role */}
-          {userRole === "contractor" && (
-            <>
-              <ContractorPage
-                copyToClipboard={copyToClipboard}
-                formData={formData}
-              />
-            </>
-          )}
+              {userRole === "contractor" && (
+                <ContractorPage
+                  copyToClipboard={copyToClipboard}
+                  formData={formData}
+                />
+              )}
 
-          {/* Regular User Role */}
-          {userRole === "user" && (
-            <>
-              <NormalUser
-                copyToClipboard={copyToClipboard}
-                formData={formData}
-              />
+              {userRole === "user" && (
+                <NormalUser
+                  copyToClipboard={copyToClipboard}
+                  formData={formData}
+                />
+              )}
             </>
           )}
         </>

@@ -125,6 +125,13 @@ const ListingComponent = ({ listings: items, category }: Props) => {
           renderItem={renderRow}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.flatListContent}
+          onEndReached={() => console.log("end reached")}
+          onEndReachedThreshold={0.1}
+          initialNumToRender={20}
+          windowSize={10}
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+          }}
         />
       )}
     </LinearGradient>
@@ -141,8 +148,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
     elevation: 6,
