@@ -115,14 +115,12 @@ const ChatComponent: React.FC = () => {
     if (chatLoading) {
       setLoading(true);
     } else if (chatData && chatData.success) {
-      console.log(chatData);
       setChatGroups(
         chatData.chatGroupIDs.map((groupId: string) => ({ groupId }))
       );
     } else if (chatError) {
-      if (chatError.message === "Token not founded pisda") {
-        return Alert.alert("Login required.");
-      }
+      console.log("Chat Error:", chatError);
+
       Sentry.captureException(chatError);
     }
   }, [chatData, chatError, userLoading]);
@@ -137,9 +135,9 @@ const ChatComponent: React.FC = () => {
           : userData.profileData;
       setUserDatas(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (userError) {
-      if (chatError.message === "Token not founded pisda") {
-        return Alert.alert("Login required.");
-      }
+      // if (chatError.message === "Token not founded pisda") {
+      //   return Alert.alert("Login required.");
+      // }
       Sentry.captureException(chatError);
     }
   }, [userData, userError, userLoading]);
@@ -407,6 +405,7 @@ const ChatComponent: React.FC = () => {
             )}
             keyExtractor={(item) => item.groupId}
           />
+          <Text>sda</Text>
         </View>
       )}
       <Modal
@@ -645,7 +644,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.primary,
     textShadowColor: Colors.primary, // Adds text shadow
-    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   messageText: {
@@ -675,7 +673,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 16,
     backgroundColor: "#fff",
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
@@ -687,7 +684,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 25,
     marginLeft: 8,
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,

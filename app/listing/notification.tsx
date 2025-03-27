@@ -6,13 +6,11 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import useSWR from "swr";
-import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
 import { Href, router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
@@ -49,11 +47,10 @@ const notificationsData = [
   },
 ];
 const NotificationScreen = () => {
-  const [userData, setUserData] = useState<string>("");
   const { t } = useTranslation();
 
   const handleNotificationPress = (message: string) => {
-    alert(`Та дарахад: ${message}`);
+    Alert.alert(`Та дарахад: ${message}`);
   };
 
   return (

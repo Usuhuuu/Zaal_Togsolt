@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logininState, RootState } from "@/app/(modals)/functions/store";
 import useSWR from "swr";
 import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
+import { useAuth } from "@/app/(modals)/context/authContext";
 
 const CustomDrawerContent = (props: any) => {
   interface UserData {
@@ -34,6 +35,7 @@ const CustomDrawerContent = (props: any) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const { bottom } = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { isItLogined } = useAuth();
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -64,13 +66,14 @@ const CustomDrawerContent = (props: any) => {
       console.log("Error fetching user data:", error);
     }
   }, [data, error]);
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.light, maxWidth: "100%" }}>
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={styles.container}
       >
-        {!loginState ? (
+        {!isItLogined ? (
           <View style={styles.header}>
             <TouchableOpacity style={styles.headerTouchable}>
               <Image

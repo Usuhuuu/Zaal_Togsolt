@@ -10,7 +10,6 @@ import { router, Tabs } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Colors from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
-import { SavedHallsProvider } from "@/app/(modals)/functions/savedhalls"; // Import your SavedHallsProvider
 import ExploreHeader from "@/components/ExploreHeader"; // Import your ExploreHeader component
 import InfoScreen from "@/components/InfoScreen"; // Example drawer screen
 import Dtraining from "@/components/training";
@@ -28,139 +27,142 @@ import ProfileStatistical from "@/components/profileScreens/contractorScreen/sta
 import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScreen";
 import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
-import { Provider } from "react-redux";
-import { persistor, store } from "../(modals)/functions/store";
-import { PersistGate } from "redux-persist/integration/react";
+import { useAuth } from "../(modals)/context/authContext";
 
 // Create a Drawer Navigator
-const TabsLayout = () => {
+export const TabsLayout = () => {
   const { t } = useTranslation();
+  const { isItLogined } = useAuth();
   return (
-    <>
-      <Tabs
-        screenOptions={{
-          tabBarInactiveTintColor: Colors.dark,
-          tabBarActiveTintColor: Colors.light,
-          tabBarStyle: {
-            height: 50,
-            paddingBottom: 5,
-            paddingTop: 5,
-            borderColor: Colors.primary,
-            position: "absolute",
-            overflow: "hidden",
-          },
-          tabBarBackground: () => (
-            <LinearGradient
-              colors={[Colors.secondary, Colors.primary]}
-              start={{ x: 0, y: 0.2 }}
-              end={{ x: 0, y: 1 }}
-              style={[StyleSheet.absoluteFill]}
+    <Tabs
+      screenOptions={{
+        tabBarInactiveTintColor: Colors.dark,
+        tabBarActiveTintColor: Colors.light,
+        tabBarStyle: {
+          height: 50,
+          paddingBottom: 5,
+          paddingTop: 5,
+          borderColor: Colors.primary,
+          position: "absolute",
+          overflow: "hidden",
+        },
+        tabBarBackground: () => (
+          <LinearGradient
+            colors={[Colors.secondary, Colors.primary]}
+            start={{ x: 0, y: 0.2 }}
+            end={{ x: 0, y: 1 }}
+            style={[StyleSheet.absoluteFill]}
+          />
+        ),
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          tabBarLabel: t("home"),
+          header: () => (
+            <ExploreHeader
+              onCategoryChanged={(category) => console.log(category)}
+            />
+          ),
+          tabBarIcon: () => (
+            <Image
+              source={require("../../assets/tab-icons/home.png")}
+              style={{ width: 24, height: 24 }}
+              accessibilityLabel="Home Tab"
+              accessibilityHint="Navigates to the home screen"
             />
           ),
         }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            tabBarLabel: t("home"),
-            header: () => (
-              <ExploreHeader
-                onCategoryChanged={(category) => console.log(category)}
-              />
-            ),
-            tabBarIcon: () => (
-              <Image
-                source={require("../../assets/tab-icons/home.png")}
-                style={{ width: 24, height: 24 }}
-                accessibilityLabel="Home Tab"
-                accessibilityHint="Navigates to the home screen"
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="inbox"
-          options={{
-            tabBarLabel: t("together"),
-            tabBarIcon: () => (
-              <Image
-                source={require("../../assets/tab-icons/teamwork.png")}
-                style={{ width: 26, height: 26 }}
-                accessibilityLabel="Inbox Tab"
-                accessibilityHint="Navigates to the inbox screen"
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="explore"
-          options={{
-            tabBarLabel: `${t("order")}`, // Explore Tab
-            tabBarIcon: () => (
-              <Image
-                source={require("../../assets/tab-icons/order.png")}
-                style={{ width: 24, height: 24 }}
-                accessibilityLabel="Explore Tab"
-                accessibilityHint="Navigates to the explore screen"
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="chat"
-          options={{
-            tabBarLabel: `${t("chat")}`,
-            tabBarIcon: () => (
-              <AntDesign name="message1" size={24} color={Colors.lightGrey} />
-            ),
-            headerShown: true,
-            headerTitle: t("chat"),
-            headerTitleStyle: { color: Colors.primary, fontSize: 24 },
-            headerTitleAlign: "left",
-            headerRight: () => {
-              return (
-                <View
-                  style={{ flexDirection: "row", marginHorizontal: 5, gap: 15 }}
-                >
-                  <TouchableOpacity>
-                    <MaterialCommunityIcons
-                      name="text-search"
-                      size={28}
-                      color={Colors.primary}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => console.log("Chat settings")}
-                  >
-                    <Entypo
-                      name="new-message"
-                      size={24}
-                      color={Colors.primary}
-                      style={{ marginRight: 10 }}
-                    />
-                  </TouchableOpacity>
-                </View>
-              );
-            },
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            tabBarLabel: `${t("profile")}`, // Profile Tab
-            tabBarIcon: () => (
-              <Image
-                source={require("../../assets/tab-icons/athlete.png")}
-                style={{ width: 24, height: 24 }}
-                accessibilityLabel="Profile Tab"
-                accessibilityHint="Navigates to the profile screen"
-              />
-            ),
-            headerShown: false,
-          }}
-        />
-      </Tabs>
-    </>
+      />
+      <Tabs.Screen
+        name="inbox"
+        options={{
+          tabBarLabel: t("together"),
+          tabBarIcon: () => (
+            <Image
+              source={require("../../assets/tab-icons/teamwork.png")}
+              style={{ width: 26, height: 26 }}
+              accessibilityLabel="Inbox Tab"
+              accessibilityHint="Navigates to the inbox screen"
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          tabBarLabel: `${t("order")}`, // Explore Tab
+          tabBarIcon: () => (
+            <Image
+              source={require("../../assets/tab-icons/order.png")}
+              style={{ width: 24, height: 24 }}
+              accessibilityLabel="Explore Tab"
+              accessibilityHint="Navigates to the explore screen"
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          tabBarLabel: `${t("chat")}`,
+          tabBarIcon: () => (
+            <AntDesign name="message1" size={24} color={Colors.lightGrey} />
+          ),
+          headerShown: true,
+          headerTitle: t("chat"),
+          headerTitleStyle: { color: Colors.primary, fontSize: 24 },
+          headerTitleAlign: "left",
+          headerRight: () => {
+            return (
+              <View
+                style={{ flexDirection: "row", marginHorizontal: 5, gap: 15 }}
+              >
+                <TouchableOpacity>
+                  <MaterialCommunityIcons
+                    name="text-search"
+                    size={28}
+                    color={Colors.primary}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => console.log("Chat settings")}>
+                  <Entypo
+                    name="new-message"
+                    size={24}
+                    color={Colors.primary}
+                    style={{ marginRight: 10 }}
+                  />
+                </TouchableOpacity>
+              </View>
+            );
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarLabel: `${t("profile")}`, // Profile Tab
+          tabBarIcon: () => (
+            <Image
+              source={require("../../assets/tab-icons/athlete.png")}
+              style={{ width: 24, height: 24 }}
+              accessibilityLabel="Profile Tab"
+              accessibilityHint="Navigates to the profile screen"
+            />
+          ),
+          headerShown: !isItLogined ? true : false,
+          headerTitle: !isItLogined ? t("aboutUs.login") : t("profile"),
+          headerStyle: {},
+          headerTitleStyle: {
+            color: Colors.primary,
+            fontSize: 24,
+          },
+
+          unmountOnBlur: true,
+        }}
+      />
+    </Tabs>
   );
 };
 
@@ -174,6 +176,7 @@ const Layout = () => {
   const userDrawerLng = drawer?.userDrawer[0];
   const adminDrawerLng = drawer?.adminDrawer[0];
   const contractorDrawerLng = drawer?.contractorDrawer[0];
+  const { isItLogined } = useAuth();
   const drawerScreens: any = {
     default: [
       { name: userDrawerLng.home, component: TabsLayout, icon: "home" },
@@ -235,21 +238,24 @@ const Layout = () => {
     ],
   };
 
-  const { data: userData, isLoading: userLoading } = useSWR(
-    "RoleAndProfile_main",
-    {
-      fetcher: () => fetchRoleAndProfil("main"),
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-      dedupingInterval: 10000,
-      errorRetryInterval: 4000,
-      errorRetryCount: 3,
-    }
-  );
+  const {
+    data: userData,
+    error: userError,
+    isLoading: userLoading,
+  } = useSWR("RoleAndProfile_main", {
+    fetcher: () => fetchRoleAndProfil("main"),
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    dedupingInterval: 10000,
+    errorRetryInterval: 4000,
+    errorRetryCount: 3,
+  });
 
   useEffect(() => {
     if (userData) {
       setUserRole(userData.role);
+    } else if (userError) {
+      setUserRole("default");
     }
   }, [userData]);
 
@@ -263,7 +269,9 @@ const Layout = () => {
   const noHeadRender = ["Home", "Нүүр хуудас", "홈"];
 
   const renderScreens = () => {
-    const screensToRender = drawerScreens[userRole] || drawerScreens.default;
+    const screensToRender = isItLogined
+      ? drawerScreens[userRole] || drawerScreens.default
+      : drawerScreens.default;
     return screensToRender?.map(
       ({
         name,
@@ -322,27 +330,23 @@ const Layout = () => {
   };
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <SavedHallsProvider>
-          <Drawer.Navigator
-            drawerContent={(props) => <CustomDrawerContent {...props} />}
-            screenOptions={{
-              drawerLabelStyle: {
-                marginLeft: -10,
-              },
-              drawerType: "slide",
-              headerShown: false,
-              drawerStyle: {
-                backgroundColor: "#eefafb",
-              },
-            }}
-          >
-            {renderScreens()}
-          </Drawer.Navigator>
-        </SavedHallsProvider>
-      </PersistGate>
-    </Provider>
+    <Drawer.Navigator
+      drawerContent={(props) => (
+        <CustomDrawerContent {...props} isItLogined={isItLogined} />
+      )}
+      screenOptions={{
+        drawerLabelStyle: {
+          marginLeft: -10,
+        },
+        drawerType: "slide",
+        headerShown: false,
+        drawerStyle: {
+          backgroundColor: "#eefafb",
+        },
+      }}
+    >
+      {renderScreens()}
+    </Drawer.Navigator>
   );
 };
 

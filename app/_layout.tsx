@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, ReactNode, useState } from "react";
 import {
   TouchableOpacity,
@@ -15,15 +14,18 @@ import {
 } from "react-native";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
-import { LanguageProvider } from "./settings/settings_pages/Languages";
+import { LanguageProvider } from "./(modals)/context/Languages";
 export { ErrorBoundary } from "expo-router";
 
-import { Provider, useSelector } from "react-redux";
-import { persistor, RootState, store } from "./(modals)/functions/store";
+import { Provider } from "react-redux";
+import { persistor, store } from "./(modals)/functions/store";
 import { useTranslation } from "react-i18next";
 import { PersistGate } from "redux-persist/integration/react";
+import { AuthProvider } from "./(modals)/context/authContext";
+import { useNavigation } from "@react-navigation/native";
+import { SavedHallsProvider } from "./(modals)/functions/savedhalls";
+import Layout, { TabsLayout } from "./(tabs)/_layout";
 
-SplashScreen.preventAutoHideAsync();
 Sentry.init({
   dsn: "https://c2284e34e20ae8c69ed3d05f8971fbb2@o4508263161856000.ingest.us.sentry.io/4508263165132800",
   tracesSampleRate: 1.0,
@@ -42,15 +44,7 @@ interface CustomErrorBoundaryProps {
 function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
   useEffect(() => {
     if (error) {
-      if (
-        error instanceof TypeError &&
-        error.message.includes("Cannot read property 'length'")
-      ) {
-        console.log("Suppressed error: ", error);
-        Sentry.captureException(error);
-      } else {
-        Sentry.captureException(error);
-      }
+      Sentry.captureException(error);
     }
   }, [error]);
 
@@ -68,16 +62,16 @@ function CustomErrorBoundary({ error, children }: CustomErrorBoundaryProps) {
   return <>{children}</>;
 }
 
-function RootLayout() {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+function RootLayout({ children }: RootLayoutProps) {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
   const [fontError, setFontError] = useState<boolean>(false);
-
-  const loginStatus = useSelector(
-    (state: RootState) => state.authStatus.isitLogined
-  );
 
   useEffect(() => {
     if (error) {
@@ -86,16 +80,13 @@ function RootLayout() {
       setFontError(true);
       Alert.alert("Error loading fonts", "Please try again later");
     }
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
   }, [error, loaded]);
 
   if (!loaded || fontError) {
     // Show a loading/fallback UI if fonts are still loading or if there's an error
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
@@ -115,7 +106,7 @@ function RootLayoutNav() {
         options={{
           headerTitle: "Burtguuleh",
           headerTitleAlign: "left",
-          animation: "fade",
+          animation: "slide_from_bottom",
           headerTintColor: Colors.primary,
           headerRight: () => {
             return (
@@ -170,7 +161,19 @@ function RootLayoutNav() {
     </Stack>
   );
 }
-// Wrap the entire app in Sentry and Error Boundary
+const ScreenTracker: React.FC = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const state = navigation.getState();
+    const currentScreen =
+      state?.index !== undefined ? state.routeNames?.[state.index] : undefined;
+    console.log("Current screen is:", currentScreen);
+  }, [navigation]);
+
+  return null; // You can return null as we just need the side effect
+};
+
 export default Sentry.wrap(() => (
   <Provider store={store}>
     <PersistGate
@@ -178,9 +181,16 @@ export default Sentry.wrap(() => (
       loading={<ActivityIndicator size={24} color={Colors.primary} />}
     >
       <CustomErrorBoundary>
-        <LanguageProvider>
-          <RootLayout />
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <SavedHallsProvider>
+              <RootLayout>
+                <Layout />
+                <TabsLayout />
+              </RootLayout>
+            </SavedHallsProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </CustomErrorBoundary>
     </PersistGate>
   </Provider>
