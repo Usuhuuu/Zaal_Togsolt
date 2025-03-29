@@ -42,7 +42,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [isitGoogle, setIsItGoogle] = useState<boolean>(false);
   const [key, setKey] = useState<number>(0);
-  const { logOut, logIn, isItLogined } = useAuth();
+  const { logIn } = useAuth();
 
   useEffect(() => {
     if (Platform.OS == "ios") {

@@ -19,9 +19,9 @@ import * as Sentry from "@sentry/react-native";
 import Constants from "expo-constants";
 import useSWR from "swr";
 import {
-  fetchRoleAndProfil,
+  fetchRoleAndProfile,
   normalFetch,
-} from "../(modals)/functions/UserProfile";
+} from "../(modals)/functions/profile_data_fetch";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
@@ -32,6 +32,7 @@ import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
 import ChildModal from "../(modals)/childModal";
 import { useTranslation } from "react-i18next";
 import { error } from "console";
+import { useAuth } from "../(modals)/context/authContext";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -85,13 +86,14 @@ const ChatComponent: React.FC = () => {
 
   const chatInitLang: any = t("chatRoom", { returnObjects: true });
   const chatLang = chatInitLang[0];
+  const { LoginStatus } = useAuth();
 
   const {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = useSWR("RoleAndProfile_main", {
-    fetcher: () => fetchRoleAndProfil("main"),
+  } = useSWR(LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null, {
+    fetcher: () => fetchRoleAndProfile("main", LoginStatus),
     revalidateOnFocus: false,
     shouldRetryOnError: false,
     dedupingInterval: 10000,

@@ -14,8 +14,8 @@ import ExploreHeader from "@/components/ExploreHeader"; // Import your ExploreHe
 import InfoScreen from "@/components/InfoScreen"; // Example drawer screen
 import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
-import useSWR from "swr";
-import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
+import useSWR, { mutate } from "swr";
+import { fetchRoleAndProfile } from "../(modals)/functions/profile_data_fetch";
 import {
   AntDesign,
   Entypo,
@@ -32,7 +32,7 @@ import { useAuth } from "../(modals)/context/authContext";
 // Create a Drawer Navigator
 export const TabsLayout = () => {
   const { t } = useTranslation();
-  const { isItLogined } = useAuth();
+  const { LoginStatus } = useAuth();
   return (
     <Tabs
       screenOptions={{
@@ -151,8 +151,8 @@ export const TabsLayout = () => {
               accessibilityHint="Navigates to the profile screen"
             />
           ),
-          headerShown: !isItLogined ? true : false,
-          headerTitle: !isItLogined ? t("aboutUs.login") : t("profile"),
+          headerShown: !LoginStatus ? true : false,
+          headerTitle: !LoginStatus ? t("aboutUs.login") : t("profile"),
           headerStyle: {},
           headerTitleStyle: {
             color: Colors.primary,
@@ -176,7 +176,8 @@ const Layout = () => {
   const userDrawerLng = drawer?.userDrawer[0];
   const adminDrawerLng = drawer?.adminDrawer[0];
   const contractorDrawerLng = drawer?.contractorDrawer[0];
-  const { isItLogined } = useAuth();
+  const { LoginStatus } = useAuth();
+
   const drawerScreens: any = {
     default: [
       { name: userDrawerLng.home, component: TabsLayout, icon: "home" },
@@ -242,12 +243,12 @@ const Layout = () => {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = useSWR("RoleAndProfile_main", {
-    fetcher: () => fetchRoleAndProfil("main"),
+  } = useSWR(LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null, {
+    fetcher: () => fetchRoleAndProfile("main", LoginStatus),
     revalidateOnFocus: false,
     shouldRetryOnError: false,
     dedupingInterval: 10000,
-    errorRetryInterval: 4000,
+    errorRetryInterval: 1000,
     errorRetryCount: 3,
   });
 
@@ -255,9 +256,11 @@ const Layout = () => {
     if (userData) {
       setUserRole(userData.role);
     } else if (userError) {
-      setUserRole("default");
+      if (userError) {
+        console.log("Error fetching user data:", userError);
+      }
     }
-  }, [userData]);
+  }, [userData, userError]);
 
   if (userLoading) {
     return (
@@ -269,7 +272,7 @@ const Layout = () => {
   const noHeadRender = ["Home", "Нүүр хуудас", "홈"];
 
   const renderScreens = () => {
-    const screensToRender = isItLogined
+    const screensToRender = LoginStatus
       ? drawerScreens[userRole] || drawerScreens.default
       : drawerScreens.default;
     return screensToRender?.map(
@@ -332,7 +335,7 @@ const Layout = () => {
   return (
     <Drawer.Navigator
       drawerContent={(props) => (
-        <CustomDrawerContent {...props} isItLogined={isItLogined} />
+        <CustomDrawerContent {...props} LoginStatus={LoginStatus} />
       )}
       screenOptions={{
         drawerLabelStyle: {

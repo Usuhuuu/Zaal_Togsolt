@@ -17,12 +17,8 @@ import Colors from "@/constants/Colors";
 import { LanguageProvider } from "./(modals)/context/Languages";
 export { ErrorBoundary } from "expo-router";
 
-import { Provider } from "react-redux";
-import { persistor, store } from "./(modals)/functions/store";
 import { useTranslation } from "react-i18next";
-import { PersistGate } from "redux-persist/integration/react";
 import { AuthProvider } from "./(modals)/context/authContext";
-import { useNavigation } from "@react-navigation/native";
 import { SavedHallsProvider } from "./(modals)/functions/savedhalls";
 import Layout, { TabsLayout } from "./(tabs)/_layout";
 
@@ -97,7 +93,6 @@ function RootLayout({ children }: RootLayoutProps) {
 function RootLayoutNav() {
   const router = useRouter();
   const { t } = useTranslation();
-
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -107,11 +102,13 @@ function RootLayoutNav() {
           headerTitle: "Burtguuleh",
           headerTitleAlign: "left",
           animation: "slide_from_bottom",
+          presentation: "modal",
           headerTintColor: Colors.primary,
-          headerRight: () => {
+          headerShown: true,
+          headerLeft: () => {
             return (
-              <TouchableOpacity onPress={() => router.replace("/")}>
-                <Ionicons name="home" size={24} color={Colors.primary} />
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={28} color={Colors.primary} />
               </TouchableOpacity>
             );
           },
@@ -161,37 +158,18 @@ function RootLayoutNav() {
     </Stack>
   );
 }
-const ScreenTracker: React.FC = () => {
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    const state = navigation.getState();
-    const currentScreen =
-      state?.index !== undefined ? state.routeNames?.[state.index] : undefined;
-    console.log("Current screen is:", currentScreen);
-  }, [navigation]);
-
-  return null; // You can return null as we just need the side effect
-};
 
 export default Sentry.wrap(() => (
-  <Provider store={store}>
-    <PersistGate
-      persistor={persistor}
-      loading={<ActivityIndicator size={24} color={Colors.primary} />}
-    >
-      <CustomErrorBoundary>
-        <AuthProvider>
-          <LanguageProvider>
-            <SavedHallsProvider>
-              <RootLayout>
-                <Layout />
-                <TabsLayout />
-              </RootLayout>
-            </SavedHallsProvider>
-          </LanguageProvider>
-        </AuthProvider>
-      </CustomErrorBoundary>
-    </PersistGate>
-  </Provider>
+  <CustomErrorBoundary>
+    <AuthProvider>
+      <LanguageProvider>
+        <SavedHallsProvider>
+          <RootLayout>
+            <Layout />
+            <TabsLayout />
+          </RootLayout>
+        </SavedHallsProvider>
+      </LanguageProvider>
+    </AuthProvider>
+  </CustomErrorBoundary>
 ));

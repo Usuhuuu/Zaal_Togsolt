@@ -17,10 +17,8 @@ import Colors from "@/constants/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useTranslation } from "react-i18next";
 import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
-import { useDispatch, useSelector } from "react-redux";
-import { logininState, RootState } from "@/app/(modals)/functions/store";
 import useSWR from "swr";
-import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
+import { fetchRoleAndProfile } from "@/app/(modals)/functions/profile_data_fetch";
 import { useAuth } from "@/app/(modals)/context/authContext";
 
 const CustomDrawerContent = (props: any) => {
@@ -35,23 +33,21 @@ const CustomDrawerContent = (props: any) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const { bottom } = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { isItLogined } = useAuth();
+  const { LoginStatus } = useAuth();
 
-  const dispatch = useDispatch();
   const router = useRouter();
 
-  const loginState = useSelector(
-    (state: RootState) => state.authStatus.isitLogined
+  const { data, error, isLoading } = useSWR(
+    LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null,
+    {
+      fetcher: () => fetchRoleAndProfile("main", LoginStatus),
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      dedupingInterval: 10000,
+      errorRetryInterval: 4000,
+      errorRetryCount: 3,
+    }
   );
-
-  const { data, error, isLoading } = useSWR("RoleAndProfile_main", {
-    fetcher: () => fetchRoleAndProfil("main"),
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-    dedupingInterval: 10000,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
-  });
   const width = Dimensions.get("window").width;
 
   useEffect(() => {
@@ -61,7 +57,6 @@ const CustomDrawerContent = (props: any) => {
           ? JSON.parse(data.profileData)
           : data.profileData;
       setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
-      dispatch(logininState({ isitLogined: true }));
     } else if (error) {
       console.log("Error fetching user data:", error);
     }
@@ -73,7 +68,7 @@ const CustomDrawerContent = (props: any) => {
         {...props}
         contentContainerStyle={styles.container}
       >
-        {!isItLogined ? (
+        {!LoginStatus ? (
           <View style={styles.header}>
             <TouchableOpacity style={styles.headerTouchable}>
               <Image
@@ -85,7 +80,7 @@ const CustomDrawerContent = (props: any) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerTouchable}
-              onPress={() => router.replace("/login")}
+              onPress={() => router.push("/login")}
             >
               <Text style={styles.headerText}>{t("aboutUs.login")}</Text>
             </TouchableOpacity>
@@ -140,16 +135,22 @@ const CustomDrawerContent = (props: any) => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{ padding: 20, backgroundColor: "#ECEFF1" }}>
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 30,
-            }}
-          >
+        <View
+          style={{
+            padding: 20,
+            backgroundColor: "#ECEFF1",
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 30,
+          }}
+        >
+          <TouchableOpacity>
             <FontAwesome name="facebook-official" size={27} color="#78909C" />
+          </TouchableOpacity>
+          <TouchableOpacity>
             <FontAwesome name="instagram" size={27} color="#78909C" />
+          </TouchableOpacity>
+          <TouchableOpacity>
             <Fontisto name="email" size={27} color="#78909C" />
           </TouchableOpacity>
         </View>

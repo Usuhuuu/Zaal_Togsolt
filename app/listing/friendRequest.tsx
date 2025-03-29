@@ -9,16 +9,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import useSWR, { mutate } from "swr";
-import { fetchRoleAndProfil } from "../(modals)/functions/UserProfile";
+import { fetchRoleAndProfile } from "../(modals)/functions/profile_data_fetch";
 import Colors from "@/constants/Colors";
 import axiosInstance from "../(modals)/functions/axiosInstanc";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../(modals)/context/authContext";
 
 const FriendRequest = () => {
   const [friendData, setFriendData] = useState<string[]>([]);
   const [userRequestData, setUserRequestData] = useState<string[]>([]);
   const [isitLoading, setIsitLoading] = useState<boolean>(false);
   const { t } = useTranslation();
+  const { LoginStatus } = useAuth();
 
   const handleAccept = async (friend_ID: string) => {
     try {
@@ -47,7 +49,7 @@ const FriendRequest = () => {
   };
 
   const { data, error, isLoading } = useSWR("User_Friend", {
-    fetcher: () => fetchRoleAndProfil("friends"),
+    fetcher: () => fetchRoleAndProfile("friends", LoginStatus),
     revalidateOnFocus: false,
     shouldRetryOnError: true,
     errorRetryInterval: 4000,

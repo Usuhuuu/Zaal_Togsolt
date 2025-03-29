@@ -1,5 +1,6 @@
+import { useAuth } from "@/app/(modals)/context/authContext";
 import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
-import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
+import { fetchRoleAndProfile } from "@/app/(modals)/functions/profile_data_fetch";
 import Colors from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,7 @@ const UserInfoScreen = () => {
   const [userData, setUserData] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isitEditable, setIsitEditable] = useState<boolean>(false);
+  const { LoginStatus } = useAuth();
 
   const [formData, setFormData] = useState<any>({
     email: "",
@@ -32,16 +34,19 @@ const UserInfoScreen = () => {
 
   const userInfo: any = t("userInfo", { returnObjects: true });
 
-  const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
-    fetcher: () => fetchRoleAndProfil(path),
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true,
-    shouldRetryOnError: true,
-    refreshWhenHidden: false,
-    dedupingInterval: 10000,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
-  });
+  const { data, error, isLoading } = useSWR(
+    LoginStatus ? [`RoleAndProfile_${path}`, LoginStatus] : null,
+    {
+      fetcher: () => fetchRoleAndProfile(path, LoginStatus),
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      shouldRetryOnError: true,
+      refreshWhenHidden: false,
+      dedupingInterval: 10000,
+      errorRetryInterval: 4000,
+      errorRetryCount: 3,
+    }
+  );
   useEffect(() => {
     if (data) {
       const parsedData =

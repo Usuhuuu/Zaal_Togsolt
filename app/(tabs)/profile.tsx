@@ -2,17 +2,16 @@ import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
-  View,
   Text,
   ActivityIndicator,
 } from "react-native";
-import { fetchRoleAndProfil } from "@/app/(modals)/functions/UserProfile";
+import { fetchRoleAndProfile } from "@/app/(modals)/functions/profile_data_fetch";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 
 // Import SavedHalls component
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import ContractorPage from "@/components/profileScreens/contractor";
 import ProfileAdmin from "@/components/profileScreens/admin";
 import NormalUser from "@/components/profileScreens/normalUser";
@@ -24,19 +23,21 @@ const Profile: React.FC = () => {
   const [path, setPath] = useState<string>("main");
   const [loading, setLoading] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string>("");
-  const [update, setUpdate] = useState<boolean>(false);
-  const { isItLogined } = useAuth();
+  const { LoginStatus } = useAuth();
 
-  const { data, error, isLoading } = useSWR(`RoleAndProfile_${path}`, {
-    fetcher: () => fetchRoleAndProfil(path),
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true,
-    shouldRetryOnError: true,
-    refreshWhenHidden: false,
-    dedupingInterval: 10000,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
-  });
+  const { data, error, isLoading } = useSWR(
+    LoginStatus ? [`RoleAndProfile_${path}`, LoginStatus] : null,
+    {
+      fetcher: () => fetchRoleAndProfile(path, LoginStatus),
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      shouldRetryOnError: true,
+      refreshWhenHidden: false,
+      dedupingInterval: 10000,
+      errorRetryInterval: 4000,
+      errorRetryCount: 3,
+    }
+  );
 
   useEffect(() => {
     if (data) {
@@ -49,7 +50,11 @@ const Profile: React.FC = () => {
     setLoading(isLoading);
   }, [data, error, isLoading]);
 
-  const router = useRouter();
+  useEffect(() => {
+    if (LoginStatus && path) {
+      mutate(`RoleAndProfile_${path}`);
+    }
+  }, [formData, path]);
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(formData);
@@ -61,7 +66,7 @@ const Profile: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {!isItLogined ? (
+      {!LoginStatus ? (
         <Page />
       ) : (
         <>

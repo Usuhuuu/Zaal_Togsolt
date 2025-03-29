@@ -21,7 +21,7 @@ import { useNavigation, CommonActions } from "@react-navigation/native";
 const ProfileSettings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [forceRerender, setForceRerender] = useState(false);
-  const { logOut, isItLogined } = useAuth();
+  const { logOut, LoginStatus } = useAuth();
   const routers = useNavigation;
 
   const { t } = useTranslation();
@@ -153,21 +153,30 @@ const ProfileSettings: React.FC = () => {
     setModalVisible(false);
   };
   const logoutHandle = async () => {
-    await SecureStorage.deleteItemAsync("Tokens");
-    Alert.alert(t("userLogout.logoutAlert"), t("userLogout.logoutMessage"), [
-      {
-        text: t("userLogout.cancel"),
-        style: "cancel",
-      },
-      {
-        text: t("userLogout.yes"),
-        onPress: () => {
-          logOut();
-          router.replace("..");
-          setForceRerender(!forceRerender);
-        },
-      },
-    ]);
+    SecureStorage.deleteItemAsync("Tokens")
+      .then(() => {
+        Alert.alert(
+          t("userLogout.logoutAlert"),
+          t("userLogout.logoutMessage"),
+          [
+            {
+              text: t("userLogout.cancel"),
+              style: "cancel",
+            },
+            {
+              text: t("userLogout.yes"),
+              onPress: () => {
+                logOut();
+                router.replace("..");
+                setForceRerender(!forceRerender);
+              },
+            },
+          ]
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
