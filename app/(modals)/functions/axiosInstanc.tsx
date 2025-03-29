@@ -2,11 +2,30 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 import { Alert } from "react-native";
-import { fetch } from "react-native-ssl-pinning";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
   "https://8f9e-118-176-174-110.ngrok-free.app";
+
+const tokenWithRetry = async (
+  maxRetry: number = 5,
+  maxInterval: number = 1000
+) => {
+  let token = null;
+  let retry = 0;
+  token = await SecureStore.getItemAsync("Tokens");
+  while (!token && retry <= maxRetry) {
+    token = await SecureStore.getItemAsync("Tokens");
+    if (!token) {
+      retry++;
+      await new Promise((resolve) => setTimeout(resolve, maxInterval));
+    }
+  }
+  if (!token) {
+    throw new Error("Token not found after retries");
+  }
+  return token;
+};
 
 // Create the main axios instance for normal requests
 export const axiosInstance = axios.create({
@@ -29,10 +48,13 @@ export const axiosInstanceRegular = axios.create({
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const token = await SecureStore.getItemAsync("Tokens");
+    const token = await tokenWithRetry();
     if (token) {
       const { accessToken } = JSON.parse(token);
       config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      config.headers.Authorization = null;
+      throw new Error("Token not founded");
     }
 
     return config;

@@ -185,6 +185,13 @@
             "country": "Улс",
             "editProfile": "Профайл засах",
             "saveProfile": "Хадгалах"
+        },
+        "aboutUs": {
+            "login": "Нэвтрэх",
+            "register": "Бүртгүүлэх",
+            "aboutUs": "Бидний тухай",
+            "helps": "Тусламж",
+            "contactUs": "Холбоо барих"
         }
 
     }

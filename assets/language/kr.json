@@ -184,7 +184,13 @@
             "country":"국가",
             "editProfile":"프로필 수정",
             "saveProfile":"저장"
+        },
+        "aboutUs": {
+            "login": "로그인",
+            "register": "등록",
+            "aboutUs": "회사 소개",
+            "helps": "도움말",
+            "contactUs": "서비스 센터"
         }
-
     }
 }
