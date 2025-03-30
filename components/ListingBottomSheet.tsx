@@ -69,10 +69,10 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 8,
 
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 4,
+    // elevation: 5, // For Android shadow
   },
   btnText: {
     color: "#fff",

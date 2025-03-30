@@ -5,7 +5,6 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
-  Text,
 } from "react-native";
 import { router, Tabs } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
