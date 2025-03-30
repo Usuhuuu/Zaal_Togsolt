@@ -14,7 +14,7 @@ import ExploreHeader from "@/components/ExploreHeader"; // Import your ExploreHe
 import InfoScreen from "@/components/InfoScreen"; // Example drawer screen
 import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { fetchRoleAndProfile } from "../(modals)/functions/profile_data_fetch";
 import {
   AntDesign,

@@ -37,49 +37,60 @@ const ListingComponent = ({ listings: items, category }: Props) => {
     }, 200);
   }, [category, items]);
 
-  const handlePress = (id: string) => {
-    router.push(`/listing/${id}`);
-  };
+  const handlePress = useCallback(
+    (id: string) => {
+      router.push(`/listing/${id}`);
+    },
+    [router]
+  );
+  const ListingItem = React.memo(
+    ({ item, onPress }: { item: Listing; onPress: (id: string) => void }) => {
+      return (
+        <TouchableOpacity
+          onPress={() => onPress(item.id)}
+          style={styles.itemContainer}
+        >
+          <ImageBackground
+            source={require("../assets/images/listingicons/1.png")}
+            style={styles.backgroundImage}
+          >
+            <View style={styles.detailsContainer}>
+              <Text style={styles.text}>{item.name}</Text>
+
+              <View style={styles.ratingContainer}>
+                <MaterialIcons name="sports-score" size={24} color="red" />
+                <Text style={styles.text}>
+                  {item.review_scores_rating / 20}
+                </Text>
+              </View>
+
+              <View style={styles.locationContainer}>
+                <Image
+                  source={require("../assets/images/placeholder.png")}
+                  style={styles.placeholderImage}
+                />
+                <Text style={styles.text}>{item.city}</Text>
+                <Text style={styles.text}>{item.neighbourhood}</Text>
+              </View>
+
+              <Text style={styles.text}>${item.price} tugrug</Text>
+
+              <TouchableOpacity style={styles.viewButton}>
+                <Image
+                  source={require("../assets/images/listingicons/right.png")}
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+      );
+    },
+    (prevProps, nextProps) => prevProps.item === nextProps.item
+  );
 
   const renderRow: ListRenderItem<Listing> = useCallback(
-    ({ item }) => (
-      <TouchableOpacity
-        onPress={() => handlePress(item.id)}
-        style={styles.itemContainer}
-      >
-        <ImageBackground
-          source={require("../assets/images/listingicons/1.png")}
-          style={styles.backgroundImage}
-        >
-          <View style={styles.detailsContainer}>
-            <Text style={styles.text}>{item.name}</Text>
-
-            <View style={styles.ratingContainer}>
-              <MaterialIcons name="sports-score" size={24} color="red" />
-              <Text style={styles.text}>{item.review_scores_rating / 20}</Text>
-            </View>
-
-            <View style={styles.locationContainer}>
-              <Image
-                source={require("../assets/images/placeholder.png")}
-                style={styles.placeholderImage}
-              />
-              <Text style={styles.text}>{item.city}</Text>
-              <Text style={styles.text}>{item.neighbourhood}</Text>
-            </View>
-
-            <Text style={styles.text}>${item.price} tugrug</Text>
-
-            <TouchableOpacity style={styles.viewButton}>
-              <Image
-                source={require("../assets/images/listingicons/right.png")}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
-    ),
+    ({ item }) => <ListingItem item={item} onPress={handlePress} />,
     [handlePress]
   );
 
@@ -127,8 +138,8 @@ const ListingComponent = ({ listings: items, category }: Props) => {
           contentContainerStyle={styles.flatListContent}
           onEndReached={() => console.log("end reached")}
           onEndReachedThreshold={0.1}
-          initialNumToRender={20}
-          windowSize={10}
+          initialNumToRender={10}
+          windowSize={5}
           maintainVisibleContentPosition={{
             minIndexForVisible: 0,
           }}
@@ -148,9 +159,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 20,
     overflow: "hidden",
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 6,
+    // shadowOpacity: 0.35,
+    // shadowRadius: 6,
+    // elevation: 6,
   },
   backgroundImage: {
     width: "100%",

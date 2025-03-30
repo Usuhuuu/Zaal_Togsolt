@@ -1,3 +1,4 @@
+import { useAuth } from "../context/authContext";
 import axiosInstance from "./axiosInstanc";
 import * as SecureStore from "expo-secure-store";
 
@@ -6,8 +7,6 @@ export const fetchRoleAndProfile = async (
   LoginStatus: boolean
 ) => {
   if (LoginStatus) {
-    console.log("LoginStatus", LoginStatus);
-    console.log("path", path);
     try {
       const response = await axiosInstance.get(`/auth/profile_${path}`);
       return {
@@ -16,6 +15,7 @@ export const fetchRoleAndProfile = async (
       };
     } catch (err) {
       console.log(err, "pisda");
+      useAuth().logOut();
       throw new Error("Failed to fetch role and profile data");
     }
   } else {

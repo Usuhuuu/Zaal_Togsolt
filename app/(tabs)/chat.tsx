@@ -31,7 +31,6 @@ import axios from "axios";
 import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
 import ChildModal from "../(modals)/childModal";
 import { useTranslation } from "react-i18next";
-import { error } from "console";
 import { useAuth } from "../(modals)/context/authContext";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
@@ -85,7 +84,6 @@ const ChatComponent: React.FC = () => {
   const { t } = useTranslation();
 
   const chatInitLang: any = t("chatRoom", { returnObjects: true });
-  const chatLang = chatInitLang[0];
   const { LoginStatus } = useAuth();
 
   const {
@@ -122,7 +120,6 @@ const ChatComponent: React.FC = () => {
       );
     } else if (chatError) {
       console.log("Chat Error:", chatError);
-
       Sentry.captureException(chatError);
     }
   }, [chatData, chatError, userLoading]);
@@ -160,7 +157,7 @@ const ChatComponent: React.FC = () => {
           auth: { token: accessToken },
           query: { groupId },
           transports: ["websocket"],
-          secure: true,
+          secure: false,
           autoConnect: true,
           reconnection: true,
           reconnectionAttempts: 5,
@@ -201,6 +198,10 @@ const ChatComponent: React.FC = () => {
 
         // 🔹 Handle token expiration & reconnection
         socketRef.current.on("connect_error", async (error) => {
+          if (error.message === "websocket error") {
+            console.log("WebSocket error, retrying...");
+            return;
+          }
           try {
             const res = await axios.post(
               `${apiUrl}/auth/refresh`,
@@ -208,7 +209,7 @@ const ChatComponent: React.FC = () => {
               { headers: { Authorization: `Bearer ${refreshToken}` } }
             );
             if (res.status == 200 && res.data.success) {
-              SecureStore.setItemAsync(
+              await SecureStore.setItemAsync(
                 "Tokens",
                 JSON.stringify({
                   accessToken: res.data.newAccessToken,
@@ -220,7 +221,7 @@ const ChatComponent: React.FC = () => {
                   token: res.data.newAccessToken,
                 };
                 socketRef.current.connect();
-                socketRef.current?.off("chatHistory");
+                //socketRef.current?.off("chatHistory");
               }
             } else if (res.status === 400) {
               await SecureStore.deleteItemAsync("Tokens");
