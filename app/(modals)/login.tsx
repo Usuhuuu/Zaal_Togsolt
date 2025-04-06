@@ -78,6 +78,7 @@ const Page = () => {
       }
     } catch (err) {
       console.log(err);
+      Alert.alert("Login Failed", "Please Try Again");
       Sentry.captureException(err);
     } finally {
       setLoading(false);

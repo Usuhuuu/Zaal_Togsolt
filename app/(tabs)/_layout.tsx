@@ -176,7 +176,7 @@ const Layout = () => {
   const userDrawerLng = drawer?.userDrawer[0];
   const adminDrawerLng = drawer?.adminDrawer[0];
   const contractorDrawerLng = drawer?.contractorDrawer[0];
-  const { LoginStatus } = useAuth();
+  const { LoginStatus, logOut, logIn } = useAuth();
 
   const drawerScreens: any = {
     default: [
@@ -255,7 +255,9 @@ const Layout = () => {
   useEffect(() => {
     if (userData) {
       setUserRole(userData.role);
+      logIn();
     } else if (userError) {
+      //logOut();
       console.log("Error fetching user data:", userError);
     }
   }, [userData, userError]);

@@ -1,4 +1,3 @@
-import { useAuth } from "../context/authContext";
 import axiosInstance from "./axiosInstanc";
 import * as SecureStore from "expo-secure-store";
 
@@ -14,7 +13,6 @@ export const fetchRoleAndProfile = async (
         profileData: response.data.formData,
       };
     } catch (err) {
-      useAuth().logOut();
       console.log(err, "pisda");
       throw new Error("Failed to fetch role and profile data");
     }
@@ -33,7 +31,6 @@ export const normalFetch = async (url: string) => {
     return response.data;
   } catch (err) {
     console.log(err);
-    useAuth().logOut();
     throw new Error("Failed to fetch data");
   }
 };

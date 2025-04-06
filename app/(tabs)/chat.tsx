@@ -42,6 +42,10 @@ interface Message {
   timestamp: Date;
   grouped?: boolean;
 }
+interface GroupChat {
+  group_ID: string;
+  members: string;
+}
 
 const markGroupedMessages = (messages: Message[]) => {
   if (!messages.length) return [];
@@ -67,7 +71,7 @@ const markGroupedMessages = (messages: Message[]) => {
 };
 
 const ChatComponent: React.FC = () => {
-  const [chatGroups, setChatGroups] = useState<{ groupId: string }[]>([]);
+  const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [currentGroupId, setCurrentGroupId] = useState<string>("");
@@ -115,14 +119,20 @@ const ChatComponent: React.FC = () => {
     if (chatLoading) {
       setLoading(true);
     } else if (chatData && chatData.success) {
+      console.log("Chat Data:", chatData);
       setChatGroups(
-        chatData.chatGroupIDs.map((groupId: string) => ({ groupId }))
+        chatData.chatGroupIDs.map((groupID: any) => ({
+          group_ID: groupID._id,
+          members: groupID.members,
+        }))
       );
     } else if (chatError) {
       console.log("Chat Error:", chatError);
       Sentry.captureException(chatError);
     }
   }, [chatData, chatError, userLoading]);
+
+  console.log("Chat Groups:", chatGroups);
 
   useEffect(() => {
     if (userLoading) {
@@ -401,12 +411,16 @@ const ChatComponent: React.FC = () => {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.groupItem}
-                onPress={() => chatInit(item.groupId)}
+                onPress={() => chatInit(item.group_ID)}
               >
-                <Text style={styles.groupText}>{item.groupId}</Text>
+                <Text style={styles.groupText}>
+                  {Array.isArray(item.members)
+                    ? item.members.join(", ")
+                    : item.members}
+                </Text>
               </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.groupId}
+            keyExtractor={(item) => item.group_ID}
           />
           <Text>sda</Text>
         </View>

@@ -33,7 +33,7 @@ const CustomDrawerContent = (props: any) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const { bottom } = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { LoginStatus } = useAuth();
+  const { LoginStatus, logIn, logOut } = useAuth();
 
   const router = useRouter();
 
@@ -57,7 +57,9 @@ const CustomDrawerContent = (props: any) => {
           ? JSON.parse(data.profileData)
           : data.profileData;
       setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
+      logIn();
     } else if (error) {
+      //logOut();
       console.log("Error fetching user data: Pisda", error);
     }
   }, [data, error]);
