@@ -256,9 +256,7 @@ const Layout = () => {
     if (userData) {
       setUserRole(userData.role);
     } else if (userError) {
-      if (userError) {
-        console.log("Error fetching user data:", userError);
-      }
+      console.log("Error fetching user data:", userError);
     }
   }, [userData, userError]);
 

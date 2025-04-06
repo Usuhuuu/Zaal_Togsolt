@@ -37,7 +37,7 @@ const CustomDrawerContent = (props: any) => {
 
   const router = useRouter();
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error } = useSWR(
     LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null,
     {
       fetcher: () => fetchRoleAndProfile("main", LoginStatus),
@@ -58,9 +58,13 @@ const CustomDrawerContent = (props: any) => {
           : data.profileData;
       setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (error) {
-      console.log("Error fetching user data:", error);
+      console.log("Error fetching user data: Pisda", error);
     }
   }, [data, error]);
+
+  useEffect(() => {
+    console.log("LoginStatus changed:", LoginStatus);
+  }, [LoginStatus]);
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.light, maxWidth: "100%" }}>

@@ -28,7 +28,7 @@ import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/functions/savedhalls";
 import { useRouter } from "expo-router";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstanc";
 
 const { width } = Dimensions.get("window");
@@ -48,7 +48,7 @@ const DetailsPage = () => {
   const [infoHeight, setInfoHeight] = useState(0);
   const [iconsOverflow, setIconsOverflow] = useState<boolean>(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
-  const [today, setToday] = useState<moment.Moment>(moment());
+  const [today, setToday] = useState<Date | Moment>(moment());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const router = useRouter();
@@ -131,9 +131,6 @@ const DetailsPage = () => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    dateSlotGiver(moment());
-  }, []);
 
   const handlePressTimeSlot = (timeSlot: any) => {
     console.log(`Time slot pressed: ${timeSlot}`);
@@ -201,7 +198,7 @@ const DetailsPage = () => {
                 animProperty: "backgroundColor",
                 animSpringDamping: 1,
               }}
-              selectedDate={today.toDate()}
+              selectedDate={moment.isMoment(today) ? today.toDate() : today}
               onDateSelected={(date: any) => dateSlotGiver(date)}
               calendarAnimation={{ type: "sequence", duration: 5 }}
               dateNumberStyle={{ fontSize: 18, fontWeight: "400" }}

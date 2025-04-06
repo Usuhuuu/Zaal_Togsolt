@@ -4,7 +4,7 @@ require File.join(File.dirname(`node --print "require.resolve('react-native/pack
 require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
-ENV['RCT_NEW_ARCH_ENABLED'] = '1'  # Manually set to 1 or 0 as required
+ENV['RCT_NEW_ARCH_ENABLED'] = '0'  # Manually set to 1 or 0 as required
 ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
 
 
@@ -56,7 +56,7 @@ target 'zaalproject' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
-    :new_arch_enabled => true
+    :new_arch_enabled => false
   )
 
   post_install do |installer|

@@ -49,6 +49,9 @@ export const axiosInstanceRegular = axios.create({
 axiosInstance.interceptors.request.use(
   async (config) => {
     const token = await tokenWithRetry();
+    if (!token) {
+      throw new Error("Token not founded");
+    }
     if (token) {
       const { accessToken } = JSON.parse(token);
       config.headers.Authorization = `Bearer ${accessToken}`;
