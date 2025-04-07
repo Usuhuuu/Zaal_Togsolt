@@ -304,16 +304,17 @@ const Page = () => {
           <TouchableOpacity
             style={styles.btnOutline}
             onPress={async () => {
-              const facebookReturn = await loginWithFacebook().then((res) => {
-                console.log(res);
-                setIsModalVisible(res?.modalVisible ?? false);
-                console.log(res?.data);
-                setFormData({
-                  ...formData,
-                  firstName: res?.data.firstName,
-                  lastName: res?.data.lastName,
-                });
-              });
+              // const facebookReturn = await loginWithFacebook().then((res) => {
+              //   console.log(res);
+              //   setIsModalVisible(res?.modalVisible ?? false);
+              //   console.log(res?.data);
+              //   setFormData({
+              //     ...formData,
+              //     firstName: res?.data.firstName,
+              //     lastName: res?.data.lastName,
+              //   });
+              // });
+              setIsModalVisible(true);
             }}
           >
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />

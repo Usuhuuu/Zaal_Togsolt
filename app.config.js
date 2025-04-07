@@ -91,6 +91,7 @@ export default {
       }],
       "expo-tracking-transparency",
       ["expo-apple-authentication"],
+      "expo-dev-client",
       ["expo-build-properties", {
         android: {
           manifest: {
@@ -127,11 +128,12 @@ export default {
               "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
             ],
           },
+
         },
       }],
     ],
     experiments: {
-      typedRoutes: true
+      typedRoutes: true,
     },
     extra: {
       apiUrl: process.env.API_URL,
