@@ -5,18 +5,17 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
-import { fetchRoleAndProfile } from "@/app/(modals)/functions/profile_data_fetch";
 import Colors from "@/constants/Colors";
 import * as Clipboard from "expo-clipboard";
-import { useRouter } from "expo-router";
 
 // Import SavedHalls component
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 import ContractorPage from "@/components/profileScreens/contractor";
 import ProfileAdmin from "@/components/profileScreens/admin";
 import NormalUser from "@/components/profileScreens/normalUser";
 import { useAuth } from "../(modals)/context/authContext";
 import Page from "../(modals)/login";
+import { auth_swr } from "../(modals)/functions/useswr";
 
 const Profile: React.FC = () => {
   const [formData, setFormData] = useState<any>({});
@@ -25,19 +24,13 @@ const Profile: React.FC = () => {
   const [userRole, setUserRole] = useState<string>("");
   const { LoginStatus } = useAuth();
 
-  const { data, error, isLoading } = useSWR(
-    LoginStatus ? [`RoleAndProfile_${path}`, LoginStatus] : null,
-    {
-      fetcher: () => fetchRoleAndProfile(path, LoginStatus),
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      shouldRetryOnError: true,
-      refreshWhenHidden: false,
-      dedupingInterval: 10000,
-      errorRetryInterval: 4000,
-      errorRetryCount: 3,
-    }
-  );
+  const { data, error, isLoading } = auth_swr({
+    item: {
+      pathname: path,
+      cacheKey: `RoleAndProfile_${path}`,
+      loginStatus: LoginStatus,
+    },
+  });
 
   useEffect(() => {
     if (data) {

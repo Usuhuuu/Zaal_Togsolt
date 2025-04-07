@@ -1,6 +1,6 @@
 import { useAuth } from "@/app/(modals)/context/authContext";
 import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
-import { fetchRoleAndProfile } from "@/app/(modals)/functions/profile_data_fetch";
+import { auth_swr } from "@/app/(modals)/functions/useswr";
 import Colors from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +14,6 @@ import {
   Alert,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import useSWR from "swr";
 
 const UserInfoScreen = () => {
   const { t } = useTranslation();
@@ -34,19 +33,14 @@ const UserInfoScreen = () => {
 
   const userInfo: any = t("userInfo", { returnObjects: true });
 
-  const { data, error, isLoading } = useSWR(
-    LoginStatus ? [`RoleAndProfile_${path}`, LoginStatus] : null,
-    {
-      fetcher: () => fetchRoleAndProfile(path, LoginStatus),
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      shouldRetryOnError: true,
-      refreshWhenHidden: false,
-      dedupingInterval: 10000,
-      errorRetryInterval: 4000,
-      errorRetryCount: 3,
-    }
-  );
+  const { data, error, isLoading } = auth_swr({
+    item: {
+      pathname: path,
+      cacheKey: `RoleAndProfile_${path}`,
+      loginStatus: LoginStatus,
+    },
+  });
+
   useEffect(() => {
     if (data) {
       const parsedData =

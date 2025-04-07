@@ -8,12 +8,12 @@ import {
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import useSWR, { mutate } from "swr";
-import { fetchRoleAndProfile } from "../(modals)/functions/profile_data_fetch";
+import { mutate } from "swr";
 import Colors from "@/constants/Colors";
 import axiosInstance from "../(modals)/functions/axiosInstanc";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
+import { auth_swr } from "../(modals)/functions/useswr";
 
 const FriendRequest = () => {
   const [friendData, setFriendData] = useState<string[]>([]);
@@ -48,13 +48,12 @@ const FriendRequest = () => {
     }
   };
 
-  const { data, error, isLoading } = useSWR("User_Friend", {
-    fetcher: () => fetchRoleAndProfile("friends", LoginStatus),
-    revalidateOnFocus: false,
-    shouldRetryOnError: true,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
-    dedupeInterval: 3000,
+  const { data, error, isLoading } = auth_swr({
+    item: {
+      pathname: "friends",
+      cacheKey: "User_Friend",
+      loginStatus: LoginStatus,
+    },
   });
 
   useEffect(() => {

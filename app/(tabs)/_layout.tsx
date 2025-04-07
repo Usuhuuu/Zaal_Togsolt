@@ -14,8 +14,6 @@ import ExploreHeader from "@/components/ExploreHeader"; // Import your ExploreHe
 import InfoScreen from "@/components/InfoScreen"; // Example drawer screen
 import Dtraining from "@/components/training";
 import CustomDrawerContent from "@/components/CostumDrawerContent";
-import useSWR from "swr";
-import { fetchRoleAndProfile } from "../(modals)/functions/profile_data_fetch";
 import {
   AntDesign,
   Entypo,
@@ -28,6 +26,7 @@ import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScr
 import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
 import { useAuth } from "../(modals)/context/authContext";
+import { auth_swr } from "../(modals)/functions/useswr";
 
 // Create a Drawer Navigator
 export const TabsLayout = () => {
@@ -243,13 +242,12 @@ const Layout = () => {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = useSWR(LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null, {
-    fetcher: () => fetchRoleAndProfile("main", LoginStatus),
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-    dedupingInterval: 10000,
-    errorRetryInterval: 1000,
-    errorRetryCount: 3,
+  } = auth_swr({
+    item: {
+      pathname: "main",
+      cacheKey: "RoleAndProfile_main",
+      loginStatus: LoginStatus,
+    },
   });
 
   useEffect(() => {

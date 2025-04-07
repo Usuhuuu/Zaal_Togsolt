@@ -17,11 +17,6 @@ import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
 import Constants from "expo-constants";
-import useSWR from "swr";
-import {
-  fetchRoleAndProfile,
-  normalFetch,
-} from "../(modals)/functions/profile_data_fetch";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
@@ -32,6 +27,7 @@ import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
 import ChildModal from "../(modals)/childModal";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
+import { auth_swr, regular_swr } from "../(modals)/functions/useswr";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -94,32 +90,26 @@ const ChatComponent: React.FC = () => {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = useSWR(LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null, {
-    fetcher: () => fetchRoleAndProfile("main", LoginStatus),
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-    dedupingInterval: 10000,
-    errorRetryInterval: 4000,
-    errorRetryCount: 3,
+  } = auth_swr({
+    item: {
+      pathname: "main",
+      cacheKey: "RoleAndProfile_main",
+      loginStatus: LoginStatus,
+    },
   });
 
   const {
     data: chatData,
     error: chatError,
     isLoading: chatLoading,
-  } = useSWR("group_chat", {
-    fetcher: () => normalFetch("/auth/chatcheck"),
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    shouldRetryOnError: true,
-    errorRetryCount: 3,
+  } = regular_swr({
+    item: { pathname: "/auth/chatcheck", cacheKey: "group_chat" },
   });
 
   useEffect(() => {
     if (chatLoading) {
       setLoading(true);
     } else if (chatData && chatData.success) {
-      console.log("Chat Data:", chatData);
       setChatGroups(
         chatData.chatGroupIDs.map((groupID: any) => ({
           group_ID: groupID._id,

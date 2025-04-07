@@ -24,7 +24,9 @@
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
+    "@reduxjs/toolkit": "^2.6.1",
     "@sentry/react-native": "^5.36.0",
+    "@stripe/stripe-react-native": "0.38.6",
     "@tanstack/react-query": "^5.62.16",
     "AsyncStorage": "^0.1.5",
     "axios": "^1.7.2",
@@ -86,8 +88,7 @@
     "socket.io-client": "^4.8.1",
     "swr": "^2.3.2",
     "xml2js": "^0.6.2",
-    "zaalproject": "file:",
-    "@stripe/stripe-react-native": "0.38.6"
+    "zaalproject": "file:"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

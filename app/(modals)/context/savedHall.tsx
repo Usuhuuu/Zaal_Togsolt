@@ -1,7 +1,6 @@
-// SavedHallsContext.js
 import { ReactNode } from "react";
 import React, { createContext, useState, useContext } from "react";
-import axiosInstance from "./axiosInstanc";
+import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface Hall {
@@ -9,13 +8,13 @@ export interface Hall {
   name: string;
 }
 
-interface SavedHallsContextType {
+interface SavedHallsContextProps {
   savedHalls: Hall[];
   addHall: (hall: Hall) => void;
   removeHall: (id: string) => void;
 }
 
-const SavedHallsContext = createContext<SavedHallsContextType>({
+const SavedHallsContext = createContext<SavedHallsContextProps>({
   savedHalls: [],
   addHall: (hall: Hall) => {},
   removeHall: (id: string) => {},

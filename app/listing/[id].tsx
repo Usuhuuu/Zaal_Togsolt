@@ -26,7 +26,7 @@ import Animated, {
 import { defaultStyles } from "@/constants/Styles";
 import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSavedHalls } from "../(modals)/functions/savedhalls";
+import { useSavedHalls } from "../(modals)/context/savedHall";
 import { useRouter } from "expo-router";
 import moment, { Moment } from "moment";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstanc";

@@ -17,9 +17,8 @@ import Colors from "@/constants/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useTranslation } from "react-i18next";
 import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
-import useSWR from "swr";
-import { fetchRoleAndProfile } from "@/app/(modals)/functions/profile_data_fetch";
 import { useAuth } from "@/app/(modals)/context/authContext";
+import { auth_swr } from "@/app/(modals)/functions/useswr";
 
 const CustomDrawerContent = (props: any) => {
   interface UserData {
@@ -37,17 +36,14 @@ const CustomDrawerContent = (props: any) => {
 
   const router = useRouter();
 
-  const { data, error } = useSWR(
-    LoginStatus ? [`RoleAndProfile_main`, LoginStatus] : null,
-    {
-      fetcher: () => fetchRoleAndProfile("main", LoginStatus),
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-      dedupingInterval: 10000,
-      errorRetryInterval: 4000,
-      errorRetryCount: 3,
-    }
-  );
+  const { data, error, isLoading } = auth_swr({
+    item: {
+      pathname: "main",
+      cacheKey: "RoleAndProfile_main",
+      loginStatus: LoginStatus,
+    },
+  });
+
   const width = Dimensions.get("window").width;
 
   useEffect(() => {
