@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors"; // Assuming Colors is defined properly
-import { axiosInstanceRegular } from "./functions/axiosInstanc";
+import { axiosInstanceRegular } from "./functions/axiosInstance";
 import { useTranslation } from "react-i18next";
 
 const Page = () => {

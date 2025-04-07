@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import Colors from "@/constants/Colors";
-import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
+import axiosInstance from "@/app/(modals)/functions/axiosInstance";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ProfileStatisticalProps {

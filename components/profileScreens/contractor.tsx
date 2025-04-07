@@ -1,4 +1,4 @@
-import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
+import axiosInstance from "@/app/(modals)/functions/axiosInstance";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";

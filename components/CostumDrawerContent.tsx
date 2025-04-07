@@ -61,7 +61,7 @@ const CustomDrawerContent = (props: any) => {
   }, [data, error]);
 
   useEffect(() => {
-    console.log("LoginStatus changed:", LoginStatus);
+    //console.log("LoginStatus changed:", LoginStatus);
   }, [LoginStatus]);
 
   return (

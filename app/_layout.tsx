@@ -5,13 +5,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, ReactNode, useState } from "react";
-import {
-  TouchableOpacity,
-  View,
-  Text,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
 import { LanguageProvider } from "./(modals)/context/Languages";
@@ -88,6 +82,7 @@ function RootLayoutNav() {
           },
         }}
       />
+
       <Stack.Screen name="listing/[id]" options={{ headerTitle: " " }} />
       <Stack.Screen
         name="(modals)/sags"
@@ -102,6 +97,7 @@ function RootLayoutNav() {
           ),
         }}
       />
+
       <Stack.Screen
         name="listing/notification"
         options={{

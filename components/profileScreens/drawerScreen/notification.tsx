@@ -11,7 +11,7 @@ import {
 import Colors from "@/constants/Colors";
 import { MultiSelect } from "react-native-element-dropdown";
 import { TextInput } from "react-native-gesture-handler";
-import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
+import axiosInstance from "@/app/(modals)/functions/axiosInstance";
 
 interface ProfileNotificationProps {
   copyToClipboard: () => void;

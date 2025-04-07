@@ -29,7 +29,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/context/savedHall";
 import { useRouter } from "expo-router";
 import moment, { Moment } from "moment";
-import { axiosInstanceRegular } from "../(modals)/functions/axiosInstanc";
+import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;

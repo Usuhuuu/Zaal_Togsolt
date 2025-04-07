@@ -122,8 +122,6 @@ const ChatComponent: React.FC = () => {
     }
   }, [chatData, chatError, userLoading]);
 
-  console.log("Chat Groups:", chatGroups);
-
   useEffect(() => {
     if (userLoading) {
       setLoading(true);

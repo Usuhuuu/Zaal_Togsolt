@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { mutate } from "swr";
 import Colors from "@/constants/Colors";
-import axiosInstance from "../(modals)/functions/axiosInstanc";
+import axiosInstance from "../(modals)/functions/axiosInstance";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../(modals)/functions/useswr";

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import React, { createContext, useState, useContext } from "react";
-import axiosInstance from "@/app/(modals)/functions/axiosInstanc";
+import axiosInstance from "@/app/(modals)/functions/axiosInstance";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface Hall {
