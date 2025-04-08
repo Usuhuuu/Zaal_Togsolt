@@ -1,0 +1,13 @@
+diff --git a/node_modules/expo-modules-core/ios/AppDelegates/ExpoAppInstance.swift b/node_modules/expo-modules-core/ios/AppDelegates/ExpoAppInstance.swift
+index 1e6e7ec..bca3807 100644
+--- a/node_modules/expo-modules-core/ios/AppDelegates/ExpoAppInstance.swift
++++ b/node_modules/expo-modules-core/ios/AppDelegates/ExpoAppInstance.swift
+@@ -43,7 +43,7 @@ open class ExpoAppInstance: RCTAppDelegate {
+ 
+     let configuration = RCTRootViewFactoryConfiguration(
+       bundleURLBlock: bundleUrlBlock,
+-      newArchEnabled: newArchEnabled(),
++      newArchEnabled: false,
+       turboModuleEnabled: turboModuleEnabled(),
+       bridgelessEnabled: bridgelessEnabled()
+     )
