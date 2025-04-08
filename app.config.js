@@ -94,6 +94,7 @@ export default {
       "expo-dev-client",
       ["expo-build-properties", {
         android: {
+
           manifest: {
             "meta-data": [
               {
@@ -104,6 +105,8 @@ export default {
           },
         },
         ios: {
+          deploymentTarget: "15.1",
+          newArchEnabled: false,
           infoPlist: {
             "aps-environment": "development",
             GMSApiKey: process.env.GOOGLE_MAPS_API_KEY,
@@ -130,6 +133,7 @@ export default {
           },
 
         },
+
       }],
     ],
     experiments: {

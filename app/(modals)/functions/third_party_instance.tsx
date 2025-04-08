@@ -26,13 +26,16 @@ export const loginWithFacebook = async () => {
             return { modalVisible: true, data: response.data };
           } else if (response.status === 400 && !response.data.success) {
             Alert.alert("error", "User not found");
+            return { modalVisible: false, data: null };
           }
         } catch (error) {
           console.log("Error fetching data from Facebook:", error);
+          return { modalVisible: false, data: null };
         }
       }
     } else {
       Alert.alert("User cancelled the login process");
+      return { modalVisible: false, data: null };
     }
   } catch (error: any) {
     if (error.code) {

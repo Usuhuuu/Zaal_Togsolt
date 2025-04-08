@@ -304,16 +304,20 @@ const Page = () => {
           <TouchableOpacity
             style={styles.btnOutline}
             onPress={async () => {
-              // const facebookReturn = await loginWithFacebook().then((res) => {
-              //   console.log(res);
-              //   setIsModalVisible(res?.modalVisible ?? false);
-              //   console.log(res?.data);
-              //   setFormData({
-              //     ...formData,
-              //     firstName: res?.data.firstName,
-              //     lastName: res?.data.lastName,
-              //   });
-              // });
+              try {
+                const facebookResponse = await loginWithFacebook();
+                console.log(facebookResponse);
+                if (facebookResponse?.modalVisible) {
+                  setIsModalVisible(facebookResponse.modalVisible);
+                  setFormData({
+                    ...formData,
+                    firstName: facebookResponse.data.firstName,
+                    lastName: facebookResponse.data.lastName,
+                  });
+                }
+              } catch (err) {
+                console.log(err);
+              }
               setIsModalVisible(true);
             }}
           >
@@ -381,8 +385,24 @@ const Page = () => {
         animationType="slide"
         presentationStyle="formSheet"
       >
-        <View style={[styles.modalContainer, { marginBottom: bottom }]}>
-          <View style={[styles.modalHeader, { height: headerHeight }]}>
+        <View
+          style={[
+            styles.modalContainer,
+            {
+              marginBottom: bottom,
+              borderBottomWidth: 1,
+              borderColor: Colors.primary,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              {
+                height: headerHeight,
+              },
+            ]}
+          >
             <TouchableOpacity>
               <Ionicons
                 name="arrow-back"
