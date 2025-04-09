@@ -318,7 +318,6 @@ const Page = () => {
               } catch (err) {
                 console.log(err);
               }
-              setIsModalVisible(true);
             }}
           >
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
