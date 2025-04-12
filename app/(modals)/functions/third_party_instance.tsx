@@ -47,7 +47,6 @@ export const loginWithFacebook = async () => {
           accessToken: data.authenticationToken,
         },
       });
-      console.log("Facebook Login Result:", response);
       console.log("Facebook Login Response:", response);
       if (response.status === 201 && response.data.success) {
         return {

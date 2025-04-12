@@ -88,6 +88,7 @@ export const TabsLayout = () => {
           ),
         }}
       />
+
       <Tabs.Screen
         name="explore"
         options={{
@@ -150,7 +151,7 @@ export const TabsLayout = () => {
               accessibilityHint="Navigates to the profile screen"
             />
           ),
-          headerShown: !LoginStatus ? true : false,
+          headerShown: !LoginStatus ? false : true,
           headerTitle: !LoginStatus ? t("aboutUs.login") : t("profile"),
           headerStyle: {},
           headerTitleStyle: {

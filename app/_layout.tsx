@@ -102,7 +102,6 @@ function RootLayoutNav() {
         options={{
           headerShown: true,
           title: `${t("notificationText")}`,
-
           headerTitleStyle: { fontSize: 28, color: Colors.primary },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
@@ -26,6 +25,7 @@ import {
   loginWithApple,
 } from "./functions/third_party_instance";
 import SignupModal from "./functions/signup_modal";
+import { TextInput } from "react-native-paper";
 
 type LoginInput = {
   userName: string;
@@ -112,23 +112,6 @@ const Page = () => {
     setPasswordHide(!passwordHide);
   };
 
-  const mobileVerify = async () => {
-    try {
-      const response = await axiosInstanceRegular.post(
-        "/auth/phoneVerification",
-        {
-          phoneNumber,
-        }
-      );
-      response.status === 200
-        ? Alert.alert("Verification Sent", "Verification code sent")
-        : Alert.alert("Error", "Verification code not sent");
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "Failed to send verification code");
-    }
-  };
-
   const mobileVerifyCheck = async () => {
     try {
       const response = await axiosInstanceRegular.post("/auth/verifyCode", {
@@ -192,22 +175,30 @@ const Page = () => {
         <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder={login.email}
+            label={login.email}
             value={email}
             onChangeText={setEmail}
             style={styles.input}
             placeholderTextColor={Colors.grey}
+            mode="outlined"
+            theme={{
+              colors: { primary: Colors.primary },
+            }}
           />
         </View>
         <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
-            placeholder={login.password}
+            label={login.password}
             secureTextEntry={passwordHide}
             value={password}
             onChangeText={setPassword}
             style={styles.input}
             placeholderTextColor={Colors.grey}
+            mode="outlined"
+            theme={{
+              colors: { primary: Colors.primary },
+            }}
           />
           <TouchableOpacity
             style={styles.eyeIcon}
@@ -220,35 +211,7 @@ const Page = () => {
             />
           </TouchableOpacity>
         </View>
-        <View style={styles.verificationContainer}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder={login.phoneNum}
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            style={styles.input}
-            placeholderTextColor={Colors.grey}
-          />
-          <TouchableOpacity style={styles.verifyButton} onPress={mobileVerify}>
-            <Text style={styles.verifyButtonText}>{login.verify}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            autoCapitalize="none"
-            placeholder={login.verifyCode}
-            value={verifyCode}
-            onChangeText={setVerifyCode}
-            style={styles.input}
-            placeholderTextColor={Colors.grey}
-          />
-          <TouchableOpacity
-            style={styles.verifyButton}
-            onPress={mobileVerifyCheck}
-          >
-            <Text style={styles.verifyButtonText}>{login.CheckCode}</Text>
-          </TouchableOpacity>
-        </View>
+
         <TouchableOpacity
           style={[styles.button, styles.loginBtn]}
           onPress={() => {
@@ -257,15 +220,11 @@ const Page = () => {
           }}
           disabled={loading}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>{login.login}</Text>
-          )}
+          <Text style={styles.buttonText}>{login.login}</Text>
         </TouchableOpacity>
         <View style={styles.separatorView}>
           <View style={styles.separatorLine} />
-          <Text style={styles.separatorText}>or</Text>
+          <Text style={[styles.separatorText, { fontSize: 18 }]}>or</Text>
           <View style={styles.separatorLine} />
         </View>
         <View style={styles.socialButtons}>
@@ -365,19 +324,19 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent background
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     shadowOpacity: 0.8,
     shadowRadius: 5,
+    justifyContent: "center",
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 0,
   },
   input: {
     height: 50,
     borderWidth: 1,
     borderColor: "#ccc",
     paddingHorizontal: 15,
-    borderRadius: 30, // Rounded edges
     backgroundColor: "#fff",
     fontSize: 16,
     color: "#333",
@@ -397,8 +356,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 30, // Rounded edges for the button
-    elevation: 3, // For Android button elevation
   },
   verifyButtonText: {
     color: "#fff",
@@ -442,12 +399,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     height: 50,
-    borderRadius: 30, // Rounded edges
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     paddingHorizontal: 15,
-    marginBottom: 12, // Spacing between social buttons
+    marginBottom: 12,
     elevation: 2, // Button elevation
   },
   btnOutlineText: {
