@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
 import { useAuth } from "@/app/(modals)/context/authContext";
 import { auth_swr } from "@/app/(modals)/functions/useswr";
+import { requestTrackingPermission } from "react-native-tracking-transparency";
 
 const CustomDrawerContent = (props: any) => {
   interface UserData {
@@ -42,6 +43,12 @@ const CustomDrawerContent = (props: any) => {
       cacheKey: "RoleAndProfile_main",
       loginStatus: LoginStatus,
     },
+  });
+  useEffect(() => {
+    const requestTracking = async () => {
+      await requestTrackingPermission();
+    };
+    requestTracking();
   });
 
   const width = Dimensions.get("window").width;

@@ -1691,6 +1691,8 @@ PODS:
     - Yoga
   - react-native-safe-area-context (4.10.5):
     - React-Core
+  - react-native-tracking-transparency (0.1.2):
+    - React
   - React-nativeconfig (0.76.9)
   - React-NativeModulesApple (0.76.9):
     - glog
@@ -2257,6 +2259,7 @@ DEPENDENCIES:
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-tracking-transparency (from `../node_modules/react-native-tracking-transparency`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -2474,6 +2477,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-pager-view"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-tracking-transparency:
+    :path: "../node_modules/react-native-tracking-transparency"
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:
@@ -2642,6 +2647,7 @@ SPEC CHECKSUMS:
   react-native-notifications: 3bafa1237ae8a47569a84801f17d80242fe9f6a5
   react-native-pager-view: 637e84f94cec285414f7f2d89685de38ff797f64
   react-native-safe-area-context: df9763c5de6fa38883028e243a0b60123acb8858
+  react-native-tracking-transparency: 15eb319f2b982070eb9831582af27d87badfa624
   React-nativeconfig: 8efdb1ef1e9158c77098a93085438f7e7b463678
   React-NativeModulesApple: cebca2e5320a3d66e123cade23bd90a167ffce5e
   React-perflogger: 72e653eb3aba9122f9e57cf012d22d2486f33358

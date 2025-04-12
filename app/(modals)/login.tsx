@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,14 +8,10 @@ import {
   Alert,
   ActivityIndicator,
   ImageBackground,
-  Modal,
-  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as SecureStore from "expo-secure-store";
 import Colors from "@/constants/Colors";
-import { Settings } from "react-native-fbsdk-next";
-import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Platform } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
@@ -29,8 +25,7 @@ import {
   loginWithGoogle,
   loginWithApple,
 } from "./functions/third_party_instance";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
+import SignupModal from "./functions/signup_modal";
 
 type LoginInput = {
   userName: string;
@@ -38,27 +33,10 @@ type LoginInput = {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  email: string;
+  userID: string;
+  signUpTimer: string;
 };
-const initSteps = [
-  {
-    steps: 0,
-    title: "First Name",
-    placeholder: "username",
-    buttonText: "Check User Name",
-  },
-  {
-    steps: 1,
-    title: "Username",
-    placeholder: "password",
-    buttonText: "Next",
-  },
-  {
-    steps: 2,
-    title: "Final",
-    placeholder: "Check the personal information",
-    buttonText: "Create Account",
-  },
-];
 const Page = () => {
   const { t } = useTranslation();
   const loginDetails: any = t("login", { returnObjects: true });
@@ -83,30 +61,12 @@ const Page = () => {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    email: "",
+    userID: "",
+    signUpTimer: "",
   });
-  const [modalPasswordHide, setModalPasswordHide] = useState<boolean>(true);
-  const [disableButton, setDisableButton] = useState<boolean>(true);
-  const fadeCheckUsername = useRef(new Animated.Value(0)).current;
-  const fadeConfirm = useRef(new Animated.Value(0)).current;
 
   const { logIn } = useAuth();
-
-  useEffect(() => {
-    Animated.timing(fadeCheckUsername, {
-      toValue: formData.userName.length > 0 ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [formData.userName]);
-
-  useEffect(() => {
-    Animated.timing(fadeConfirm, {
-      toValue: formData.password.length > 0 ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [formData.password]);
-
   useEffect(() => {
     if (Platform.OS == "ios") {
       setIsITApple(true);
@@ -182,20 +142,6 @@ const Page = () => {
       Alert.alert("Error", "Failed to verify the code");
     }
   };
-
-  const requestTracking = async () => {
-    const { status } = await requestTrackingPermissionsAsync();
-    Settings.initializeSDK();
-    if (status == "granted") {
-      await Settings.setAdvertiserTrackingEnabled(true);
-    }
-  };
-  useEffect(() => {
-    if (isitGoogle) {
-      requestTracking();
-    }
-  }, [isitGoogle]);
-
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
@@ -206,8 +152,36 @@ const Page = () => {
     });
   }, []);
 
-  const { bottom } = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
+  const handleFacebookLogin = async () => {
+    try {
+      const facebookResponse = await loginWithFacebook();
+      const returnData = facebookResponse?.data;
+      console.log(returnData);
+      if (facebookResponse?.modalVisible) {
+        setFormData({
+          ...formData,
+          userID: returnData.data.userID,
+          email: returnData.data.email || "",
+          firstName: returnData.data.firstName || "",
+          lastName: returnData.data.lastName || "",
+          signUpTimer: returnData.data.signUpTimer || "",
+        });
+        setTimeout(() => {
+          setIsModalVisible(true);
+        }, 500);
+      } else if (
+        facebookResponse?.data.message ===
+        "Successfully logged in with Facebook"
+      ) {
+        logIn();
+        Alert.alert(`${facebookResponse?.data.message}`);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    return;
+  };
+
   return (
     <ImageBackground
       source={require("../../assets/images/zurag1.jpg")}
@@ -303,21 +277,8 @@ const Page = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.btnOutline}
-            onPress={async () => {
-              try {
-                const facebookResponse = await loginWithFacebook();
-                console.log(facebookResponse);
-                if (facebookResponse?.modalVisible) {
-                  setIsModalVisible(facebookResponse.modalVisible);
-                  setFormData({
-                    ...formData,
-                    firstName: facebookResponse.data.firstName,
-                    lastName: facebookResponse.data.lastName,
-                  });
-                }
-              } catch (err) {
-                console.log(err);
-              }
+            onPress={() => {
+              handleFacebookLogin();
             }}
           >
             <Ionicons name="logo-facebook" size={24} style={styles.btnIcon} />
@@ -379,191 +340,14 @@ const Page = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        presentationStyle="formSheet"
-      >
-        <View
-          style={[
-            styles.modalContainer,
-            {
-              marginBottom: bottom,
-              borderBottomWidth: 1,
-              borderColor: Colors.primary,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.modalHeader,
-              {
-                height: headerHeight,
-              },
-            ]}
-          >
-            <TouchableOpacity>
-              <Ionicons
-                name="arrow-back"
-                size={28}
-                color={Colors.primary}
-                onPress={() => setIsModalVisible(false)}
-              />
-            </TouchableOpacity>
-            <View
-              style={{
-                flex: 1,
-                width: "100%",
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                alignItems: "center",
-              }}
-            >
-              {initSteps.map((item) => {
-                return (
-                  <View
-                    key={item.steps}
-                    style={{
-                      alignItems: "center",
-                      padding: 5,
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor:
-                          steps === item.steps ? Colors.primary : Colors.white,
-                        borderWidth: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderRadius: 25,
-                        padding: 5,
-                        paddingHorizontal: 10,
-                        borderColor: Colors.primary,
-                      }}
-                    >
-                      <Text style={{ color: Colors.grey, fontSize: 20 }}>
-                        {item.steps}
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        borderBottomWidth: 1,
-                        borderColor:
-                          steps === item.steps ? Colors.primary : Colors.white,
-                      }}
-                    >
-                      <Text>{item.title}</Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-          {steps === 0 && (
-            <View style={styles.modalInputContainer}>
-              <TextInput style={styles.modalInput} value={formData.firstName} />
-              <TextInput style={styles.modalInput} value={formData.lastName} />
-              <View style={styles.modalButtonContainerFirst}>
-                <TouchableOpacity
-                  style={styles.modalNextButton}
-                  onPress={() => {
-                    setSteps(steps + 1);
-                    console.log(formData);
-                  }}
-                >
-                  <Text style={styles.modalButtonText}>Next</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-          {steps === 1 && (
-            <View style={styles.modalInputContainer}>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="Enter the username"
-                value={formData.userName}
-                onChange={(e) =>
-                  setFormData({ ...formData, userName: e.nativeEvent.text })
-                }
-              />
-              <Animated.View
-                style={{
-                  opacity: fadeCheckUsername,
-                  alignItems: "center",
-                  padding: 10,
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    setDisableButton(false);
-                  }}
-                  style={{
-                    backgroundColor: Colors.primary,
-                    padding: 10,
-                    borderRadius: 20,
-                  }}
-                >
-                  <Text style={{ color: Colors.white, fontSize: 20 }}>
-                    Check User Name
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-              <View style={styles.modalButtonContainer}>
-                <TouchableOpacity
-                  style={styles.modalNextButton}
-                  onPress={() => setSteps(steps - 1)}
-                >
-                  <Text style={styles.modalButtonText}>Preview</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalNextButton}
-                  onPress={() => {
-                    setSteps(steps + 1);
-                    console.log(formData);
-                  }}
-                  disabled={disableButton}
-                >
-                  <Text style={styles.modalButtonText}>Next</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-          {steps === 2 && (
-            <View style={styles.modalInputContainer}>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="password"
-                onChangeText={(e) => setFormData({ ...formData, password: e })}
-                secureTextEntry={modalPasswordHide}
-              />
-              <Animated.View style={{ opacity: fadeConfirm }}>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="again password"
-                />
-              </Animated.View>
-
-              <View style={styles.modalButtonContainer}>
-                <TouchableOpacity
-                  style={styles.modalNextButton}
-                  onPress={() => setSteps(steps - 1)}
-                >
-                  <Text style={styles.modalButtonText}>Preview</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalNextButton}
-                  onPress={() => {
-                    setSteps(steps + 1);
-                    console.log(formData);
-                  }}
-                >
-                  <Text style={styles.modalButtonText}>Next</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        </View>
-      </Modal>
+      <SignupModal
+        isModalVisible={isModalVisible}
+        setModalVisible={setIsModalVisible}
+        formData={formData}
+        setFormData={setFormData}
+        steps={steps}
+        setSteps={setSteps}
+      />
     </ImageBackground>
   );
 };
@@ -677,49 +461,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     marginRight: 15,
-  },
-
-  modalContainer: {
-    flex: 1,
-    width: "95%",
-    height: "100%",
-    marginHorizontal: 10,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  modalInputContainer: {
-    gap: 20,
-  },
-  modalInput: {
-    height: 50,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginHorizontal: 20,
-    borderRadius: 15,
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginHorizontal: 20,
-    alignItems: "center",
-  },
-  modalButtonContainerFirst: {
-    alignItems: "flex-end",
-  },
-  modalNextButton: {
-    backgroundColor: Colors.primary,
-    padding: 10,
-    borderRadius: 20,
-    width: "45%",
-    alignItems: "center",
-  },
-  modalButtonText: {
-    color: Colors.white,
-    fontSize: 20,
   },
 });
 

@@ -1,6 +1,10 @@
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { LoginManager, AccessToken } from "react-native-fbsdk-next";
+import {
+  LoginManager,
+  Settings,
+  AuthenticationToken,
+} from "react-native-fbsdk-next";
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as Sentry from "@sentry/react-native";
 import {
@@ -8,50 +12,90 @@ import {
   isErrorWithCode,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import { getTrackingStatus } from "react-native-tracking-transparency";
 
 export const loginWithFacebook = async () => {
   try {
+    Settings.initializeSDK();
+    let isLimitedLogin = false;
+    if (Platform.OS === "ios") {
+      const trackStatus = await getTrackingStatus();
+      if (trackStatus === "authorized" || trackStatus === "unavailable") {
+        await Settings.setAdvertiserTrackingEnabled(true);
+        isLimitedLogin = false;
+      } else if (trackStatus === "denied") {
+        await Settings.setAdvertiserTrackingEnabled(false);
+        isLimitedLogin = true;
+      }
+    } else {
+      await Settings.setAdvertiserTrackingEnabled(true);
+    }
+
+    LoginManager.logOut();
     const result = await LoginManager.logInWithPermissions([
       "public_profile",
       "email",
     ]);
-    if (!result.isCancelled) {
-      const data = await AccessToken.getCurrentAccessToken();
-      if (data) {
-        try {
-          const response = await axiosInstanceRegular.post("/auth/facebook", {
-            fbAccessToken: data.accessToken,
-          });
-          if (response.status === 200 && response.data.success) {
-            return { modalVisible: true, data: response.data };
-          } else if (response.status === 400 && !response.data.success) {
-            Alert.alert("error", "User not found");
-            return { modalVisible: false, data: null };
-          }
-        } catch (error) {
-          console.log("Error fetching data from Facebook:", error);
-          return { modalVisible: false, data: null };
-        }
-      }
-    } else {
-      Alert.alert("User cancelled the login process");
+    if (result.isCancelled) {
+      Alert.alert("Login cancelled");
       return { modalVisible: false, data: null };
     }
+    const data = await AuthenticationToken.getAuthenticationTokenIOS();
+    if (data) {
+      const response = await axiosInstanceRegular.post("/auth/facebook", {
+        fbData: {
+          accessToken: data.authenticationToken,
+        },
+      });
+      console.log("Facebook Login Result:", response);
+      console.log("Facebook Login Response:", response);
+      if (response.status === 201 && response.data.success) {
+        return {
+          modalVisible: true,
+          data: response.data,
+        };
+      } else if (response.status === 200 && response.data.success) {
+        await SecureStore.setItemAsync(
+          "Tokens",
+          JSON.stringify({
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken,
+          })
+        );
+
+        return {
+          modalVisible: false,
+          data: { message: response.data.message },
+        };
+      }
+    }
   } catch (error: any) {
+    console.log("Facebook Login Error:", error);
+
     if (error.code) {
       switch (error.code) {
         case 1:
           Alert.alert("Network error");
+          break;
         case 190:
-          Alert.alert("invalid Access Token");
+          Alert.alert("Invalid Access Token");
+          break;
         case 10:
           Alert.alert("App not set up correctly");
+          break;
         case 429:
           Alert.alert("Too Many Requests");
+          break;
         default:
-          Sentry.captureException("facebook Error", error.code);
+          Sentry.captureException(error);
+          Alert.alert("Unknown Error", "Something went wrong.");
       }
+    } else {
+      Alert.alert("Login failed", "Please try again later.");
+      Sentry.captureException(error);
     }
+
+    return { modalVisible: false, data: null };
   }
 };
 
