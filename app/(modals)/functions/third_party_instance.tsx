@@ -100,19 +100,19 @@ export const loginWithGoogle = async (googleAccessToken: string) => {
     const response = await axiosInstanceRegular.post("/auth/google", {
       accessToken: googleAccessToken,
     });
-
     const responseData = response.data;
+
     if (
-      response.status == 200 &&
+      response.status === 200 &&
       responseData.success &&
-      responseData.data.accessToken &&
-      responseData.data.refreshToken
+      responseData.accessToken &&
+      responseData.refreshToken
     ) {
       await SecureStore.setItemAsync(
         "Tokens",
         JSON.stringify({
-          accessToken: responseData.data.accessToken,
-          refreshToken: responseData.data.refreshToken,
+          accessToken: responseData.accessToken,
+          refreshToken: responseData.refreshToken,
         })
       );
       return {

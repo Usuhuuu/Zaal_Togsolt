@@ -49,7 +49,7 @@ const Page = () => {
   const [key, setKey] = useState<number>(0);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -169,8 +169,8 @@ const Page = () => {
             setIsModalVisible(true);
           }, 500);
         } else if (
-          responseGoogle?.data.success &&
-          responseGoogle?.data.message === "Successfully logged in with Google"
+          responseGoogle?.success &&
+          responseData?.message === "Successfully logged in with Google"
         ) {
           logIn();
           Alert.alert(`${responseGoogle?.data.message}`);

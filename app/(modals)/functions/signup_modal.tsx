@@ -18,9 +18,10 @@ import {
 import { useAuth } from "../context/authContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { ScrollView, TextInput } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as SecureStore from "expo-secure-store";
+import { TextInput } from "react-native-paper";
 
 type LoginInput = {
   userName: string;
@@ -279,6 +280,7 @@ const SignupModal = ({
             <TextInput
               style={styles.modalInput}
               value={formData.firstName}
+              mode="outlined"
               placeholder={
                 typeof initSteps[0].placeholder === "object" &&
                 "placeholderFirstName" in initSteps[0].placeholder
@@ -292,6 +294,7 @@ const SignupModal = ({
             <TextInput
               style={styles.modalInput}
               value={formData.lastName}
+              mode="outlined"
               placeholder={
                 typeof initSteps[0].placeholder === "object" &&
                 "placeholderLastName" in initSteps[0].placeholder
