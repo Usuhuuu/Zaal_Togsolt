@@ -16,6 +16,7 @@
     </intent>
   </queries>
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true">
+      <meta-data android:name="com.google.android.geo.API_KEY" android:value="com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6" />
     <meta-data android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled" android:value="false"/>
     <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
     <meta-data android:name="com.facebook.sdk.ApplicationName" android:value="Login with Facebook"/>

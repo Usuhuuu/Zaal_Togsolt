@@ -34,9 +34,9 @@ PODS:
     - ExpoModulesCore
   - EXManifests (0.15.8):
     - ExpoModulesCore
-  - EXNotifications (0.28.19):
+  - EXNotifications (0.29.14):
     - ExpoModulesCore
-  - Expo (52.0.44):
+  - Expo (52.0.46):
     - ExpoModulesCore
   - expo-dev-client (5.0.20):
     - EXManifests
@@ -263,7 +263,7 @@ PODS:
     - ExpoModulesCore
   - ExpoFileSystem (18.0.12):
     - ExpoModulesCore
-  - ExpoFont (12.0.10):
+  - ExpoFont (13.0.4):
     - ExpoModulesCore
   - ExpoHaptics (13.0.1):
     - ExpoModulesCore
@@ -1666,8 +1666,6 @@ PODS:
     - React-Core
   - react-native-maps (1.14.0):
     - React-Core
-  - react-native-notifications (5.1.0):
-    - React-Core
   - react-native-pager-view (6.7.0):
     - DoubleConversion
     - glog
@@ -2254,7 +2252,6 @@ DEPENDENCIES:
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - react-native-maps (from `../node_modules/react-native-maps`)
-  - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-tracking-transparency (from `../node_modules/react-native-tracking-transparency`)
@@ -2468,8 +2465,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fbsdk-next"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
-  react-native-notifications:
-    :path: "../node_modules/react-native-notifications"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-safe-area-context:
@@ -2567,8 +2562,8 @@ SPEC CHECKSUMS:
   EXJSONUtils: 01fc7492b66c234e395dcffdd5f53439c5c29c93
   EXLocation: c52e800875ce2a5974b3b796ff2f3a8b978e0b28
   EXManifests: a19d50504b8826546a4782770317bc83fffec87d
-  EXNotifications: 6ce128c0d3d3d161cd68bfd07d593db40e140396
-  Expo: 75e002fc29a18a72aa3db967b41b29c2b206875d
+  EXNotifications: 9d3d17e52c95f377750d4a2ae553a716313dd4aa
+  Expo: a6ff273c618506b12129a0d06f2a08201bfbcf43
   expo-dev-client: db44302cdbe0ec55b0ef1849c9a23a76dec6dbac
   expo-dev-launcher: 82de1bf29e91f4794bcc65a697e7066d9a826bee
   expo-dev-menu: 3fda3eb2b3394dc92955f6ff60cb278f843641be
@@ -2580,7 +2575,7 @@ SPEC CHECKSUMS:
   ExpoClipboard: 243e22ff4161bbffcd3d2db469ae860ddc1156be
   ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
   ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
-  ExpoFont: 38dddf823e32740c2a9f37c926a33aeca736b5c4
+  ExpoFont: f354e926f8feae5e831ec8087f36652b44a0b188
   ExpoHaptics: 9f47be324f691b6291c17c216189ab832d1a4d69
   ExpoHead: 1a1b30c6c1d125e9b8a199ca305c16a1dc041624
   ExpoKeepAwake: b0171a73665bfcefcfcc311742a72a956e6aa680
@@ -2639,7 +2634,6 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 5c3d795318c22ab8df55100e50b151384a4a60b3
   react-native-fbsdk-next: 52f81e60eb3e8e0e06cf9728b4572d3509ca9d01
   react-native-maps: deb2adbdf309b622f15055b72b8742054929c740
-  react-native-notifications: 3bafa1237ae8a47569a84801f17d80242fe9f6a5
   react-native-pager-view: 637e84f94cec285414f7f2d89685de38ff797f64
   react-native-safe-area-context: df9763c5de6fa38883028e243a0b60123acb8858
   react-native-tracking-transparency: 15eb319f2b982070eb9831582af27d87badfa624

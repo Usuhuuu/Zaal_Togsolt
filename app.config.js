@@ -69,6 +69,7 @@ export default {
     },
     plugins: [
       "expo-router",
+      "expo-font",
       "expo-secure-store",
       "expo-localization",
       'expo-notifications',
@@ -94,12 +95,11 @@ export default {
       "expo-dev-client",
       ["expo-build-properties", {
         android: {
-
           manifest: {
             "meta-data": [
               {
                 "android:name": "com.google.android.geo.API_KEY",
-                "android:value": process.env.GOOGLE_MAPS_API_KEY || "AIzaSyDezC8XCeVeRY1lh34mbxAjuhe1OWJhLRc",
+                "android:value": process.env.GOOGLE_MAPS_API_KEY
               },
             ],
           },

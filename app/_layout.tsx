@@ -15,8 +15,6 @@ import { AuthProvider } from "./(modals)/context/authContext";
 import { SavedHallsProvider } from "@/app/(modals)/context/savedHall";
 import Layout, { TabsLayout } from "./(tabs)/_layout";
 import { CustomErrorBoundary } from "./(modals)/context/errorContext";
-import { SafeAreaView } from "react-native-safe-area-context";
-
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
