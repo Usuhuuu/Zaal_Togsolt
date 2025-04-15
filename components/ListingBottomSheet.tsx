@@ -5,6 +5,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { Listing } from "@/interfaces/listing";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ListingBottomSheetProps {
   listing: Listing[];
@@ -19,18 +20,19 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
     bottomSheetRef.current?.collapse();
     setrefresh(refresh + 1);
   };
-  const snapPoints = useMemo(() => ["9%", "90%"], []);
+  const { bottom, top } = useSafeAreaInsets();
+  const snapPoints = useMemo(() => [bottom + 100, "100%"], []);
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
       handleIndicatorStyle={{
-        backgroundColor: Colors.primary, // Change color
+        backgroundColor: Colors.primary,
         width: 60,
         borderRadius: 2,
       }}
-      style={styles.sheetContainer}
+      style={[styles.sheetContainer, { marginTop: top }]}
     >
       <View style={styles.contentContainer}>
         <Listings listings={listing} category={category} refresh={refresh} />
@@ -54,7 +56,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   absoluteBtn: {
-    position: "absolute",
     bottom: 20,
     alignSelf: "center",
     width: "90%",
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    elevation: 5,
   },
   handleIndicator: {
     backgroundColor: Colors.primary,

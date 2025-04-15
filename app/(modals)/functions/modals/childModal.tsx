@@ -37,7 +37,6 @@ const ChildModal = () => {
   ];
 
   const height = Dimensions.get("window").height;
-  const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
   const { bottom } = useSafeAreaInsets();
   return (

@@ -1,4 +1,4 @@
-import { router, useNavigation, Href } from "expo-router";
+import { router, Href } from "expo-router";
 import React, { useState } from "react";
 import {
   ScrollView,

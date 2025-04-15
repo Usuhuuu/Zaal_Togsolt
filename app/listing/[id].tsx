@@ -10,7 +10,6 @@ import {
   Share,
   Modal,
   ImageBackground,
-  ActivityIndicator,
   Alert,
 } from "react-native";
 import listingsData from "@/assets/Data/airbnb-listings.json";
@@ -24,12 +23,10 @@ import Animated, {
   useScrollViewOffset,
 } from "react-native-reanimated";
 import { defaultStyles } from "@/constants/Styles";
-import CalendarStrip from "react-native-calendar-strip";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/context/savedHall";
 import { useRouter } from "expo-router";
-import moment, { Moment } from "moment";
-import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
+import OrderScreen from "./detail";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -41,6 +38,13 @@ const ScheduleScreen = () => (
   </View>
 );
 
+type FormData = {
+  zaalId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+};
+
 const DetailsPage = () => {
   const [isScheduleVisible, setIsScheduleVisible] = useState<boolean>(false);
   const [isOrderScreenVisible, setIsOrderScreenVisible] =
@@ -48,18 +52,13 @@ const DetailsPage = () => {
   const [infoHeight, setInfoHeight] = useState(0);
   const [iconsOverflow, setIconsOverflow] = useState<boolean>(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
-  const [today, setToday] = useState<Date | Moment>(moment());
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const router = useRouter();
-  const zaalFormData = {
+  const [formData, setFormData] = useState<FormData>({
     zaalId: "",
     date: "",
     startTime: "",
     endTime: "",
-  };
-  const tempZaal = "674c9367f5b8455cd83d70c2";
-
+  });
+  const router = useRouter();
   const { addHall } = useSavedHalls();
 
   const handleSave = () => {
@@ -99,139 +98,6 @@ const DetailsPage = () => {
   const handleViewReviews = () => {
     router.push(
       `/listing/ZaalReview?reviews=${listing.number_of_reviews}&rating=${listing.review_scores_rating}`
-    );
-  };
-
-  const baseTimeSlots = [
-    { start_time: "06:00", end_time: "08:00" },
-    { start_time: "08:00", end_time: "10:00" },
-    { start_time: "10:00", end_time: "12:00" },
-    { start_time: "12:00", end_time: "14:00" },
-    { start_time: "14:00", end_time: "16:00" },
-    { start_time: "16:00", end_time: "18:00" },
-    { start_time: "18:00", end_time: "20:00" },
-    { start_time: "20:00", end_time: "22:00" },
-    { start_time: "22:00", end_time: "24:00" },
-  ];
-  const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
-  const [zahialgaBtn, setZahialgaBtn] = useState<boolean>(false);
-
-  const dateSlotGiver = async (date: any) => {
-    setIsLoading(true);
-    try {
-      const odor = date.toISOString().split("T")[0];
-      setToday(odor);
-      const zaalniID = zaalFormData.zaalId;
-      const response = await axiosInstanceRegular.get("/timeslotscheck", {
-        params: { zaalniID: tempZaal, odor },
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePressTimeSlot = (timeSlot: any) => {
-    console.log(`Time slot pressed: ${timeSlot}`);
-    setZahialgaBtn(true);
-  };
-  type TimeSlotProps = {
-    timeString: string;
-    isDisabled: boolean;
-    isPending: boolean;
-    handlePressTimeSlot: (timeSlot: string) => void;
-  };
-
-  const TimeSlot: React.FC<TimeSlotProps> = React.memo(
-    ({ timeString, isDisabled, isPending, handlePressTimeSlot }) => {
-      return (
-        <View style={styles.timeSlotView}>
-          <TouchableOpacity
-            onPress={() => handlePressTimeSlot(timeString)}
-            disabled={isDisabled}
-            style={[
-              styles.lalarinSdaBtn,
-              {
-                backgroundColor: isDisabled
-                  ? "red"
-                  : isPending
-                  ? "yellow"
-                  : "white",
-                opacity: isDisabled || isPending ? 0.5 : 1,
-              },
-            ]}
-          >
-            <Text>{timeString}</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-  );
-
-  const OrderScreen = () => {
-    return (
-      <View style={styles.zahialgaView}>
-        {isLoading ? (
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <ActivityIndicator
-              size="large"
-              color="blue"
-              style={styles.loader}
-            />
-          </View>
-        ) : (
-          <>
-            <CalendarStrip
-              style={styles.calendars}
-              daySelectionAnimation={{
-                type: "background",
-                duration: 200,
-                highlightColor: Colors.primary,
-                animType: "timing",
-                animUpdateType: "timing",
-                animProperty: "backgroundColor",
-                animSpringDamping: 1,
-              }}
-              selectedDate={moment.isMoment(today) ? today.toDate() : today}
-              onDateSelected={(date: any) => dateSlotGiver(date)}
-              calendarAnimation={{ type: "sequence", duration: 5 }}
-              dateNumberStyle={{ fontSize: 18, fontWeight: "400" }}
-              dateNameStyle={{ fontSize: 10, fontWeight: "400" }}
-              calendarHeaderStyle={{ fontSize: 18, fontWeight: "500" }}
-            />
-            <View style={styles.LLR_style}>
-              {/* Render available and unavailable time slots */}
-              {baseTimeSlots?.map((timeSlot, index) => {
-                const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
-                const isDisabled = unavailableTimes.some(
-                  (time: any) =>
-                    time.time === timeString &&
-                    time.status.includes("Completed")
-                );
-                const isPending = unavailableTimes.some(
-                  (time: any) =>
-                    time.time === timeString && time.status.includes("Pending")
-                );
-                return (
-                  <TimeSlot
-                    key={index}
-                    timeString={timeString}
-                    isDisabled={isDisabled}
-                    isPending={isPending}
-                    handlePressTimeSlot={handlePressTimeSlot}
-                  />
-                );
-              })}
-            </View>
-          </>
-        )}
-      </View>
     );
   };
 
@@ -305,7 +171,10 @@ const DetailsPage = () => {
   }, []);
 
   const handleZaalId = (input: any) => {
-    zaalFormData.zaalId = input;
+    setFormData((prev) => ({
+      ...prev,
+      zaalId: input,
+    }));
   };
 
   useEffect(() => {
@@ -538,7 +407,7 @@ const DetailsPage = () => {
             <TouchableOpacity onPress={() => setIsOrderScreenVisible(false)}>
               <Ionicons name="close" size={24} color={Colors.grey} />
             </TouchableOpacity>
-            <OrderScreen />
+            <OrderScreen formData={formData} setFormData={setFormData} />
           </View>
         </View>
       </Modal>
@@ -690,42 +559,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "90%",
     height: "90%",
-  },
-  loader: {
-    height: "100%",
-    color: "black",
-  },
-  zahialgaView: {
-    height: "95%",
-    paddingBottom: "30%",
-    borderBottomWidth: 1,
-    borderColor: Colors.primary,
-    width: "100%",
-  },
-  timeSlotView: {
-    paddingTop: 10,
-    flexDirection: "row",
-    //backgroundColor: "black",
-  },
-  lalarinSdaBtn: {
-    borderWidth: 0.5,
-    borderRadius: 20,
-    marginBottom: 10,
-    width: "50%",
-    padding: 10,
-    minWidth: "50%",
-    marginHorizontal: -2,
-    alignItems: "center",
-  },
-  calendars: {
-    height: "20%",
-    borderBottomWidth: 1,
-    borderColor: Colors.primary,
-  },
-  LLR_style: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
   },
 });
 

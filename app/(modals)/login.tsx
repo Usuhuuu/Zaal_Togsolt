@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,14 +28,13 @@ import { TextInput } from "react-native-paper";
 
 type LoginInput = {
   userName: string;
-  password: string;
-  confirmPassword: string;
   firstName: string;
   lastName: string;
   email: string;
   userID: string;
   signUpTimer: string;
 };
+
 const Page = () => {
   const { t } = useTranslation();
   const loginDetails: any = t("login", { returnObjects: true });
@@ -44,21 +42,17 @@ const Page = () => {
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [verifyCode, setVerifyCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [passwordHide, setPasswordHide] = useState<boolean>(true);
-  const [isVerified, setIsVerified] = useState<boolean>(false);
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [isitGoogle, setIsItGoogle] = useState<boolean>(false);
   const [key, setKey] = useState<number>(0);
+  const [path, setPath] = useState<string>("");
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
-    password: "",
-    confirmPassword: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -112,23 +106,10 @@ const Page = () => {
     setPasswordHide(!passwordHide);
   };
 
-  const mobileVerifyCheck = async () => {
-    try {
-      const response = await axiosInstanceRegular.post("/auth/verifyCode", {
-        verifyCode,
-      });
-      response.status === 200
-        ? setIsVerified(true)
-        : Alert.alert("Error", "Failed to verify");
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "Failed to verify the code");
-    }
-  };
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        "56931783205-g9s9glhtlpmjh6vktt3osnh44go1fo7k.apps.googleusercontent.com",
+        "56931783205-14if86k43tt1pip0n5dj08tag8665vk8.apps.googleusercontent.com",
       offlineAccess: true,
       iosClientId:
         "56931783205-78eeaknokj0nah74h5d53eis9ebj77r6.apps.googleusercontent.com",
@@ -149,6 +130,7 @@ const Page = () => {
           lastName: returnData.data.lastName || "",
           signUpTimer: returnData.data.signUpTimer || "",
         });
+        setPath(facebookResponse.path || "");
         setTimeout(() => {
           setIsModalVisible(true);
         }, 500);
@@ -163,6 +145,40 @@ const Page = () => {
       console.log(err);
     }
     return;
+  };
+  const handleGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signIn();
+      const { accessToken } = await GoogleSignin.getTokens();
+      const googleAccessToken = accessToken;
+      if (googleAccessToken) {
+        const responseGoogle = await loginWithGoogle(googleAccessToken);
+        const responseData = responseGoogle?.data;
+        if (responseGoogle?.modalVisible && responseData?.data.signUpTimer) {
+          setFormData({
+            ...formData,
+            userID: responseData.data.googleID,
+            email: responseData.data.email || "",
+            firstName: responseData.data.firstName || "",
+            lastName: responseData.data.lastName || "",
+            signUpTimer: responseData.data.signUpTimer || "",
+          });
+          setPath(responseGoogle.path || "");
+          setTimeout(() => {
+            setIsModalVisible(true);
+          }, 500);
+        } else if (
+          responseGoogle?.data.success &&
+          responseGoogle?.data.message === "Successfully logged in with Google"
+        ) {
+          logIn();
+          Alert.alert(`${responseGoogle?.data.message}`);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -228,7 +244,10 @@ const Page = () => {
           <View style={styles.separatorLine} />
         </View>
         <View style={styles.socialButtons}>
-          <TouchableOpacity style={styles.btnOutline} onPress={loginWithGoogle}>
+          <TouchableOpacity
+            style={styles.btnOutline}
+            onPress={handleGoogleLogin}
+          >
             <Ionicons name="logo-google" size={24} style={styles.btnIcon} />
             <Text style={styles.btnOutlineText}>
               {login.continuewithgoogle}
@@ -306,6 +325,7 @@ const Page = () => {
         setFormData={setFormData}
         steps={steps}
         setSteps={setSteps}
+        path={path}
       />
     </ImageBackground>
   );

@@ -24,10 +24,11 @@ import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import axios from "axios";
 import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
-import ChildModal from "../(modals)/childModal";
+import ChildModal from "../(modals)/functions/modals/childModal";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr, regular_swr } from "../(modals)/functions/useswr";
+import MainChatModal from "../(modals)/functions/modals/mainChatModal";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -166,33 +167,41 @@ const ChatComponent: React.FC = () => {
 
         // 🔹 Handle successful connection
         socketRef.current.on("connect", () => {
-          socketRef.current?.emit("chatHistory", { timer: Date.now() });
-
-          socketRef.current?.once("chatHistory", (message) => {
-            setIsitReady(true);
-            if (message.nextCursor == null) {
+          if (!(socketRef.current as any).hasFetchedHistory) {
+            socketRef.current?.emit("chatHistory", { timer: Date.now() });
+            socketRef.current?.once("chatHistory", (message) => {
+              setIsitReady(true);
+              if (message.nextCursor == null) {
+                setIsitReady(false);
+                return;
+              }
+              setMessages((prevMsj) => [...message.messages, ...prevMsj]);
+              setCursor(message.nextCursor);
               setIsitReady(false);
-              return;
-            }
-
-            setMessages((prevMsj) => [...message.messages, ...prevMsj]);
-            setCursor(message.nextCursor);
-            setIsitReady(false);
-          });
+            });
+          }
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
             if (data.groupId !== currentGroupId) return;
+            const newMsj: Message = {
+              sender_unique_name: data.sender_unique_name,
+              groupId: data.groupId,
+              message: data.message,
+              timestamp: new Date(data.timestamp),
+            };
 
             if (data.sender_unique_name === userDatas.unique_user_ID) {
               return;
             }
-            setMessages((prevMessages) => [...prevMessages, data]);
+            setMessages((prevMessages) => [newMsj, ...prevMessages]);
           });
 
           socketRef.current?.on("reconnect", (attempt) => {
             console.log(`Reconnected successfully after ${attempt} attempts`);
           });
         });
+
+        socketRef.current.emit("joinGroup");
 
         // 🔹 Handle token expiration & reconnection
         socketRef.current.on("connect_error", async (error) => {
@@ -265,7 +274,6 @@ const ChatComponent: React.FC = () => {
 
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
-  const headerHeight = useHeaderHeight();
   const { bottom } = useSafeAreaInsets();
 
   const MemoizedChatItem = React.memo(
@@ -413,196 +421,25 @@ const ChatComponent: React.FC = () => {
           <Text>sda</Text>
         </View>
       )}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={readyToShow}
-        style={{ zIndex: 1 }}
-        onRequestClose={() => {
-          if (socketRef.current?.connected) {
-            socketRef.current?.disconnect();
-          }
-          setReadyToShow(false);
-        }}
-        onDismiss={() => {
-          setMessages([]);
-        }}
-      >
-        {isitReady ? (
-          <ActivityIndicator color={Colors.primary} size={"large"} />
-        ) : (
-          <SafeAreaProvider
-            style={{
-              backgroundColor: "#fff",
-            }}
-          >
-            <SafeAreaView
-              style={{
-                height: height,
-                width: width,
-              }}
-            >
-              <View
-                style={{
-                  height: height - headerHeight,
-                  width: "95%",
-                  marginHorizontal: 10,
-                }}
-              >
-                <View
-                  style={{
-                    height: headerHeight / 2,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingHorizontal: 16,
-                    borderBottomColor: "#ddd",
-                    borderBottomWidth: 1,
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => {
-                      setReadyToShow(false);
-                      if (socketRef.current) {
-                        socketRef.current?.disconnect();
-                        setTimeout(() => {
-                          if (!socketRef.current?.connected) {
-                          } else {
-                            console.log("Socket still connected");
-                          }
-                        }, 500);
-                      }
-                    }}
-                  >
-                    <Ionicons
-                      name="chevron-back-outline"
-                      size={24}
-                      color={Colors.primary}
-                    />
-                  </TouchableOpacity>
-                  <Text style={{ color: Colors.primary, fontSize: 18 }}>
-                    {currentGroupId}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setChildModalVisible(true);
-                    }}
-                  >
-                    <AntDesign
-                      name="exclamationcircleo"
-                      size={24}
-                      color={Colors.primary}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <FlatList
-                  data={markedMessages}
-                  style={[
-                    {
-                      maxHeight: height - headerHeight - bottom - 80,
-                    },
-                  ]}
-                  renderItem={renderChatItem}
-                  keyExtractor={(item) =>
-                    item.timestamp
-                      ? item.timestamp.toString()
-                      : Math.random().toString()
-                  }
-                  inverted={true}
-                  onEndReached={loadOlderMsj}
-                  onEndReachedThreshold={0.2}
-                  ListFooterComponent={loading ? <ActivityIndicator /> : null}
-                  ref={flatListRef}
-                  maintainVisibleContentPosition={{
-                    minIndexForVisible: 0,
-                  }}
-                  initialNumToRender={20}
-                  maxToRenderPerBatch={20}
-                  windowSize={10}
-                  removeClippedSubviews={true}
-                />
-                <KeyboardAvoidingView
-                  behavior={Platform.OS == "ios" ? "padding" : "height"}
-                  keyboardVerticalOffset={headerHeight / 2 + 10}
-                >
-                  <View style={[styles.inputContainer]}>
-                    <TouchableOpacity>
-                      <AntDesign
-                        name="pluscircleo"
-                        size={24}
-                        color={Colors.grey}
-                      />
-                    </TouchableOpacity>
-                    <View style={styles.input}>
-                      <TextInput
-                        placeholder={chatInitLang.enterMessage}
-                        value={newMessage}
-                        onChangeText={setNewMessage}
-                        maxLength={2000}
-                        style={{ flex: 1 }}
-                        placeholderTextColor={Colors.grey}
-                        clearTextOnFocus={false}
-                        multiline
-                      />
-                      <Entypo
-                        name="emoji-happy"
-                        size={24}
-                        color={Colors.grey}
-                      />
-                    </View>
-
-                    <TouchableOpacity
-                      style={styles.sendButton}
-                      onPress={() => sendMessage(newMessage)}
-                    >
-                      <Ionicons name="send" size={24} color={Colors.light} />
-                    </TouchableOpacity>
-                  </View>
-                </KeyboardAvoidingView>
-              </View>
-            </SafeAreaView>
-          </SafeAreaProvider>
-        )}
-
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={childModalVisible}
-          style={{ zIndex: 2 }}
-        >
-          <SafeAreaProvider style={{ backgroundColor: "#fff" }}>
-            <SafeAreaView>
-              <View
-                style={{
-                  height: headerHeight / 2,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  paddingHorizontal: 16,
-                  borderBottomColor: "#ddd",
-                  borderBottomWidth: 1,
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    setChildModalVisible(false);
-                  }}
-                >
-                  <Ionicons
-                    name="chevron-back-outline"
-                    size={24}
-                    color={Colors.primary}
-                  />
-                </TouchableOpacity>
-                <Text style={{ fontSize: 24, color: Colors.primary }}>
-                  Group Chat Settings
-                </Text>
-              </View>
-              <ChildModal />
-            </SafeAreaView>
-          </SafeAreaProvider>
-        </Modal>
-      </Modal>
+      <MainChatModal
+        readyToShow={readyToShow}
+        setReadyToShow={setReadyToShow}
+        socketRef={socketRef}
+        setMessages={setMessages}
+        isitReady={isitReady}
+        setChildModalVisible={setChildModalVisible}
+        childModalVisible={childModalVisible}
+        currentGroupId={currentGroupId}
+        markedMessages={markedMessages}
+        loadOlderMsj={loadOlderMsj}
+        loading={loading}
+        flatListRef={flatListRef}
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+        sendMessage={sendMessage}
+        renderChatItem={renderChatItem}
+        chatInitLang={chatInitLang}
+      />
     </View>
   );
 };
@@ -669,35 +506,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#ddd",
     gap: 10,
-  },
-  input: {
-    flex: 1,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 10,
-    paddingHorizontal: 16,
-    backgroundColor: "#fff",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sendButton: {
-    padding: 12,
-    borderRadius: 25,
-    marginLeft: 8,
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-    backgroundColor: Colors.primary,
-  },
-  sendButtonText: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "bold",
   },
 
   msjContainer: {},

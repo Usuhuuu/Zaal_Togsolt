@@ -151,7 +151,7 @@ export const TabsLayout = () => {
               accessibilityHint="Navigates to the profile screen"
             />
           ),
-          headerShown: !LoginStatus ? false : true,
+          headerShown: !LoginStatus ? true : false,
           headerTitle: !LoginStatus ? t("aboutUs.login") : t("profile"),
           headerStyle: {},
           headerTitleStyle: {

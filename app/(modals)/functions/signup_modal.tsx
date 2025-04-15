@@ -24,8 +24,6 @@ import * as SecureStore from "expo-secure-store";
 
 type LoginInput = {
   userName: string;
-  password: string;
-  confirmPassword: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -75,6 +73,7 @@ const SignupModal = ({
   setFormData,
   steps,
   setSteps,
+  path,
 }: {
   isModalVisible: boolean;
   setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -82,6 +81,7 @@ const SignupModal = ({
   setFormData: React.Dispatch<React.SetStateAction<LoginInput>>;
   steps: number;
   setSteps: React.Dispatch<React.SetStateAction<number>>;
+  path: string;
 }) => {
   const [modalPasswordHide, setModalPasswordHide] = useState<boolean>(true);
   const [disableButton, setDisableButton] = useState<boolean>(true);
@@ -126,10 +126,10 @@ const SignupModal = ({
 
   const handleSubmit = async () => {
     try {
-      const response = await axiosInstanceRegular.post("/auth/facebook", {
+      console.log(path);
+      const response = await axiosInstanceRegular.post(`/auth/${path}`, {
         fbData: {
           userName: formData.userName,
-          password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
@@ -160,14 +160,6 @@ const SignupModal = ({
       useNativeDriver: true,
     }).start();
   }, [formData.userName]);
-
-  useEffect(() => {
-    Animated.timing(fadeConfirm, {
-      toValue: formData.password.length > 0 ? 1 : 0,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  }, [formData.password]);
 
   const fadeInStep = () => {
     fadeAnim.setValue(0);

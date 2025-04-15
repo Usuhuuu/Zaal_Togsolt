@@ -8,7 +8,6 @@ import {
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as Sentry from "@sentry/react-native";
 import {
-  GoogleSignin,
   isErrorWithCode,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
@@ -17,15 +16,12 @@ import { getTrackingStatus } from "react-native-tracking-transparency";
 export const loginWithFacebook = async () => {
   try {
     Settings.initializeSDK();
-    let isLimitedLogin = false;
     if (Platform.OS === "ios") {
       const trackStatus = await getTrackingStatus();
       if (trackStatus === "authorized" || trackStatus === "unavailable") {
         await Settings.setAdvertiserTrackingEnabled(true);
-        isLimitedLogin = false;
       } else if (trackStatus === "denied") {
         await Settings.setAdvertiserTrackingEnabled(false);
-        isLimitedLogin = true;
       }
     } else {
       await Settings.setAdvertiserTrackingEnabled(true);
@@ -51,6 +47,7 @@ export const loginWithFacebook = async () => {
       if (response.status === 201 && response.data.success) {
         return {
           modalVisible: true,
+          path: "facebook",
           data: response.data,
         };
       } else if (response.status === 200 && response.data.success) {
@@ -98,30 +95,44 @@ export const loginWithFacebook = async () => {
   }
 };
 
-export const loginWithGoogle = async () => {
+export const loginWithGoogle = async (googleAccessToken: string) => {
   try {
-    await GoogleSignin.hasPlayServices();
-    const user_info = await GoogleSignin.signIn();
-    const { idToken, accessToken } = await GoogleSignin.getTokens();
-    const googleAccessToken = accessToken;
-    if (googleAccessToken) {
-      const response = await axiosInstanceRegular.post("/auth/google", {
-        googleAccessToken,
-      });
-      if (response.status == 200) {
-        const tokens = await SecureStore.setItemAsync(
-          "Tokens",
-          JSON.stringify({
-            accessToken: response.data.accessToken,
-            refreshToken: response.data.refreshToken,
-          })
-        );
-        Alert.alert("Google Login Success", "You are logged in!");
-      } else {
-        Alert.alert("error");
-      }
+    const response = await axiosInstanceRegular.post("/auth/google", {
+      accessToken: googleAccessToken,
+    });
+
+    const responseData = response.data;
+    if (
+      response.status == 200 &&
+      responseData.success &&
+      responseData.data.accessToken &&
+      responseData.data.refreshToken
+    ) {
+      await SecureStore.setItemAsync(
+        "Tokens",
+        JSON.stringify({
+          accessToken: responseData.data.accessToken,
+          refreshToken: responseData.data.refreshToken,
+        })
+      );
+      return {
+        modalVisible: false,
+        success: true,
+        data: { message: responseData.message },
+      };
+    } else if (
+      response.status === 201 &&
+      responseData.success &&
+      responseData.data.signUpTimer
+    ) {
+      return {
+        modalVisible: true,
+        path: "google",
+        data: responseData,
+      };
     }
   } catch (err: any) {
+    console.log("Google Login Error:", err);
     if (isErrorWithCode(err)) {
       switch (err.code) {
         case statusCodes.IN_PROGRESS:
