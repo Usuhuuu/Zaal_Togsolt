@@ -1976,7 +1976,7 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNGestureHandler (2.16.2):
+  - RNGestureHandler (2.25.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2087,7 +2087,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.31.1):
+  - RNScreens (4.4.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2135,8 +2135,6 @@ PODS:
   - RNSslPinning (1.5.8):
     - AFNetworking (~> 4.0)
     - React
-  - RNSVG (15.2.0):
-    - React-Core
   - SDWebImage (5.11.1):
     - SDWebImage/Core (= 5.11.1)
   - SDWebImage/Core (5.11.1)
@@ -2297,7 +2295,6 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSslPinning (from `../node_modules/react-native-ssl-pinning`)
-  - RNSVG (from `../node_modules/react-native-svg`)
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2553,8 +2550,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sentry/react-native"
   RNSslPinning:
     :path: "../node_modules/react-native-ssl-pinning"
-  RNSVG:
-    :path: "../node_modules/react-native-svg"
   stripe-react-native:
     :path: "../node_modules/@stripe/stripe-react-native"
   Yoga:
@@ -2679,13 +2674,12 @@ SPEC CHECKSUMS:
   RNCCheckbox: 450ce156f3e29e25efa0315c96cfbabe5a39ded1
   RNCMaskedView: de80352547bd4f0d607bf6bab363d826822bd126
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
-  RNGestureHandler: e83f87de6001d97ba0a86b304a695309317550b2
+  RNGestureHandler: c5753d613f9a9ae4546e2c932f759db7c5f158d3
   RNGoogleSignin: b8760528f2a7cbe157ecfdcc13bdb7d2745c9389
   RNReanimated: 6d22a1aec06a9787b797bc0c40fc2779be0599a5
-  RNScreens: b8b7170cb7b89417d574117a84b598dd2a8032b4
+  RNScreens: 295d9c0aaeb7f680d03d7e9b476569a4959aae89
   RNSentry: 41eab31e46a191a4f9296d64a318b2a6bf0f98c5
   RNSslPinning: 4478c22fed7179a22be2bdd7d7f235fc51bf85dc
-  RNSVG: 0e7deccab0678200815104223aadd5ca734dd41d
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   Sentry: 1ca8405451040482877dcd344dfa3ef80b646631
