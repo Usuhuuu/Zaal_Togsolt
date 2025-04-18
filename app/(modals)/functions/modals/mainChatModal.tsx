@@ -35,7 +35,7 @@ interface MainChatModalProps {
   setChildModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   childModalVisible: boolean;
   currentGroupId: string;
-  markedMessages: Message[];
+  message: Message[];
   loadOlderMsj: () => void;
   loading: boolean;
   flatListRef: React.RefObject<FlatList>;
@@ -57,7 +57,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   setChildModalVisible,
   childModalVisible,
   currentGroupId,
-  markedMessages,
+  message,
   loadOlderMsj,
   loading,
   flatListRef,
@@ -154,12 +154,12 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 </TouchableOpacity>
               </View>
               <FlatList
-                data={markedMessages}
+                data={message}
                 style={[
                   {
                     flex: 1,
                     maxHeight: height - headerHeight - bottom - 80,
-                    backgroundColor: "#eeeeee",
+                    backgroundColor: "#ffffff",
                   },
                 ]}
                 renderItem={renderChatItem}
@@ -204,14 +204,18 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       clearTextOnFocus={false}
                       multiline
                     />
-                    <Entypo name="emoji-happy" size={24} color={Colors.grey} />
+                    <Entypo
+                      name="emoji-happy"
+                      size={24}
+                      color={Colors.lightGrey}
+                    />
                   </View>
 
                   <TouchableOpacity
                     style={styles.sendButton}
                     onPress={() => sendMessage(newMessage)}
                   >
-                    <Ionicons name="send" size={24} color={Colors.light} />
+                    <Ionicons name="send" size={32} color={Colors.primary} />
                   </TouchableOpacity>
                 </View>
               </KeyboardAvoidingView>
@@ -269,12 +273,11 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 20,
-    padding: 10,
+    padding: 5,
     paddingHorizontal: 16,
     backgroundColor: "#fff",
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -296,7 +299,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-    backgroundColor: Colors.primary,
   },
   sendButtonText: {
     fontSize: 16,

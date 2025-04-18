@@ -2,33 +2,26 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
-  TextInput,
   FlatList,
   StyleSheet,
   Alert,
   TouchableOpacity,
   ActivityIndicator,
-  Modal,
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { io, Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
 import Constants from "expo-constants";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import axios from "axios";
-import { differenceInMinutes, formatDistanceToNow, parseISO } from "date-fns";
-import ChildModal from "../(modals)/functions/modals/childModal";
+import { format, parseISO, differenceInDays } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr, regular_swr } from "../(modals)/functions/useswr";
 import MainChatModal from "../(modals)/functions/modals/mainChatModal";
+import { Avatar } from "react-native-paper";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -37,34 +30,53 @@ interface Message {
   groupId: string;
   message: string;
   timestamp: Date;
-  grouped?: boolean;
+  showDateSeparator?: boolean;
 }
 interface GroupChat {
   group_ID: string;
   members: string;
 }
 
-const markGroupedMessages = (messages: Message[]) => {
-  if (!messages.length) return [];
-
-  let initMsj = parseISO(messages[0].timestamp.toString());
-  const markedMsj = messages.map((msj, index) => {
-    if (index === 0) {
-      return { ...msj, grouped: false };
-    }
-    const timeDiff = differenceInMinutes(
-      initMsj,
-      parseISO(msj.timestamp.toString())
+const prepareMessages = (messages: Message[]) => {
+  return messages.map((message, index) => {
+    const currentDate = format(
+      parseISO(message.timestamp.toString()),
+      "yyyy-MM-dd"
     );
-    if (timeDiff < 30) {
-      return { ...msj, grouped: true };
-    } else {
-      initMsj = parseISO(msj.timestamp.toString());
-      return { ...msj, grouped: false };
-    }
-  });
 
-  return markedMsj;
+    const nextMessage = messages[index + 1];
+    const nextDate = nextMessage
+      ? format(parseISO(nextMessage.timestamp.toString()), "yyyy-MM-dd")
+      : null;
+
+    const isLastMessageOfDay = currentDate !== nextDate;
+
+    const hasOlderDate = messages.some((msg, i) => {
+      if (i <= index) return false;
+      const msgDate = format(parseISO(msg.timestamp.toString()), "yyyy-MM-dd");
+      return msgDate !== currentDate;
+    });
+
+    return {
+      ...message,
+      showDateSeparator: isLastMessageOfDay && hasOlderDate,
+    };
+  });
+};
+
+const newMsjPrepare = (previewMsj: any, newMsj: any) => {
+  const diff = differenceInDays(newMsj.timestamp, previewMsj.timestamp);
+  if (diff > 0) {
+    return {
+      ...newMsj,
+      showDateSeparator: true,
+    };
+  } else {
+    return {
+      ...newMsj,
+      showDateSeparator: false,
+    };
+  }
 };
 
 const ChatComponent: React.FC = () => {
@@ -145,10 +157,8 @@ const ChatComponent: React.FC = () => {
       setCurrentGroupId(groupId);
       const token = await SecureStore.getItemAsync("Tokens");
       if (!token) {
-        Sentry.captureException("Token not found while joining group.");
         return Alert.alert("Login required to join group.");
       }
-
       const { accessToken, refreshToken } = JSON.parse(token);
       // Initialize socket if not already connected
       if (!socketRef.current || socketRef.current.disconnected) {
@@ -175,7 +185,8 @@ const ChatComponent: React.FC = () => {
                 setIsitReady(false);
                 return;
               }
-              setMessages((prevMsj) => [...message.messages, ...prevMsj]);
+              const formattedMessages = prepareMessages(message.messages);
+              setMessages((prevMsj) => [...formattedMessages, ...prevMsj]);
               setCursor(message.nextCursor);
               setIsitReady(false);
             });
@@ -264,7 +275,9 @@ const ChatComponent: React.FC = () => {
       timestamp: new Date(),
     };
 
-    setMessages((prevMessages) => [newMessage, ...prevMessages]);
+    const prevMsj = messages[0].timestamp;
+    const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
+    setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
     socketRef.current.emit("sendMessage", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
@@ -278,83 +291,92 @@ const ChatComponent: React.FC = () => {
 
   const MemoizedChatItem = React.memo(
     ({ item, userDatas }: { item: Message; userDatas: any }) => {
+      //본인
+      const userSelf: boolean =
+        item.sender_unique_name === userDatas.unique_user_ID;
       return (
         <View>
-          {item.sender_unique_name === userDatas.unique_user_ID ? (
-            <View
-              style={[
-                styles.msjContainer,
-                { alignItems: "flex-end", marginVertical: 3 },
-              ]}
-            >
-              <View
-                style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 5,
-                }}
-              >
-                {!item.grouped && (
-                  <Text style={{ color: Colors.dark, fontWeight: "200" }}>
-                    {formatDistanceToNow(item.timestamp, { addSuffix: true })}
-                  </Text>
-                )}
-              </View>
-              <View
-                style={[
-                  styles.msjInside,
-                  {
-                    borderBottomLeftRadius: 10,
-                    borderBottomRightRadius: 10,
-                    borderTopLeftRadius: 10,
-                    borderColor: Colors.lightGrey,
-                    backgroundColor: Colors.lightGrey,
-                    alignItems: "center",
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.messageText,
-                    { fontWeight: "500", alignItems: "center" },
-                  ]}
-                >
-                  {item.message}
-                </Text>
-              </View>
-            </View>
-          ) : (
-            <View
-              style={[
-                styles.msjContainer,
-                { alignItems: "flex-start", marginVertical: 3 },
-              ]}
-            >
-              <View
-                style={[
-                  styles.msjInside,
-                  {
-                    borderBottomLeftRadius: 10,
-                    borderBottomRightRadius: 10,
-                    borderTopRightRadius: 10,
-                    borderColor: Colors.primary,
-                    backgroundColor: Colors.primary,
-                  },
-                ]}
-              >
-                <Text style={[styles.messageText, { color: Colors.light }]}>
-                  {item.message}
-                </Text>
-              </View>
-              {!item.grouped && (
-                <Text style={{ color: Colors.dark, fontWeight: "200" }}>
-                  {formatDistanceToNow(item.timestamp, { addSuffix: true })}
-                </Text>
-              )}
+          {item.showDateSeparator && (
+            <View style={styles.dateSeparator}>
+              <View style={styles.line} />
+              <Text style={styles.dateText}>
+                {format(new Date(item.timestamp), "EEEE MMMM dd")}
+              </Text>
+              <View style={styles.line} />
             </View>
           )}
+
+          <View
+            style={[
+              styles.msjContainer,
+              { alignItems: userSelf ? "flex-end" : "flex-start" },
+            ]}
+          >
+            <View style={{ flexDirection: "row" }}>
+              {/* Avatar */}
+              {!userSelf && (
+                <View style={{ marginRight: 6 }}>
+                  <Avatar.Icon size={40} icon={"account"} />
+                </View>
+              )}
+
+              {/* Message bubble and time */}
+
+              <View>
+                <View>
+                  {!userSelf && (
+                    <Text style={[styles.userNameText, { marginBottom: 4 }]}>
+                      {item.sender_unique_name}
+                    </Text>
+                  )}
+                </View>
+                <View
+                  style={[
+                    styles.msjInside,
+                    userSelf
+                      ? {
+                          borderBottomLeftRadius: 10,
+                          borderBottomRightRadius: 10,
+                          borderTopLeftRadius: 10,
+                          backgroundColor: Colors.primary,
+                          borderColor: Colors.primary,
+                        }
+                      : {
+                          borderBottomLeftRadius: 10,
+                          borderBottomRightRadius: 10,
+                          borderTopRightRadius: 10,
+                          backgroundColor: Colors.lightGrey,
+                          borderColor: Colors.lightGrey,
+                        },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.messageText,
+                      {
+                        color: userSelf ? Colors.light : Colors.dark,
+                      },
+                    ]}
+                  >
+                    {item.message}
+                  </Text>
+                </View>
+
+                {/* Time under message bubble */}
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: Colors.dark,
+                    fontWeight: "300",
+                    marginTop: 2,
+                    alignSelf: userSelf ? "flex-end" : "flex-start",
+                  }}
+                >
+                  {format(item.timestamp, "hh:mm a")}
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
       );
     },
@@ -381,13 +403,13 @@ const ChatComponent: React.FC = () => {
         setLoading(false);
         return;
       }
-
-      setMessages((prevMessages) => [...prevMessages, ...message.messages]);
+      const formattedMessages = prepareMessages(message.messages);
+      setMessages((prevMessages) => [...prevMessages, ...formattedMessages]);
       setCursor(message.nextCursor);
       setLoading(false);
     });
   };
-  const markedMessages = markGroupedMessages(messages);
+
   return (
     <View style={[styles.container]}>
       {isLoading ? (
@@ -430,7 +452,7 @@ const ChatComponent: React.FC = () => {
         setChildModalVisible={setChildModalVisible}
         childModalVisible={childModalVisible}
         currentGroupId={currentGroupId}
-        markedMessages={markedMessages}
+        message={messages}
         loadOlderMsj={loadOlderMsj}
         loading={loading}
         flatListRef={flatListRef}
@@ -485,14 +507,15 @@ const styles = StyleSheet.create({
   userNameText: {
     fontSize: 12,
     color: Colors.primary,
-    textShadowColor: Colors.primary, // Adds text shadow
-    textShadowRadius: 2,
+    textShadowColor: Colors.primary,
+    textShadowRadius: 0.5,
   },
   messageText: {
     padding: 10,
     maxWidth: "80%",
     minWidth: "30%",
     justifyContent: "center",
+    fontSize: 18,
   },
   messagesList: {
     //height: Dimensions.get("window").height,
@@ -508,11 +531,38 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  msjContainer: {},
+  msjContainer: {
+    marginHorizontal: 10,
+    paddingVertical: 10,
+  },
   msjInside: {
     flexDirection: "column",
     borderWidth: 1,
-    padding: 5,
+  },
+  TimerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  userImage: {},
+
+  dateSeparator: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 10,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.primary,
+    marginHorizontal: 5,
+  },
+  dateText: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    color: Colors.primary,
+    fontWeight: "400",
   },
 });
 
