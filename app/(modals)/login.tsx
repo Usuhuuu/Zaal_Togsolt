@@ -45,11 +45,9 @@ const Page = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [passwordHide, setPasswordHide] = useState<boolean>(true);
   const [isItApple, setIsITApple] = useState<boolean>(false);
-  const [isitGoogle, setIsItGoogle] = useState<boolean>(false);
-  const [key, setKey] = useState<number>(0);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -232,7 +230,6 @@ const Page = () => {
           style={[styles.button, styles.loginBtn]}
           onPress={() => {
             handleSubmit();
-            setKey((k) => k + 1);
           }}
           disabled={loading}
         >

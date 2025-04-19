@@ -38,12 +38,7 @@ export const TabsLayout = () => {
         tabBarInactiveTintColor: Colors.dark,
         tabBarActiveTintColor: Colors.light,
         tabBarStyle: {
-          height: 50,
-          paddingBottom: 5,
-          paddingTop: 5,
           borderColor: Colors.primary,
-          position: "absolute",
-          overflow: "hidden",
         },
         tabBarBackground: () => (
           <LinearGradient

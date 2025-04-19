@@ -15,6 +15,8 @@ import { AuthProvider } from "./(modals)/context/authContext";
 import { SavedHallsProvider } from "@/app/(modals)/context/savedHall";
 import Layout, { TabsLayout } from "./(tabs)/_layout";
 import { CustomErrorBoundary } from "./(modals)/context/errorContext";
+import { PermissionContextProvider } from "./(modals)/context/permissionContext";
+
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
@@ -129,14 +131,16 @@ function RootLayoutNav() {
 export default Sentry.wrap(() => (
   <CustomErrorBoundary>
     <AuthProvider>
-      <LanguageProvider>
-        <SavedHallsProvider>
-          <RootLayout>
-            <Layout />
-            <TabsLayout />
-          </RootLayout>
-        </SavedHallsProvider>
-      </LanguageProvider>
+      <PermissionContextProvider>
+        <LanguageProvider>
+          <SavedHallsProvider>
+            <RootLayout>
+              <Layout />
+              <TabsLayout />
+            </RootLayout>
+          </SavedHallsProvider>
+        </LanguageProvider>
+      </PermissionContextProvider>
     </AuthProvider>
   </CustomErrorBoundary>
 ));

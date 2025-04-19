@@ -6,6 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { mutate } from "swr";
 
 interface AuthContextType {
   LoginStatus: boolean;
@@ -46,6 +47,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("LoginStatus");
+      mutate(() => true, undefined, { revalidate: false });
+      // Optionally, you can also clear other user-related data here
       setIsAuthenticated(false);
     } catch (error) {
       console.error("Failed to remove login status", error);

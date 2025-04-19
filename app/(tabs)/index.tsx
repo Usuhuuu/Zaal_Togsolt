@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions, Platform } from "react-native";
 import React, { useMemo, useState } from "react";
 import { Stack } from "expo-router";
 import ExploreHeader from "@/components/ExploreHeader";
@@ -7,11 +7,7 @@ import listingsDataGeo from "@/assets/Data/airbnb-listings.geo (1).json"; // Ens
 import { ListingGeo } from "@/interfaces/listingGeo";
 import ListingBottomSheet from "@/components/ListingBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import the root view component
-import Colors from "@/constants/Colors";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface FeatureCollection {
   type: "FeatureCollection";
@@ -27,10 +23,19 @@ const Page = () => {
     console.log(`CHANGED_`, category);
     setCategory(category);
   };
-  const { bottom, top } = useSafeAreaInsets();
+  const { top } = useSafeAreaInsets();
   const height = Dimensions.get("window").height;
+
   return (
-    <GestureHandlerRootView style={[styles.container, { marginTop: top }]}>
+    <GestureHandlerRootView
+      style={[
+        styles.container,
+        {
+          marginTop: top,
+          minHeight: Platform.OS === "ios" ? height / 1.23 : null,
+        },
+      ]}
+    >
       <Stack.Screen
         options={{
           header: () => <ExploreHeader onCategoryChanged={onDataChanged} />,
@@ -45,7 +50,6 @@ const Page = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: "100%",
     flex: 1,
   },
 });

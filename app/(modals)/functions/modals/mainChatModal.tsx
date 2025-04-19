@@ -19,6 +19,12 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
 
+interface GroupMember {
+  group_ID: string;
+  group_chat_name: string;
+  members: string;
+  chat_image: string;
+}
 interface Message {
   sender_unique_name: string;
   groupId: string;
@@ -46,6 +52,7 @@ interface MainChatModalProps {
   chatInitLang: {
     enterMessage: string;
   };
+  memberData: GroupMember[];
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
@@ -66,6 +73,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   sendMessage,
   renderChatItem,
   chatInitLang,
+  memberData,
 }) => {
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
@@ -133,7 +141,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   }}
                 >
                   <Ionicons
-                    name="chevron-back-outline"
+                    name="arrow-back-sharp"
                     size={24}
                     color={Colors.primary}
                   />
@@ -197,7 +205,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     <TextInput
                       placeholder={chatInitLang.enterMessage}
                       value={newMessage}
-                      onChangeText={setNewMessage}
+                      onChangeText={(newMsj) => setNewMessage(newMsj)}
                       maxLength={2000}
                       style={{ flex: 1 }}
                       placeholderTextColor={Colors.grey}
@@ -226,7 +234,6 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
 
       <Modal
         animationType="fade"
-        transparent={true}
         visible={childModalVisible}
         style={{ zIndex: 2 }}
       >
@@ -249,7 +256,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 }}
               >
                 <Ionicons
-                  name="chevron-back-outline"
+                  name="arrow-back-sharp"
                   size={24}
                   color={Colors.primary}
                 />
@@ -258,7 +265,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 Group Chat Settings
               </Text>
             </View>
-            <ChildModal />
+            <ChildModal MemberData={memberData} />
           </SafeAreaView>
         </SafeAreaProvider>
       </Modal>

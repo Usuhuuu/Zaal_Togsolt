@@ -34,7 +34,9 @@ interface Message {
 }
 interface GroupChat {
   group_ID: string;
+  group_chat_name: string;
   members: string;
+  chat_image: string;
 }
 
 const prepareMessages = (messages: Message[]) => {
@@ -127,6 +129,8 @@ const ChatComponent: React.FC = () => {
         chatData.chatGroupIDs.map((groupID: any) => ({
           group_ID: groupID._id,
           members: groupID.members,
+          group_chat_name: groupID.group_chat_name,
+          chat_image: groupID.chat_image,
         }))
       );
     } else if (chatError) {
@@ -181,7 +185,8 @@ const ChatComponent: React.FC = () => {
             socketRef.current?.emit("chatHistory", { timer: Date.now() });
             socketRef.current?.once("chatHistory", (message) => {
               setIsitReady(true);
-              if (message.nextCursor == null) {
+              if (message.nextCursor === null) {
+                setLoading(false);
                 setIsitReady(false);
                 return;
               }
@@ -275,10 +280,20 @@ const ChatComponent: React.FC = () => {
       timestamp: new Date(),
     };
 
-    const prevMsj = messages[0].timestamp;
-    const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
-    setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+    const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
+
+    if (!prevMsj) {
+      const newMsjPrepared = {
+        ...newMessage,
+        showDateSeparator: true,
+      };
+      setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+    } else {
+      const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
+      setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+    }
     socketRef.current.emit("sendMessage", newMessage);
+    console.log("Message sent:", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
       animated: true,
@@ -313,14 +328,11 @@ const ChatComponent: React.FC = () => {
             ]}
           >
             <View style={{ flexDirection: "row" }}>
-              {/* Avatar */}
               {!userSelf && (
                 <View style={{ marginRight: 6 }}>
                   <Avatar.Icon size={40} icon={"account"} />
                 </View>
               )}
-
-              {/* Message bubble and time */}
 
               <View>
                 <View>
@@ -340,6 +352,7 @@ const ChatComponent: React.FC = () => {
                           borderTopLeftRadius: 10,
                           backgroundColor: Colors.primary,
                           borderColor: Colors.primary,
+                          marginLeft: 50,
                         }
                       : {
                           borderBottomLeftRadius: 10,
@@ -347,6 +360,7 @@ const ChatComponent: React.FC = () => {
                           borderTopRightRadius: 10,
                           backgroundColor: Colors.lightGrey,
                           borderColor: Colors.lightGrey,
+                          marginRight: 100,
                         },
                   ]}
                 >
@@ -361,8 +375,6 @@ const ChatComponent: React.FC = () => {
                     {item.message}
                   </Text>
                 </View>
-
-                {/* Time under message bubble */}
                 <Text
                   style={{
                     fontSize: 11,
@@ -427,20 +439,15 @@ const ChatComponent: React.FC = () => {
             data={chatGroups}
             style={styles.groupItemContainer}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.groupItem}
-                onPress={() => chatInit(item.group_ID)}
-              >
-                <Text style={styles.groupText}>
-                  {Array.isArray(item.members)
-                    ? item.members.join(", ")
-                    : item.members}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.groupItem}>
+                <Avatar.Icon icon={item.chat_image} />
+                <TouchableOpacity onPress={() => chatInit(item.group_ID)}>
+                  <Text style={styles.groupText}>{item.group_chat_name}</Text>
+                </TouchableOpacity>
+              </View>
             )}
             keyExtractor={(item) => item.group_ID}
           />
-          <Text>sda</Text>
         </View>
       )}
       <MainChatModal
@@ -461,6 +468,7 @@ const ChatComponent: React.FC = () => {
         sendMessage={sendMessage}
         renderChatItem={renderChatItem}
         chatInitLang={chatInitLang}
+        memberData={chatGroups}
       />
     </View>
   );
@@ -493,6 +501,8 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 7,
     borderRadius: 5,
+    flexDirection: "row",
+    alignItems: "center",
   },
   groupText: {
     fontSize: 18,
@@ -511,11 +521,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 0.5,
   },
   messageText: {
-    padding: 10,
-    maxWidth: "80%",
-    minWidth: "30%",
-    justifyContent: "center",
+    padding: 5,
     fontSize: 18,
+    marginRight: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   },
   messagesList: {
     //height: Dimensions.get("window").height,
@@ -536,8 +547,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   msjInside: {
-    flexDirection: "column",
     borderWidth: 1,
+    paddingHorizontal: 5,
   },
   TimerContainer: {
     alignItems: "center",
