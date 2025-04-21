@@ -35,8 +35,6 @@ interface ChildModalProps {
 }
 
 const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
-  console.log("ChildModal");
-  console.log("pisda", MemberData);
   const [settingsModalVisible, setSettingsModalVisible] =
     useState<boolean>(false);
   const [memberModalVisible, setMemberModalVisible] = useState<boolean>(false);
@@ -212,13 +210,14 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
               },
             ]}
           >
-            <TouchableOpacity>
-              <Ionicons
-                name="arrow-back"
-                size={28}
-                color={Colors.primary}
-                onPress={() => {}}
-              />
+            <TouchableOpacity
+              onPress={() => {
+                setBaseModalVisible(false);
+                setChangeNameModalVisible(false);
+                setMemberModalVisible(false);
+              }}
+            >
+              <Ionicons name="arrow-back" size={28} color={Colors.primary} />
             </TouchableOpacity>
             <View
               style={{
@@ -262,7 +261,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalBody: {
-    paddingTop: 20,
     flex: 1,
   },
 });

@@ -26,7 +26,7 @@ import UserInfoScreen from "@/components/profileScreens/drawerScreen/userInfoScr
 import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
 import { useAuth } from "../(modals)/context/authContext";
-import { auth_swr } from "../(modals)/functions/useswr";
+import { auth_swr } from "../../hooks/useswr";
 
 // Create a Drawer Navigator
 export const TabsLayout = () => {

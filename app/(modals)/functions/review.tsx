@@ -20,7 +20,7 @@ export const zaal_review_update = async (
     );
 
     if (!response.data.auth) {
-      return false; 
+      return false;
     } else if (response.status === 200) {
       return "Review updated successfully"; // Success response
     } else {

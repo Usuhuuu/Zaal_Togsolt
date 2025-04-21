@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import React from "react";
 import { View, Modal, Text } from "react-native";
 
@@ -15,7 +16,7 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
   setGroupName,
 }) => {
   return (
-    <View>
+    <View style={{ backgroundColor: Colors.lightGrey, flex: 1 }}>
       <Text>Hello</Text>
     </View>
   );

@@ -13,7 +13,7 @@ import Colors from "@/constants/Colors";
 import axiosInstance from "../(modals)/functions/axiosInstance";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
-import { auth_swr } from "../(modals)/functions/useswr";
+import { auth_swr } from "../../hooks/useswr";
 
 const FriendRequest = () => {
   const [friendData, setFriendData] = useState<string[]>([]);

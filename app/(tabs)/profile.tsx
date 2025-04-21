@@ -15,7 +15,7 @@ import ProfileAdmin from "@/components/profileScreens/admin";
 import NormalUser from "@/components/profileScreens/normalUser";
 import { useAuth } from "../(modals)/context/authContext";
 import Page from "../(modals)/login";
-import { auth_swr } from "../(modals)/functions/useswr";
+import { auth_swr } from "../../hooks/useswr";
 
 const Profile: React.FC = () => {
   const [formData, setFormData] = useState<any>({});

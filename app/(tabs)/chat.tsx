@@ -19,7 +19,7 @@ import axios from "axios";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
-import { auth_swr, regular_swr } from "../(modals)/functions/useswr";
+import { auth_swr, regular_swr } from "../../hooks/useswr";
 import MainChatModal from "../(modals)/functions/modals/mainChatModal";
 import { Avatar } from "react-native-paper";
 
