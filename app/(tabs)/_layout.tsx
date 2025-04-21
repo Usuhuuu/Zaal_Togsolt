@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
-
+import { CameraView } from "expo-camera";
 // Create a Drawer Navigator
 export const TabsLayout = () => {
   const { t } = useTranslation();
@@ -121,7 +121,17 @@ export const TabsLayout = () => {
                     color={Colors.primary}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("Chat settings")}>
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("New message");
+                    return (
+                      <CameraView
+                        style={{ flex: 1 }}
+                        onCameraReady={() => console.log("Camera is ready")}
+                      />
+                    );
+                  }}
+                >
                   <Entypo
                     name="new-message"
                     size={24}

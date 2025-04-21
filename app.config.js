@@ -72,68 +72,83 @@ export default {
       "expo-font",
       "expo-secure-store",
       "expo-localization",
-      'expo-notifications',
-      // "@stripe/stripe-react-native", {
-      //   "merchantIdentifier": string,
-      //   "enableGooglePay": boolean
-      // }
-      ["@react-native-google-signin/google-signin", {
-        iosUrlScheme: 'com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6' || `${process.env.GOOGLE_URL}`,
-      }],
-      ["react-native-fbsdk-next", {
-        appID: process.env.FACEBOOK_APP_ID || "8534089993319728",
-        clientToken: process.env.FACEBOOK_CLIENT_ID,
-        displayName: "Login with Facebook",
-        scheme: `fb${process.env.FACEBOOK_APP_ID}`,
-        advertiserIDCollectionEnabled: false,
-        autoLogAppEventsEnabled: false,
-        isAutoInitEnabled: true,
-        iosUserTrackingPermission: "This identifier will be used to deliver personalized ads to you."
-      }],
+      "expo-notifications",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true,
+        }
+      ],
+      // Other plugins...
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          iosUrlScheme: "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6" || `${process.env.GOOGLE_URL}`,
+        }
+      ],
+      [
+        "react-native-fbsdk-next",
+        {
+          appID: process.env.FACEBOOK_APP_ID || "8534089993319728",
+          clientToken: process.env.FACEBOOK_CLIENT_ID,
+          displayName: "Login with Facebook",
+          scheme: `fb${process.env.FACEBOOK_APP_ID}`,
+          advertiserIDCollectionEnabled: false,
+          autoLogAppEventsEnabled: false,
+          isAutoInitEnabled: true,
+          iosUserTrackingPermission: "This identifier will be used to deliver personalized ads to you.",
+        }
+      ],
       "expo-tracking-transparency",
-      ["expo-apple-authentication"],
+      "expo-apple-authentication",
       "expo-dev-client",
-      ["expo-build-properties", {
-        android: {
-          manifest: {
-            "meta-data": [
-              {
-                "android:name": "com.google.android.geo.API_KEY",
-                "android:value": process.env.GOOGLE_MAPS_API_KEY
-              },
-            ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            manifest: {
+              "meta-data": [
+                {
+                  "android:name": "com.google.android.geo.API_KEY",
+                  "android:value": process.env.GOOGLE_MAPS_API_KEY
+                }
+              ]
+            }
           },
-        },
-        ios: {
-          deploymentTarget: "15.1",
-          infoPlist: {
-            "aps-environment": "development",
-            GMSApiKey: process.env.GOOGLE_MAPS_API_KEY,
-            NSLocationWhenInUseUsageDescription: "Your app needs access to your location to show your position on the map",
-            NSLocationAlwaysUsageDescription: "Your app needs access to your location for continuous location updates",
-            FacebookAppID: process.env.FACEBOOK_APP_ID,
-            FacebookClientToken: process.env.FACEBOOK_CLIENT_ID,
-            FacebookDisplayName: "Login with Facebook",
-            NSUserTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you.",
-            CFBundleURLTypes: [
-              {
-                CFBundleURLSchemes: [
-                  "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
-                  `fb${process.env.FACEBOOK_APP_ID}`,
-                  "com.usuhbayr.zaalproject",
-                  "exp+zaalproject",
-                ]
-              }
-            ],
-            LSApplicationQueriesSchemes: [
-              "google",
-              "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
-            ],
+          ios: {
+            deploymentTarget: "15.1",
+            infoPlist: {
+              "aps-environment": "development",
+              GMSApiKey: process.env.GOOGLE_MAPS_API_KEY,
+              NSLocationWhenInUseUsageDescription: "Your app needs access to your location to show your position on the map",
+              NSLocationAlwaysUsageDescription: "Your app needs access to your location for continuous location updates",
+              FacebookAppID: process.env.FACEBOOK_APP_ID,
+              FacebookClientToken: process.env.FACEBOOK_CLIENT_ID,
+              FacebookDisplayName: "Login with Facebook",
+              NSUserTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you.",
+              NSCameraUsageDescription: "We need access to your camera to take pictures or videos.",
+              NSMicrophoneUsageDescription: "We need access to your microphone to record audio during video capture.",
+              CFBundleURLTypes: [
+                {
+                  CFBundleURLSchemes: [
+                    "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
+                    `fb${process.env.FACEBOOK_APP_ID}`,
+                    "com.usuhbayr.zaalproject",
+                    "exp+zaalproject"
+                  ]
+                }
+              ],
+              LSApplicationQueriesSchemes: [
+                "google",
+                "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6"
+              ]
+            }
           },
-
-        },
-        newArchEnabled: false,
-      }],
+          newArchEnabled: false
+        }
+      ]
     ],
     experiments: {
       typedRoutes: true,

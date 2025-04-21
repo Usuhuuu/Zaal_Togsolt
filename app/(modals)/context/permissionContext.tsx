@@ -1,10 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useCameraPermissions } from "expo-camera";
+import { Text } from "react-native";
 
 interface PermissionContextProps {
   notificaitons: boolean;
   location: boolean;
   trackRequest: boolean;
+  camera: boolean;
+  microphone: boolean;
   enablePermissions: (permission: keyof PermissionContextProps) => void;
   disablePermissions: (permission: keyof PermissionContextProps) => void;
 }
@@ -20,6 +24,8 @@ export const PermissionContextProvider: React.FC<{
     notificaitons: false,
     location: false,
     trackRequest: false,
+    camera: false,
+    microphone: false,
     enablePermissions: () => {},
     disablePermissions: () => {},
   });
@@ -37,6 +43,10 @@ export const PermissionContextProvider: React.FC<{
       console.error("Failed to persist permissions", err);
     }
   };
+  useEffect(() => {
+    persistPermissions();
+  }, []);
+
   const enablePermissions = async (
     permission: keyof PermissionContextProps
   ) => {
@@ -76,12 +86,22 @@ export const PermissionContextProvider: React.FC<{
     }
   };
 
+  const [permission, requestPermission] = useCameraPermissions();
+  if (!permission) {
+    requestPermission();
+  }
+  if (!permission?.granted) {
+    return <Text>Permission not granted</Text>;
+  }
+
   return (
     <PermissionContext.Provider
       value={{
         notificaitons: permissions.notificaitons,
         location: permissions.location,
         trackRequest: permissions.trackRequest,
+        camera: permissions.camera,
+        microphone: permissions.microphone,
         enablePermissions,
         disablePermissions,
       }}

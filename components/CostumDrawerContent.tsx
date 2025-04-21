@@ -18,8 +18,9 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useTranslation } from "react-i18next";
 import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
 import { useAuth } from "@/app/(modals)/context/authContext";
-import { auth_swr } from "@/app/(modals)/functions/useswr";
+import { auth_swr } from "@/hooks/useswr";
 import { requestTrackingPermission } from "react-native-tracking-transparency";
+import { useCameraPermissions } from "expo-camera";
 
 const CustomDrawerContent = (props: any) => {
   interface UserData {
