@@ -20,7 +20,6 @@ import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
 import { useAuth } from "@/app/(modals)/context/authContext";
 import { auth_swr } from "@/hooks/useswr";
 import { requestTrackingPermission } from "react-native-tracking-transparency";
-import { useCameraPermissions } from "expo-camera";
 
 const CustomDrawerContent = (props: any) => {
   interface UserData {

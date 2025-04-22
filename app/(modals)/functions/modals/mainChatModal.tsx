@@ -18,13 +18,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
+import { GroupChat } from "@/app/(tabs)/chat";
 
-interface GroupMember {
-  group_ID: string;
-  group_chat_name: string;
-  members: string;
-  chat_image: string;
-}
 interface Message {
   sender_unique_name: string;
   groupId: string;
@@ -40,7 +35,6 @@ interface MainChatModalProps {
   isitReady: boolean;
   setChildModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   childModalVisible: boolean;
-  currentGroupId: string;
   message: Message[];
   loadOlderMsj: () => void;
   loading: boolean;
@@ -52,7 +46,7 @@ interface MainChatModalProps {
   chatInitLang: {
     enterMessage: string;
   };
-  memberData: GroupMember[];
+  memberData: GroupChat[];
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
@@ -63,7 +57,6 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   isitReady,
   setChildModalVisible,
   childModalVisible,
-  currentGroupId,
   message,
   loadOlderMsj,
   loading,
@@ -101,7 +94,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
       ) : (
         <SafeAreaProvider
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: Colors.white,
           }}
         >
           <SafeAreaView
@@ -146,9 +139,16 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     color={Colors.primary}
                   />
                 </TouchableOpacity>
-                <Text style={{ color: Colors.primary, fontSize: 18 }}>
-                  {currentGroupId}
-                </Text>
+                <View style={{ alignItems: "center" }}>
+                  <Text style={{ color: Colors.primary, fontSize: 18 }}>
+                    {memberData[0].sportHallName}
+                  </Text>
+                  <Text style={{ color: Colors.secondary, fontSize: 14 }}>
+                    {memberData[0].date}
+                    {""}
+                    {memberData[0].startTime} - {memberData[0].endTime}
+                  </Text>
+                </View>
                 <TouchableOpacity
                   onPress={() => {
                     setChildModalVisible(true);

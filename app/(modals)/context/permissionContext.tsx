@@ -1,7 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useCameraPermissions } from "expo-camera";
-import { Text } from "react-native";
 
 interface PermissionContextProps {
   notificaitons: boolean;
@@ -85,14 +83,6 @@ export const PermissionContextProvider: React.FC<{
       console.error("Failed to disable permission", Err);
     }
   };
-
-  const [permission, requestPermission] = useCameraPermissions();
-  if (!permission) {
-    requestPermission();
-  }
-  if (!permission?.granted) {
-    return <Text>Permission not granted</Text>;
-  }
 
   return (
     <PermissionContext.Provider

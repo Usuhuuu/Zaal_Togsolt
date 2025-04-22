@@ -124,6 +124,20 @@ function RootLayoutNav() {
           ),
         }}
       />
+
+      <Stack.Screen
+        name="(modals)/cameraModal.tsx"
+        options={{
+          title: "Camera",
+          headerTitleStyle: { fontSize: 25, color: Colors.primary },
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={28} color={Colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Stack>
   );
 }

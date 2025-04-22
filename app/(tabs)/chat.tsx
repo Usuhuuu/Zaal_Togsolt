@@ -32,42 +32,42 @@ interface Message {
   timestamp: Date;
   showDateSeparator?: boolean;
 }
-interface GroupChat {
+export interface GroupChat {
   group_ID: string;
   group_chat_name: string;
   members: string;
   chat_image: string;
+  sportHallName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 }
 
 const prepareMessages = (messages: Message[]) => {
-  return messages.map((message, index) => {
-    const currentDate = format(
-      parseISO(message.timestamp.toString()),
-      "yyyy-MM-dd"
-    );
+  const result = [...messages];
+  const dateGroups: Record<string, number[]> = {};
 
-    const nextMessage = messages[index + 1];
-    const nextDate = nextMessage
-      ? format(parseISO(nextMessage.timestamp.toString()), "yyyy-MM-dd")
-      : null;
+  // Group message indexes by date
+  result.forEach((msg, index) => {
+    const dateKey = format(parseISO(msg.timestamp.toString()), "yyyy-MM-dd");
+    if (!dateGroups[dateKey]) dateGroups[dateKey] = [];
+    dateGroups[dateKey].push(index);
+  });
 
-    const isLastMessageOfDay = currentDate !== nextDate;
-
-    const hasOlderDate = messages.some((msg, i) => {
-      if (i <= index) return false;
-      const msgDate = format(parseISO(msg.timestamp.toString()), "yyyy-MM-dd");
-      return msgDate !== currentDate;
-    });
-
-    return {
-      ...message,
-      showDateSeparator: isLastMessageOfDay && hasOlderDate,
+  // Mark only the last message of each date group
+  Object.values(dateGroups).forEach((indexes) => {
+    const lastIndex = indexes[indexes.length - 1];
+    result[lastIndex] = {
+      ...result[lastIndex],
+      showDateSeparator: true,
     };
   });
+
+  return result;
 };
 
 const newMsjPrepare = (previewMsj: any, newMsj: any) => {
-  const diff = differenceInDays(newMsj.timestamp, previewMsj.timestamp);
+  const diff = differenceInDays(newMsj.timestamp, previewMsj);
   if (diff > 0) {
     return {
       ...newMsj,
@@ -126,12 +126,36 @@ const ChatComponent: React.FC = () => {
       setLoading(true);
     } else if (chatData && chatData.success) {
       setChatGroups(
-        chatData.chatGroupIDs.map((groupID: any) => ({
-          group_ID: groupID._id,
-          members: groupID.members,
-          group_chat_name: groupID.group_chat_name,
-          chat_image: groupID.chat_image,
-        }))
+        chatData.chatGroupIDs.map((groupID: any) => {
+          const regex = /^(.*?)(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}~\d{2}:\d{2})$/;
+          const match = groupID.group_chat_name.match(regex);
+
+          if (match) {
+            const sportHallName = match[1].trim();
+            const date = match[2];
+            const time = match[3];
+            const [startTime, endTime] = time.split("~");
+
+            return {
+              group_ID: groupID._id,
+              members: groupID.members,
+              group_chat_name: `${sportHallName} - ${date}${startTime} – ${endTime}`,
+              chat_image: groupID.chat_image,
+              //splitted key
+              sportHallName,
+              date,
+              startTime,
+              endTime,
+            };
+          } else {
+            return {
+              group_ID: groupID._id,
+              members: groupID.members,
+              group_chat_name: groupID.group_chat_name,
+              chat_image: groupID.chat_image,
+            };
+          }
+        })
       );
     } else if (chatError) {
       console.log("Chat Error:", chatError);
@@ -440,9 +464,36 @@ const ChatComponent: React.FC = () => {
             style={styles.groupItemContainer}
             renderItem={({ item }) => (
               <View style={styles.groupItem}>
-                <Avatar.Icon icon={item.chat_image} />
-                <TouchableOpacity onPress={() => chatInit(item.group_ID)}>
-                  <Text style={styles.groupText}>{item.group_chat_name}</Text>
+                <TouchableOpacity
+                  onPress={() => chatInit(item.group_ID)}
+                  style={{ flexDirection: "row", padding: 5, gap: 5 }}
+                >
+                  <Avatar.Image
+                    size={35}
+                    source={require("@/assets/images/sportHall_Icon_full_primary.png")}
+                    theme={{
+                      colors: { primary: Colors.white },
+                    }}
+                  />
+                  <View
+                    style={{
+                      flex: 1,
+                      flexWrap: "wrap",
+                      flexDirection: "row",
+                      gap: 5,
+                    }}
+                  >
+                    <Text style={{ fontWeight: 600 }}>
+                      {item.sportHallName}
+                    </Text>
+                    <Text style={{ fontWeight: 800 }}>-</Text>
+                    <Text style={{ fontWeight: 300 }}>
+                      {format(new Date(item.date), "MMMM dd")}
+                    </Text>
+                    <Text>
+                      {item.startTime} - {item.endTime}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             )}
@@ -458,7 +509,6 @@ const ChatComponent: React.FC = () => {
         isitReady={isitReady}
         setChildModalVisible={setChildModalVisible}
         childModalVisible={childModalVisible}
-        currentGroupId={currentGroupId}
         message={messages}
         loadOlderMsj={loadOlderMsj}
         loading={loading}
@@ -477,6 +527,7 @@ const ChatComponent: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F9FAFB",
   },
   title: {
     fontSize: 28,
@@ -497,12 +548,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   groupItem: {
-    borderWidth: 0.3,
     padding: 10,
     marginVertical: 7,
     borderRadius: 5,
-    flexDirection: "row",
-    alignItems: "center",
+    backgroundColor: Colors.white,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   groupText: {
     fontSize: 18,

@@ -15,6 +15,7 @@ import { Avatar, Switch } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChangeNameModal from "./innerModals/changeNameModal";
 import MemberModal from "./innerModals/memberModal";
+import { GroupChat } from "@/app/(tabs)/chat";
 
 type childModalNested = {
   id: string;
@@ -23,15 +24,8 @@ type childModalNested = {
   onPress: () => void;
 };
 
-type GroupMember = {
-  group_ID: string;
-  group_chat_name: string;
-  members: string;
-  chat_image: string;
-};
-
 interface ChildModalProps {
-  MemberData: GroupMember[];
+  MemberData: GroupChat[];
 }
 
 const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {

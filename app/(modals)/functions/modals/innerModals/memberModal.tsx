@@ -56,6 +56,9 @@ const MemberModal: React.FC<MemberModalProps> = ({
         "/auth/chat-link-generate",
         {
           group_ID: memberData[0].group_ID,
+        },
+        {
+          timeout: 10 * 1000,
         }
       );
       if (generateLink.status === 200 && generateLink.data.success) {
