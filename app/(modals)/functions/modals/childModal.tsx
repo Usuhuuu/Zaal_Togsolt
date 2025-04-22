@@ -131,7 +131,7 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
                 gap: 10,
                 borderBottomWidth: 1,
                 borderTopWidth: 1,
-                borderColor: Colors.grey,
+                borderColor: Colors.light,
               }}
             >
               {item.icon}
@@ -230,6 +230,7 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
                 setChangeNameModalVisible={setChangeNameModalVisible}
                 groupName={groupName}
                 setGroupName={setGroupName}
+                MemberData={MemberData}
               />
             )}
             {memberModalVisible && (

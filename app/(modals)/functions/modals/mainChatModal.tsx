@@ -140,14 +140,19 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   />
                 </TouchableOpacity>
                 <View style={{ alignItems: "center" }}>
-                  <Text style={{ color: Colors.primary, fontSize: 18 }}>
-                    {memberData[0].sportHallName}
-                  </Text>
-                  <Text style={{ color: Colors.secondary, fontSize: 14 }}>
-                    {memberData[0].date}
-                    {""}
-                    {memberData[0].startTime} - {memberData[0].endTime}
-                  </Text>
+                  {memberData.length > 0 ? (
+                    <>
+                      <Text style={{ color: Colors.primary, fontSize: 18 }}>
+                        {memberData[0].sportHallName ?? ""}
+                      </Text>
+                      <Text style={{ color: Colors.secondary, fontSize: 14 }}>
+                        {memberData[0].date ?? ""}
+                        {""}
+                        {memberData[0].startTime ?? ""} -{" "}
+                        {memberData[0].endTime ?? ""}
+                      </Text>
+                    </>
+                  ) : null}
                 </View>
                 <TouchableOpacity
                   onPress={() => {
