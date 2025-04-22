@@ -37,10 +37,10 @@ export interface GroupChat {
   group_chat_name: string;
   members: string;
   chat_image: string;
-  sportHallName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
+  sportHallName?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 const prepareMessages = (messages: Message[]) => {
@@ -488,7 +488,7 @@ const ChatComponent: React.FC = () => {
                     </Text>
                     <Text style={{ fontWeight: 800 }}>-</Text>
                     <Text style={{ fontWeight: 300 }}>
-                      {format(new Date(item.date), "MMMM dd")}
+                      {item.date ? format(new Date(item.date), "MMMM dd") : ""}
                     </Text>
                     <Text>
                       {item.startTime} - {item.endTime}
@@ -501,6 +501,7 @@ const ChatComponent: React.FC = () => {
           />
         </View>
       )}
+
       <MainChatModal
         readyToShow={readyToShow}
         setReadyToShow={setReadyToShow}
