@@ -28,8 +28,8 @@ interface Message {
   grouped?: boolean;
 }
 interface MainChatModalProps {
-  readyToShow: boolean;
-  setReadyToShow: React.Dispatch<React.SetStateAction<boolean>>;
+  mainModalShow: boolean;
+  setmainModalShow: React.Dispatch<React.SetStateAction<boolean>>;
   socketRef: React.RefObject<any>;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   isitReady: boolean;
@@ -50,8 +50,8 @@ interface MainChatModalProps {
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
-  readyToShow,
-  setReadyToShow,
+  mainModalShow,
+  setmainModalShow,
   socketRef,
   setMessages,
   isitReady,
@@ -77,16 +77,10 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
     <Modal
       animationType="fade"
       transparent={true}
-      visible={readyToShow}
+      visible={mainModalShow}
       style={{ zIndex: 1 }}
       onRequestClose={() => {
-        if (socketRef.current?.connected) {
-          socketRef.current?.disconnect();
-        }
-        setReadyToShow(false);
-      }}
-      onDismiss={() => {
-        setMessages([]);
+        setmainModalShow(false);
       }}
     >
       {isitReady ? (
@@ -121,16 +115,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
               >
                 <TouchableOpacity
                   onPress={() => {
-                    setReadyToShow(false);
-                    if (socketRef.current) {
-                      socketRef.current?.disconnect();
-                      setTimeout(() => {
-                        if (!socketRef.current?.connected) {
-                        } else {
-                          console.log("Socket still connected");
-                        }
-                      }, 500);
-                    }
+                    setmainModalShow(false);
                   }}
                 >
                   <Ionicons
@@ -140,19 +125,28 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   />
                 </TouchableOpacity>
                 <View style={{ alignItems: "center" }}>
-                  {memberData.length > 0 ? (
-                    <>
-                      <Text style={{ color: Colors.primary, fontSize: 18 }}>
-                        {memberData[0].sportHallName ?? ""}
-                      </Text>
-                      <Text style={{ color: Colors.secondary, fontSize: 14 }}>
-                        {memberData[0].date ?? ""}
-                        {""}
-                        {memberData[0].startTime ?? ""} -{" "}
-                        {memberData[0].endTime ?? ""}
-                      </Text>
-                    </>
-                  ) : null}
+                  {memberData[0] ? (
+                    memberData[0].sportHallName &&
+                    memberData[0].date &&
+                    memberData[0].startTime &&
+                    memberData[0].endTime ? (
+                      <>
+                        <Text style={{ color: Colors.primary, fontSize: 18 }}>
+                          {memberData[0].sportHallName}
+                        </Text>
+                        <Text style={{ color: Colors.secondary, fontSize: 14 }}>
+                          {memberData[0].date} {memberData[0].startTime} –{" "}
+                          {memberData[0].endTime}
+                        </Text>
+                      </>
+                    ) : (
+                      <Text>{memberData[0].group_chat_name ?? ""}</Text>
+                    )
+                  ) : (
+                    <Text>
+                      <ActivityIndicator size={24} color={Colors.primary} />
+                    </Text>
+                  )}
                 </View>
                 <TouchableOpacity
                   onPress={() => {

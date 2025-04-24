@@ -9,9 +9,11 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
-import { TextInput } from "react-native-paper";
+import { HelperText, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import axiosInstance from "../../axiosInstance";
 
 interface ChangeNameModalProps {
   changeNameModalVisible: boolean;
@@ -29,6 +31,8 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
   MemberData,
 }) => {
   const [chatName, setChatName] = React.useState<string>("");
+  const numericValue = chatName.length;
+  const hasError = isNaN(numericValue) || numericValue >= 100;
 
   useEffect(() => {
     if (MemberData?.length > 0) {
@@ -39,11 +43,26 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
     }
   }, [MemberData, groupName]);
 
-  const handleSave = () => {
-    setGroupName(chatName);
-    setChangeNameModalVisible(false);
-  };
   const { bottom } = useSafeAreaInsets();
+
+  const handleNameChange = async () => {
+    if (chatName.length < 100) {
+      const response = await axiosInstance.post(
+        "/auth/chat-update-group-name",
+        {
+          groupId: MemberData[0]?.group_ID,
+          groupName: chatName,
+        }
+      );
+      if (response.status === 200 && response.data.success) {
+        setGroupName(chatName);
+        Alert.alert("Group name updated successfully");
+      } else {
+        Alert.alert("Failed to update group name", "Please try again later");
+      }
+    }
+  };
+
   return (
     <View
       style={{
@@ -58,7 +77,7 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <View style={{ marginHorizontal: 20, gap: 10 }}>
+        <View style={{ marginHorizontal: 20, gap: 10, marginTop: 40 }}>
           <Text
             style={{ alignSelf: "center", fontSize: 24, fontWeight: "500" }}
           >
@@ -72,12 +91,22 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
               style={{
                 backgroundColor: Colors.white,
               }}
+              error={hasError}
               theme={{
                 colors: {
                   primary: Colors.white,
                 },
               }}
             />
+            {hasError && (
+              <HelperText
+                type="error"
+                visible={hasError}
+                style={{ marginLeft: 10 }}
+              >
+                Name must be less than 100 characters.
+              </HelperText>
+            )}
           </View>
           <View
             style={{
@@ -122,9 +151,10 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
                   backgroundColor: Colors.primary,
                   width: "48%",
                   alignItems: "center",
+                  borderRadius: 10,
                 },
               ]}
-              onPress={handleSave}
+              onPress={handleNameChange}
             >
               <Text
                 style={{ color: Colors.white, fontSize: 20, fontWeight: "500" }}
