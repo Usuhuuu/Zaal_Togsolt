@@ -19,6 +19,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
 import { GroupChat } from "@/app/(tabs)/chat";
+import { List } from "react-native-paper";
 
 interface Message {
   sender_unique_name: string;
@@ -28,8 +29,8 @@ interface Message {
   grouped?: boolean;
 }
 interface MainChatModalProps {
-  readyToShow: boolean;
-  setReadyToShow: React.Dispatch<React.SetStateAction<boolean>>;
+  mainModalShow: boolean;
+  setmainModalShow: React.Dispatch<React.SetStateAction<boolean>>;
   socketRef: React.RefObject<any>;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   isitReady: boolean;
@@ -50,8 +51,8 @@ interface MainChatModalProps {
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
-  readyToShow,
-  setReadyToShow,
+  mainModalShow,
+  setmainModalShow,
   socketRef,
   setMessages,
   isitReady,
@@ -68,6 +69,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   chatInitLang,
   memberData,
 }) => {
+  const [menuVisible, setMenuVisible] = React.useState(false);
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
@@ -77,16 +79,10 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
     <Modal
       animationType="fade"
       transparent={true}
-      visible={readyToShow}
+      visible={mainModalShow}
       style={{ zIndex: 1 }}
       onRequestClose={() => {
-        if (socketRef.current?.connected) {
-          socketRef.current?.disconnect();
-        }
-        setReadyToShow(false);
-      }}
-      onDismiss={() => {
-        setMessages([]);
+        setmainModalShow(false);
       }}
     >
       {isitReady ? (
@@ -121,16 +117,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
               >
                 <TouchableOpacity
                   onPress={() => {
-                    setReadyToShow(false);
-                    if (socketRef.current) {
-                      socketRef.current?.disconnect();
-                      setTimeout(() => {
-                        if (!socketRef.current?.connected) {
-                        } else {
-                          console.log("Socket still connected");
-                        }
-                      }, 500);
-                    }
+                    setmainModalShow(false);
                   }}
                 >
                   <Ionicons
@@ -140,19 +127,28 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   />
                 </TouchableOpacity>
                 <View style={{ alignItems: "center" }}>
-                  {memberData.length > 0 ? (
-                    <>
-                      <Text style={{ color: Colors.primary, fontSize: 18 }}>
-                        {memberData[0].sportHallName ?? ""}
-                      </Text>
-                      <Text style={{ color: Colors.secondary, fontSize: 14 }}>
-                        {memberData[0].date ?? ""}
-                        {""}
-                        {memberData[0].startTime ?? ""} -{" "}
-                        {memberData[0].endTime ?? ""}
-                      </Text>
-                    </>
-                  ) : null}
+                  {memberData[0] ? (
+                    memberData[0].sportHallName &&
+                    memberData[0].date &&
+                    memberData[0].startTime &&
+                    memberData[0].endTime ? (
+                      <>
+                        <Text style={{ color: Colors.primary, fontSize: 18 }}>
+                          {memberData[0].sportHallName}
+                        </Text>
+                        <Text style={{ color: Colors.secondary, fontSize: 14 }}>
+                          {memberData[0].date} {memberData[0].startTime} –{" "}
+                          {memberData[0].endTime}
+                        </Text>
+                      </>
+                    ) : (
+                      <Text>{memberData[0].group_chat_name ?? ""}</Text>
+                    )
+                  ) : (
+                    <Text>
+                      <ActivityIndicator size={24} color={Colors.primary} />
+                    </Text>
+                  )}
                 </View>
                 <TouchableOpacity
                   onPress={() => {
@@ -170,25 +166,17 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 data={message}
                 style={[
                   {
-                    flex: 1,
-                    maxHeight: height - headerHeight - bottom - 80,
-                    backgroundColor: "#ffffff",
+                    backgroundColor: Colors.white,
+                    paddingBottom: 40,
                   },
                 ]}
                 renderItem={renderChatItem}
-                keyExtractor={(item) =>
-                  item.timestamp
-                    ? item.timestamp.toString()
-                    : Math.random().toString()
-                }
+                keyExtractor={(item) => item.timestamp.toString()}
                 inverted={true}
                 onEndReached={loadOlderMsj}
                 onEndReachedThreshold={0.2}
                 ListFooterComponent={loading ? <ActivityIndicator /> : null}
                 ref={flatListRef}
-                maintainVisibleContentPosition={{
-                  minIndexForVisible: 0,
-                }}
                 initialNumToRender={20}
                 maxToRenderPerBatch={20}
                 windowSize={10}
@@ -199,13 +187,56 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 keyboardVerticalOffset={headerHeight / 2 + 10}
               >
                 <View style={[styles.inputContainer]}>
-                  <TouchableOpacity>
-                    <AntDesign
-                      name="pluscircleo"
-                      size={24}
-                      color={Colors.grey}
-                    />
-                  </TouchableOpacity>
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setMenuVisible(!menuVisible);
+                      }}
+                      style={{
+                        backgroundColor: Colors.lightGrey,
+                        padding: 7,
+                        borderRadius: 20,
+                      }}
+                    >
+                      <AntDesign
+                        name="plus"
+                        size={24}
+                        color={Colors.darkGrey}
+                      />
+                    </TouchableOpacity>
+                    {menuVisible && (
+                      <View
+                        style={{
+                          position: "absolute",
+                          backgroundColor: "white",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 4,
+                          elevation: 5,
+                          top: -80,
+                          flex: 1,
+                          left: 0,
+                          right: 0,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          padding: 10,
+                          width: 40,
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => console.log("Option 1")}
+                        >
+                          <Ionicons name="camera" size={24} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => console.log("Option 2")}
+                        >
+                          <Ionicons name="camera" size={24} />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+
                   <View style={styles.input}>
                     <TextInput
                       placeholder={chatInitLang.enterMessage}
@@ -213,14 +244,9 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       onChangeText={(newMsj) => setNewMessage(newMsj)}
                       maxLength={2000}
                       style={{ flex: 1 }}
-                      placeholderTextColor={Colors.grey}
+                      placeholderTextColor={Colors.darkGrey}
                       clearTextOnFocus={false}
                       multiline
-                    />
-                    <Entypo
-                      name="emoji-happy"
-                      size={24}
-                      color={Colors.lightGrey}
                     />
                   </View>
 
@@ -282,14 +308,10 @@ export default MainChatModal;
 const styles = StyleSheet.create({
   input: {
     flex: 1,
-    borderColor: "#ccc",
-    borderWidth: 1,
     borderRadius: 20,
-    padding: 5,
+    padding: 7,
     paddingHorizontal: 16,
-    backgroundColor: "#fff",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: Colors.lightGrey,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -297,11 +319,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderColor: "#ddd",
+    paddingHorizontal: 10,
     gap: 10,
   },
   sendButton: {

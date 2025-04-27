@@ -20,6 +20,8 @@ import { Ionicons, Fontisto, AntDesign } from "@expo/vector-icons";
 import { useAuth } from "@/app/(modals)/context/authContext";
 import { auth_swr } from "@/hooks/useswr";
 import { requestTrackingPermission } from "react-native-tracking-transparency";
+import * as Notification from "expo-notifications";
+import * as SecureStorage from "expo-secure-store";
 
 const CustomDrawerContent = (props: any) => {
   interface UserData {
@@ -44,6 +46,36 @@ const CustomDrawerContent = (props: any) => {
       loginStatus: LoginStatus,
     },
   });
+
+  const handleNotification = async () => {
+    let token: string =
+      (await SecureStorage.getItemAsync("notificationToken")) || "";
+    if (token === "") {
+      const { status } = await Notification.requestPermissionsAsync();
+      const tokens = await Notification.getExpoPushTokenAsync();
+      if (status === "granted") {
+        token = (await Notification.getExpoPushTokenAsync()).data;
+        await SecureStorage.setItemAsync("notificationToken", token);
+      } else {
+        console.log("Notification permission not granted");
+      }
+    } else {
+    }
+  };
+
+  useEffect(() => {
+    handleNotification();
+  });
+
+  useEffect(() => {
+    const recieveNotification = Notification.addNotificationReceivedListener(
+      (notification) => {
+        console.log(notification);
+      }
+    );
+    return () => recieveNotification.remove();
+  });
+
   useEffect(() => {
     const requestTracking = async () => {
       await requestTrackingPermission();

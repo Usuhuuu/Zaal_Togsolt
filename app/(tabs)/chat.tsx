@@ -86,7 +86,7 @@ const ChatComponent: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [currentGroupId, setCurrentGroupId] = useState<string>("");
-  const [readyToShow, setReadyToShow] = useState<boolean>(false);
+  const [mainModalShow, setmainModalShow] = useState<boolean>(false);
   const [userDatas, setUserDatas] = useState<any>([]);
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -127,31 +127,35 @@ const ChatComponent: React.FC = () => {
     } else if (chatData && chatData.success) {
       setChatGroups(
         chatData.chatGroupIDs.map((groupID: any) => {
-          const regex = /^(.*?)(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}~\d{2}:\d{2})$/;
-          const match = groupID.group_chat_name.match(regex);
-
+          const groupChatName = groupID.group_chat_name;
+          const regex =
+            /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+[–-]\s+(\d{2}:\d{2})/;
+          const match = groupChatName.match(regex);
           if (match) {
-            const sportHallName = match[1].trim();
-            const date = match[2];
-            const time = match[3];
-            const [startTime, endTime] = time.split("~");
+            const [_, date, startTime, endTime] = match;
+            const indexOfDate = groupChatName.indexOf(date);
+
+            const sportHallName = groupChatName
+              .substring(0, indexOfDate)
+              .replace(/-\s*$/, "")
+              .trim();
 
             return {
               group_ID: groupID._id,
               members: groupID.members,
-              group_chat_name: `${sportHallName} - ${date}${startTime} – ${endTime}`,
+              group_chat_name: `${sportHallName} - ${date} ${startTime} – ${endTime}`,
               chat_image: groupID.chat_image,
-              //splitted key
+              // splitted data
               sportHallName,
               date,
               startTime,
               endTime,
             };
-          } else {
+          } else if (match === null) {
             return {
               group_ID: groupID._id,
               members: groupID.members,
-              group_chat_name: groupID.group_chat_name,
+              group_chat_name: groupChatName,
               chat_image: groupID.chat_image,
             };
           }
@@ -184,15 +188,19 @@ const ChatComponent: React.FC = () => {
     try {
       setCurrentGroupId(groupId);
       const token = await SecureStore.getItemAsync("Tokens");
+
       if (!token) {
         return Alert.alert("Login required to join group.");
       }
+      const notificationToken = await SecureStore.getItemAsync(
+        "notificationToken"
+      );
       const { accessToken, refreshToken } = JSON.parse(token);
       // Initialize socket if not already connected
       if (!socketRef.current || socketRef.current.disconnected) {
         socketRef.current = io(`${apiUrl}`, {
           auth: { token: accessToken },
-          query: { groupId },
+          query: { groupId, notificationToken },
           transports: ["websocket"],
           secure: false,
           autoConnect: true,
@@ -201,10 +209,12 @@ const ChatComponent: React.FC = () => {
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
         });
+
         (socketRef.current as any).hasFetchedHistory = false;
 
-        // 🔹 Handle successful connection
         socketRef.current.on("connect", () => {
+          socketRef.current?.emit("joinGroup", groupId);
+
           if (!(socketRef.current as any).hasFetchedHistory) {
             socketRef.current?.emit("chatHistory", { timer: Date.now() });
             socketRef.current?.once("chatHistory", (message) => {
@@ -215,33 +225,49 @@ const ChatComponent: React.FC = () => {
                 return;
               }
               const formattedMessages = prepareMessages(message.messages);
-              setMessages((prevMsj) => [...formattedMessages, ...prevMsj]);
+              setMessages((prevMsj: Message[]) => {
+                const merged = [...formattedMessages, ...prevMsj];
+                const seen = new Set();
+                //hash map almost gshh sda
+                return merged.filter((item) => {
+                  if (seen.has(item.timestamp)) return false;
+                  seen.add(item.timestamp);
+                  return true;
+                });
+              });
+
               setCursor(message.nextCursor);
               setIsitReady(false);
             });
           }
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
-            if (data.groupId !== currentGroupId) return;
             const newMsj: Message = {
               sender_unique_name: data.sender_unique_name,
               groupId: data.groupId,
               message: data.message,
               timestamp: new Date(data.timestamp),
             };
+            setMessages((prevMessages: Message[]) => {
+              const merged = [newMsj, ...prevMessages];
+              const seen = new Set();
+              return merged.filter((item) => {
+                if (seen.has(item.timestamp)) return false;
+                seen.add(item.timestamp);
+                return true;
+              });
+            });
 
-            if (data.sender_unique_name === userDatas.unique_user_ID) {
-              return;
-            }
-            setMessages((prevMessages) => [newMsj, ...prevMessages]);
+            flatListRef.current?.scrollToIndex({
+              index: 0,
+              animated: true,
+            });
           });
 
           socketRef.current?.on("reconnect", (attempt) => {
             console.log(`Reconnected successfully after ${attempt} attempts`);
           });
         });
-
-        socketRef.current.emit("joinGroup");
 
         // 🔹 Handle token expiration & reconnection
         socketRef.current.on("connect_error", async (error) => {
@@ -285,12 +311,25 @@ const ChatComponent: React.FC = () => {
         });
       }
 
-      setReadyToShow(true);
+      setmainModalShow(true);
     } catch (error) {
       console.error("Error joining group:", error);
       Sentry.captureException(error);
     }
   };
+
+  const handleSocket = useCallback(() => {
+    if (mainModalShow) {
+      socketRef.current?.emit("chat-active");
+    } else {
+      socketRef.current?.emit("chat-inactive");
+    }
+  }, [mainModalShow]);
+
+  useEffect(() => {
+    console.log(mainModalShow);
+    handleSocket();
+  }, [mainModalShow]);
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
@@ -317,7 +356,6 @@ const ChatComponent: React.FC = () => {
       setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
     }
     socketRef.current.emit("sendMessage", newMessage);
-    console.log("Message sent:", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
       animated: true,
@@ -416,7 +454,9 @@ const ChatComponent: React.FC = () => {
         </View>
       );
     },
-    (prevProps, nextProps) => prevProps.item === nextProps.item
+    (prev, next) =>
+      prev.item.message === next.item.message &&
+      prev.item.timestamp === next.item.timestamp
   );
 
   const renderChatItem = useCallback(
@@ -483,16 +523,27 @@ const ChatComponent: React.FC = () => {
                       gap: 5,
                     }}
                   >
-                    <Text style={{ fontWeight: 600 }}>
-                      {item.sportHallName}
-                    </Text>
-                    <Text style={{ fontWeight: 800 }}>-</Text>
-                    <Text style={{ fontWeight: 300 }}>
-                      {item.date ? format(new Date(item.date), "MMMM dd") : ""}
-                    </Text>
-                    <Text>
-                      {item.startTime} - {item.endTime}
-                    </Text>
+                    {item.sportHallName &&
+                    item.date &&
+                    item.startTime &&
+                    item.endTime ? (
+                      <>
+                        <Text style={{ fontWeight: 600 }}>
+                          {item.sportHallName}
+                        </Text>
+                        <Text style={{ fontWeight: 800 }}>-</Text>
+                        <Text style={{ fontWeight: 300 }}>
+                          {item.date
+                            ? format(new Date(item.date), "MMMM dd")
+                            : ""}
+                        </Text>
+                        <Text>
+                          {item.startTime} - {item.endTime}
+                        </Text>
+                      </>
+                    ) : (
+                      <Text>{item.group_chat_name}</Text>
+                    )}
                   </View>
                 </TouchableOpacity>
               </View>
@@ -503,8 +554,8 @@ const ChatComponent: React.FC = () => {
       )}
 
       <MainChatModal
-        readyToShow={readyToShow}
-        setReadyToShow={setReadyToShow}
+        mainModalShow={mainModalShow}
+        setmainModalShow={setmainModalShow}
         socketRef={socketRef}
         setMessages={setMessages}
         isitReady={isitReady}

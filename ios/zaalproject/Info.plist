@@ -87,9 +87,7 @@
       <true/>
     </dict>
     <key>NSCameraUsageDescription</key>
-<string>We need access to your camera to take pictures or videos.</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>We need access to your microphone to record audio during video capture.</string>
+    <string>Allow $(PRODUCT_NAME) to access your camera</string>
     <key>NSFaceIDUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -98,6 +96,8 @@
     <string>Your app needs access to your location for continuous location updates</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Your app needs access to your location to show your position on the map</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

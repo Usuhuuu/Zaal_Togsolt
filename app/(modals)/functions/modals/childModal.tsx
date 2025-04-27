@@ -186,7 +186,7 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
       <View>
         <Modal
           animationType="slide"
-          presentationStyle="formSheet"
+          presentationStyle={"pageSheet"}
           visible={baseModalVisible}
           onRequestClose={() => {
             setBaseModalVisible(false);
