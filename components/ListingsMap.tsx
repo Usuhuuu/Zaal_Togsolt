@@ -18,7 +18,7 @@ import MapViewClustering from "react-native-map-clustering";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-
+import * as SecureStorage from "expo-secure-store";
 interface ListingsMapProps {
   listings: {
     features: ListingGeo[];
@@ -58,20 +58,30 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
 
   useEffect(() => {
     const requestLocationPermission = async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === "granted") {
-          setHasLocationPermission(true);
-          const location = await Location.getCurrentPositionAsync();
-          setUserLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          });
-        } else {
-          setHasLocationPermission(false);
+      const userLocation = await SecureStorage.getItemAsync("userLocation");
+      if (!userLocation) {
+        try {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status === "granted") {
+            setHasLocationPermission(true);
+            const location = await Location.getCurrentPositionAsync();
+            const userLocation = {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            };
+            await SecureStorage.setItemAsync(
+              "userLocation",
+              JSON.stringify(userLocation)
+            );
+            setUserLocation(userLocation);
+          } else {
+            setHasLocationPermission(false);
+          }
+        } catch (error) {
+          console.error("Error fetching location:", error);
         }
-      } catch (error) {
-        console.error("Error fetching location:", error);
+      } else {
+        setUserLocation(JSON.parse(userLocation));
       }
     };
 

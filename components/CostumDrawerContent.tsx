@@ -158,20 +158,24 @@ const CustomDrawerContent = (props: any) => {
         <View style={styles.log}>
           <View style={styles.logInside}>
             <TouchableOpacity style={styles.logInsideTouchable}>
-              <Ionicons name="people" size={24} color="#78909C" />
+              <Ionicons name="people" size={24} color={Colors.darkGrey} />
               <Text style={styles.logText}>{t("aboutUs.aboutUs")}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.logInside}>
             <TouchableOpacity style={styles.logInsideTouchable}>
-              <Ionicons name="help" size={24} color="#78909C" />
+              <Ionicons name="help" size={24} color={Colors.darkGrey} />
               <Text style={styles.logText}>{t("aboutUs.helps")}</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.logInside}>
             <TouchableOpacity style={styles.logInsideTouchable}>
-              <AntDesign name="customerservice" size={24} color="#78909C" />
+              <AntDesign
+                name="customerservice"
+                size={24}
+                color={Colors.darkGrey}
+              />
               <Text style={styles.logText}>{t("aboutUs.contactUs")}</Text>
             </TouchableOpacity>
           </View>
@@ -179,27 +183,31 @@ const CustomDrawerContent = (props: any) => {
         <View
           style={{
             padding: 20,
-            backgroundColor: "#ECEFF1",
+            backgroundColor: Colors.grey,
             flexDirection: "row",
             justifyContent: "center",
             gap: 30,
           }}
         >
           <TouchableOpacity>
-            <FontAwesome name="facebook-official" size={27} color="#78909C" />
+            <FontAwesome
+              name="facebook-official"
+              size={27}
+              color={Colors.darkGrey}
+            />
           </TouchableOpacity>
           <TouchableOpacity>
-            <FontAwesome name="instagram" size={27} color="#78909C" />
+            <FontAwesome name="instagram" size={27} color={Colors.darkGrey} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Fontisto name="email" size={27} color="#78909C" />
+            <Fontisto name="email" size={27} color={Colors.darkGrey} />
           </TouchableOpacity>
         </View>
       </View>
       <View
         style={[
           styles.footer,
-          { paddingBottom: 20 + bottom, backgroundColor: "#ECEFF1" },
+          { paddingBottom: 20 + bottom, backgroundColor: Colors.grey },
         ]}
       >
         <FontAwesome name="copyright" size={24} color="black" />
@@ -250,15 +258,13 @@ const styles = StyleSheet.create({
   footer: {
     paddingBottom: 20,
     padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: Colors.primary,
     alignItems: "center",
     flexDirection: "row",
     gap: 10,
   },
   log: {
     justifyContent: "center",
-    backgroundColor: "#ECEFF1",
+    backgroundColor: Colors.grey,
   },
   logInside: {
     flexDirection: "row",
@@ -271,7 +277,7 @@ const styles = StyleSheet.create({
   },
   logText: {
     paddingHorizontal: 20,
-    color: "#78909C",
+    color: Colors.darkGrey,
   },
   footerButton: {
     marginVertical: 10,

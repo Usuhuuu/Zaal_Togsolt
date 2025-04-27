@@ -21,7 +21,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { ScrollView } from "react-native-gesture-handler";
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as SecureStore from "expo-secure-store";
-import { TextInput } from "react-native-paper";
+import { Avatar, Badge, TextInput } from "react-native-paper";
+import { launchImageLibrary } from "react-native-image-picker";
 
 type LoginInput = {
   userName: string;
@@ -61,6 +62,11 @@ const initSteps = [
   },
   {
     steps: 3,
+    title: "Image",
+    placeholder: "Upload the image",
+  },
+  {
+    steps: 4,
     title: "Final",
     placeholder: "Check the personal information",
     buttonText: "Create Account",
@@ -86,6 +92,8 @@ const SignupModal = ({
 }) => {
   const [modalPasswordHide, setModalPasswordHide] = useState<boolean>(true);
   const [disableButton, setDisableButton] = useState<boolean>(true);
+  const [imageUrl, setImageUrl] = useState<string>("");
+
   const fadeCheckUsername = useRef(new Animated.Value(0)).current;
   const fadeConfirm = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -281,7 +289,7 @@ const SignupModal = ({
               style={styles.modalInput}
               value={formData.firstName}
               mode="outlined"
-              placeholder={
+              label={
                 typeof initSteps[0].placeholder === "object" &&
                 "placeholderFirstName" in initSteps[0].placeholder
                   ? initSteps[0].placeholder.placeholderFirstName
@@ -290,12 +298,17 @@ const SignupModal = ({
               onChangeText={(e) => {
                 setFormData({ ...formData, firstName: e });
               }}
+              theme={{
+                colors: {
+                  primary: Colors.primary,
+                },
+              }}
             />
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput]}
               value={formData.lastName}
               mode="outlined"
-              placeholder={
+              label={
                 typeof initSteps[0].placeholder === "object" &&
                 "placeholderLastName" in initSteps[0].placeholder
                   ? initSteps[0].placeholder.placeholderLastName
@@ -303,6 +316,11 @@ const SignupModal = ({
               }
               onChangeText={(e) => {
                 setFormData({ ...formData, lastName: e });
+              }}
+              theme={{
+                colors: {
+                  primary: Colors.primary,
+                },
               }}
             />
             <View style={styles.modalButtonContainerFirst}>
@@ -324,14 +342,20 @@ const SignupModal = ({
           >
             <TextInput
               style={styles.modalInput}
-              placeholder={
+              label={
                 typeof initSteps[1].placeholder === "string"
                   ? initSteps[1].placeholder
                   : ""
               }
+              mode="outlined"
               value={formData.email}
               onChangeText={(e) => {
                 setFormData({ ...formData, email: e });
+              }}
+              theme={{
+                colors: {
+                  primary: Colors.primary,
+                },
               }}
             />
             <View style={styles.modalButtonContainer}>
@@ -363,15 +387,21 @@ const SignupModal = ({
           >
             <TextInput
               style={styles.modalInput}
-              placeholder={
+              label={
                 typeof initSteps[2].placeholder === "string"
                   ? initSteps[2].placeholder
                   : ""
               }
+              mode="outlined"
               value={formData.userName}
               onChange={(e) =>
                 setFormData({ ...formData, userName: e.nativeEvent.text })
               }
+              theme={{
+                colors: {
+                  primary: Colors.primary,
+                },
+              }}
             />
 
             <View style={styles.modalButtonContainer}>
@@ -424,13 +454,77 @@ const SignupModal = ({
         )}
         {steps === 3 && (
           <Animated.View
+            style={[styles.modalInputContainer, { opacity: fadeAnim }]}
+          >
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={() => {
+                  launchImageLibrary(
+                    { mediaType: "photo", includeBase64: true },
+                    (response) => {
+                      if (response.assets && response.assets[0].uri) {
+                        setImageUrl(response.assets[0].uri);
+                      } else {
+                        console.warn("No image selected or invalid response");
+                      }
+                    }
+                  );
+                }}
+              >
+                <Avatar.Image
+                  source={
+                    imageUrl
+                      ? { uri: imageUrl }
+                      : require("@/assets/images/profileIcons/profile.png")
+                  }
+                  size={100}
+                />
+              </TouchableOpacity>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.modalNextButton}
+                  onPress={() => {
+                    setSteps(steps - 1);
+                    fadeInStep();
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>Preview</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalNextButton}
+                  onPress={() => {
+                    if (!disableButton) {
+                      setSteps(steps + 1);
+                      fadeInStep();
+                    } else {
+                      Alert.alert("Please check your username");
+                    }
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>Next</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Animated.View>
+        )}
+        {steps === 4 && (
+          <Animated.View
             style={[styles.modalInputContainer, { opacity: fadeAnim, flex: 1 }]}
           >
             <ScrollView>
               {Object.entries(formData).map(([fields, value]) => (
                 <View key={fields} style={styles.modalInputContainer}>
                   <Text>{fields}</Text>
-                  <TextInput value={value} style={styles.modalInput} />
+                  <TextInput
+                    value={value}
+                    mode="outlined"
+                    style={styles.modalInput}
+                    theme={{
+                      colors: {
+                        primary: Colors.primary,
+                      },
+                    }}
+                  />
                 </View>
               ))}
             </ScrollView>
@@ -468,13 +562,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalInput: {
-    height: 50,
-    borderWidth: 1,
-    paddingVertical: 10,
     paddingHorizontal: 15,
     marginHorizontal: 20,
-    borderRadius: 15,
-    borderColor: "#bebebe",
+    marginVertical: 5,
   },
   modalButtonContainer: {
     flexDirection: "row",
