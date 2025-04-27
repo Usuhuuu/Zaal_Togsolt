@@ -23,16 +23,15 @@ const Page = () => {
     console.log(`CHANGED_`, category);
     setCategory(category);
   };
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const height = Dimensions.get("window").height;
 
   return (
     <GestureHandlerRootView
       style={[
-        styles.container,
         {
           marginTop: top,
-          minHeight: Platform.OS === "ios" ? height / 1.23 : null,
+          height: height - top - bottom - 100,
         },
       ]}
     >

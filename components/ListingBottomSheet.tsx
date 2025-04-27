@@ -21,7 +21,7 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
     setrefresh(refresh + 1);
   };
   const { bottom, top } = useSafeAreaInsets();
-  const snapPoints = useMemo(() => [bottom + 100, "100%"], []);
+  const snapPoints = useMemo(() => [bottom + 90, "100%"], []);
 
   return (
     <BottomSheet
