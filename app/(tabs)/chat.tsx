@@ -188,15 +188,19 @@ const ChatComponent: React.FC = () => {
     try {
       setCurrentGroupId(groupId);
       const token = await SecureStore.getItemAsync("Tokens");
+
       if (!token) {
         return Alert.alert("Login required to join group.");
       }
+      const notificationToken = await SecureStore.getItemAsync(
+        "notificationToken"
+      );
       const { accessToken, refreshToken } = JSON.parse(token);
       // Initialize socket if not already connected
       if (!socketRef.current || socketRef.current.disconnected) {
         socketRef.current = io(`${apiUrl}`, {
           auth: { token: accessToken },
-          query: { groupId },
+          query: { groupId, notificationToken },
           transports: ["websocket"],
           secure: false,
           autoConnect: true,
@@ -208,9 +212,8 @@ const ChatComponent: React.FC = () => {
 
         (socketRef.current as any).hasFetchedHistory = false;
 
-        // 🔹 Handle successful connection
         socketRef.current.on("connect", () => {
-          socketRef.current?.emit("joinGroup");
+          socketRef.current?.emit("joinGroup", groupId);
 
           if (!(socketRef.current as any).hasFetchedHistory) {
             socketRef.current?.emit("chatHistory", { timer: Date.now() });
@@ -239,18 +242,26 @@ const ChatComponent: React.FC = () => {
           }
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
-            if (data.groupId !== currentGroupId) return;
             const newMsj: Message = {
               sender_unique_name: data.sender_unique_name,
               groupId: data.groupId,
               message: data.message,
               timestamp: new Date(data.timestamp),
             };
+            setMessages((prevMessages: Message[]) => {
+              const merged = [newMsj, ...prevMessages];
+              const seen = new Set();
+              return merged.filter((item) => {
+                if (seen.has(item.timestamp)) return false;
+                seen.add(item.timestamp);
+                return true;
+              });
+            });
 
-            if (data.sender_unique_name === userDatas.unique_user_ID) {
-              return;
-            }
-            setMessages((prevMessages) => [newMsj, ...prevMessages]);
+            flatListRef.current?.scrollToIndex({
+              index: 0,
+              animated: true,
+            });
           });
 
           socketRef.current?.on("reconnect", (attempt) => {
@@ -345,7 +356,6 @@ const ChatComponent: React.FC = () => {
       setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
     }
     socketRef.current.emit("sendMessage", newMessage);
-    console.log("Message sent:", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
       animated: true,

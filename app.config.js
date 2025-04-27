@@ -119,6 +119,8 @@ export default {
           },
           ios: {
             deploymentTarget: "15.1",
+            "com.apple.developer.push-notifications": true,
+            "aps-environment": "development",
             infoPlist: {
               "aps-environment": "development",
               GMSApiKey: process.env.GOOGLE_MAPS_API_KEY,
