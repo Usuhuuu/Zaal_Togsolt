@@ -47,15 +47,23 @@ const prepareMessages = (messages: Message[]) => {
   const result = [...messages];
   const dateGroups: Record<string, number[]> = {};
 
-  // Group message indexes by date
+  // Group messages by their date
   result.forEach((msg, index) => {
     const dateKey = format(parseISO(msg.timestamp.toString()), "yyyy-MM-dd");
     if (!dateGroups[dateKey]) dateGroups[dateKey] = [];
     dateGroups[dateKey].push(index);
   });
 
-  // Mark only the last message of each date group
-  Object.values(dateGroups).forEach((indexes) => {
+  const dates = Object.keys(dateGroups);
+
+  // If there is only 1 date, don't mark anything
+  if (dates.length <= 1) {
+    return result.map((msg) => ({ ...msg, showDateSeparator: false }));
+  }
+
+  // Otherwise, mark the last message of each day
+  dates.forEach((dateKey) => {
+    const indexes = dateGroups[dateKey];
     const lastIndex = indexes[indexes.length - 1];
     result[lastIndex] = {
       ...result[lastIndex],
