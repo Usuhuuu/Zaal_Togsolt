@@ -64,6 +64,8 @@ const MemberModal: React.FC<MemberModalProps> = ({
       if (generateLink.status === 200 && generateLink.data.success) {
         const { link } = generateLink.data;
         setQrLink(link);
+      } else if (generateLink.status === 400 && !generateLink.data.success) {
+        Alert.alert(generateLink.data.message);
       }
     } catch (err) {
       console.error("Error adding member:", err);

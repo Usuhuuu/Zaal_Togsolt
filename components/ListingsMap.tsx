@@ -6,11 +6,7 @@ import {
   Platform,
 } from "react-native";
 import React, { memo, useEffect, useState, useCallback } from "react";
-import MapView, {
-  Marker,
-  PROVIDER_GOOGLE,
-  MapViewProps,
-} from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { ListingGeo } from "@/interfaces/listingGeo";
 import { useRouter } from "expo-router";
@@ -65,6 +61,7 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
           if (status === "granted") {
             setHasLocationPermission(true);
             const location = await Location.getCurrentPositionAsync();
+            console.log("Location:", location);
             const userLocation = {
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
@@ -85,7 +82,6 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
       }
     };
 
-    // Call the function inside useEffect without conditionally rendering the hook
     requestLocationPermission();
   }, []);
 

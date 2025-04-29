@@ -185,9 +185,6 @@ const ChatComponent: React.FC = () => {
           : userData.profileData;
       setUserDatas(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (userError) {
-      // if (chatError.message === "Token not founded pisda") {
-      //   return Alert.alert("Login required.");
-      // }
       Sentry.captureException(chatError);
     }
   }, [userData, userError, userLoading]);
@@ -209,13 +206,17 @@ const ChatComponent: React.FC = () => {
         socketRef.current = io(`${apiUrl}`, {
           auth: { token: accessToken },
           query: { groupId, notificationToken },
+          extraHeaders: {
+            "x-app-source": "MobileApp",
+          },
           transports: ["websocket"],
-          secure: false,
+          secure: true,
           autoConnect: true,
           reconnection: true,
           reconnectionAttempts: 5,
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
+          path: "/socket.io/",
         });
 
         (socketRef.current as any).hasFetchedHistory = false;
@@ -279,6 +280,7 @@ const ChatComponent: React.FC = () => {
 
         // 🔹 Handle token expiration & reconnection
         socketRef.current.on("connect_error", async (error) => {
+          console.log("Connection error:", error.message);
           if (error.message === "websocket error") {
             console.log("WebSocket error, retrying...");
             return;
@@ -287,7 +289,12 @@ const ChatComponent: React.FC = () => {
             const res = await axios.post(
               `${apiUrl}/auth/refresh`,
               {},
-              { headers: { Authorization: `Bearer ${refreshToken}` } }
+              {
+                headers: {
+                  Authorization: `Bearer ${refreshToken}`,
+                  "x-app-source": "MobileApp",
+                },
+              }
             );
             if (res.status == 200 && res.data.success) {
               await SecureStore.setItemAsync(
@@ -335,7 +342,6 @@ const ChatComponent: React.FC = () => {
   }, [mainModalShow]);
 
   useEffect(() => {
-    console.log(mainModalShow);
     handleSocket();
   }, [mainModalShow]);
 
@@ -612,7 +618,7 @@ const styles = StyleSheet.create({
     marginVertical: 7,
     borderRadius: 5,
     backgroundColor: Colors.white,
-    shadowColor: "#000",
+    shadowColor: Colors.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

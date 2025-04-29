@@ -21,7 +21,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { ScrollView } from "react-native-gesture-handler";
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as SecureStore from "expo-secure-store";
-import { Avatar, Badge, TextInput } from "react-native-paper";
+import { Avatar, TextInput } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 
 type LoginInput = {

@@ -35,11 +35,11 @@ const CustomDrawerContent = (props: any) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const { bottom } = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { LoginStatus, logIn, logOut } = useAuth();
+  const { LoginStatus, logIn } = useAuth();
 
   const router = useRouter();
 
-  const { data, error, isLoading } = auth_swr({
+  const { data, error } = auth_swr({
     item: {
       pathname: "main",
       cacheKey: "RoleAndProfile_main",
@@ -65,15 +65,6 @@ const CustomDrawerContent = (props: any) => {
 
   useEffect(() => {
     handleNotification();
-  });
-
-  useEffect(() => {
-    const recieveNotification = Notification.addNotificationReceivedListener(
-      (notification) => {
-        console.log(notification);
-      }
-    );
-    return () => recieveNotification.remove();
   });
 
   useEffect(() => {

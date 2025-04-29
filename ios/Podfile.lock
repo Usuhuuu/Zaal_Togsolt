@@ -265,6 +265,8 @@ PODS:
     - ExpoModulesCore
   - ExpoCrypto (14.0.2):
     - ExpoModulesCore
+  - ExpoDevice (7.0.3):
+    - ExpoModulesCore
   - ExpoFileSystem (18.0.12):
     - ExpoModulesCore
   - ExpoFont (13.0.4):
@@ -1691,7 +1693,7 @@ PODS:
     - Yoga
   - react-native-maps (1.14.0):
     - React-Core
-  - react-native-pager-view (6.7.0):
+  - react-native-pager-view (6.7.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2132,7 +2134,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSentry (6.10.0):
+  - RNSentry (6.11.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2153,7 +2155,7 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - Sentry/HybridSDK (= 8.48.0)
+    - Sentry/HybridSDK (= 8.49.0)
     - Yoga
   - RNSslPinning (1.5.8):
     - AFNetworking (~> 4.0)
@@ -2166,7 +2168,7 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
-  - Sentry/HybridSDK (8.48.0)
+  - Sentry/HybridSDK (8.49.0)
   - SocketRocket (0.7.1)
   - Stripe (23.28.3):
     - StripeApplePay (= 23.28.3)
@@ -2233,6 +2235,7 @@ DEPENDENCIES:
   - ExpoCamera (from `../node_modules/expo-camera/ios`)
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
+  - ExpoDevice (from `../node_modules/expo-device/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
@@ -2402,6 +2405,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-clipboard/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
+  ExpoDevice:
+    :path: "../node_modules/expo-device/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
@@ -2617,6 +2622,7 @@ SPEC CHECKSUMS:
   ExpoCamera: 0a3e78de7b1ca8c438ee6784fa6f22c5b1b36966
   ExpoClipboard: 243e22ff4161bbffcd3d2db469ae860ddc1156be
   ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
+  ExpoDevice: d36ab4186b6799a28fd449bb9a1c77455f23fd1a
   ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
   ExpoFont: f354e926f8feae5e831ec8087f36652b44a0b188
   ExpoHaptics: 9f47be324f691b6291c17c216189ab832d1a4d69
@@ -2678,7 +2684,7 @@ SPEC CHECKSUMS:
   react-native-fbsdk-next: 52f81e60eb3e8e0e06cf9728b4572d3509ca9d01
   react-native-image-picker: 32515318a4ecfbc864f5f94a1c67df1ce4b8d854
   react-native-maps: deb2adbdf309b622f15055b72b8742054929c740
-  react-native-pager-view: 637e84f94cec285414f7f2d89685de38ff797f64
+  react-native-pager-view: 63e15e36214c63e76c490fad02c4eb61703973de
   react-native-safe-area-context: df9763c5de6fa38883028e243a0b60123acb8858
   react-native-tracking-transparency: 15eb319f2b982070eb9831582af27d87badfa624
   React-nativeconfig: 8efdb1ef1e9158c77098a93085438f7e7b463678
@@ -2716,12 +2722,12 @@ SPEC CHECKSUMS:
   RNGoogleSignin: b8760528f2a7cbe157ecfdcc13bdb7d2745c9389
   RNReanimated: 6d22a1aec06a9787b797bc0c40fc2779be0599a5
   RNScreens: 295d9c0aaeb7f680d03d7e9b476569a4959aae89
-  RNSentry: 41eab31e46a191a4f9296d64a318b2a6bf0f98c5
+  RNSentry: 8c96b2bdad455fed97a50b2faeec5510a771dfb8
   RNSslPinning: 4478c22fed7179a22be2bdd7d7f235fc51bf85dc
   RNSVG: a07e14363aa208062c6483bad24a438d5986d490
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
-  Sentry: 1ca8405451040482877dcd344dfa3ef80b646631
+  Sentry: 5eda2559a20fa0c377b695ed9d7c178a47122891
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Stripe: cdf416cf2efe286f532a6306de0fcaa0ecc8c71a
   stripe-react-native: cfd043258216a17eaf49b3cdd67954f90438b7e9

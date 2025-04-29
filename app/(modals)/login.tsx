@@ -47,7 +47,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -92,7 +92,7 @@ const Page = () => {
         Alert.alert("Check your internet connection");
       }
     } catch (err) {
-      console.log(err);
+      console.log("Pisda", err);
       Alert.alert("Login Failed", "Please Try Again");
       Sentry.captureException(err);
     } finally {
@@ -118,7 +118,6 @@ const Page = () => {
     try {
       const facebookResponse = await loginWithFacebook();
       const returnData = facebookResponse?.data;
-      console.log(returnData);
       if (facebookResponse?.modalVisible) {
         setFormData({
           ...formData,
@@ -341,7 +340,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: Colors.white,
     shadowOpacity: 0.8,
     shadowRadius: 5,
     justifyContent: "center",

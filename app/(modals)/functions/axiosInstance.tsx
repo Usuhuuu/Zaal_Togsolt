@@ -34,15 +34,16 @@ export const axiosInstance = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    "x-app-source": "MobileApp",
   },
 });
 
 export const axiosInstanceRegular = axios.create({
   baseURL: apiUrl,
   timeout: 1000,
-  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    "x-app-source": "MobileApp",
   },
 });
 

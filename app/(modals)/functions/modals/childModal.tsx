@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useHeaderHeight } from "@react-navigation/elements";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Modal,
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChangeNameModal from "./innerModals/changeNameModal";
 import MemberModal from "./innerModals/memberModal";
 import { GroupChat } from "@/app/(tabs)/chat";
+import * as Notification from "expo-notifications";
 
 type childModalNested = {
   id: string;
@@ -29,8 +30,6 @@ interface ChildModalProps {
 }
 
 const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
-  const [settingsModalVisible, setSettingsModalVisible] =
-    useState<boolean>(false);
   const [memberModalVisible, setMemberModalVisible] = useState<boolean>(false);
   const [notificationsState, setNotificationsState] = useState<boolean>(false);
   const [changeNameModalVisible, setChangeNameModalVisible] =
@@ -70,7 +69,7 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
     },
     {
       id: "4",
-      title: "Notifications",
+      title: "Notification",
       icon: <Ionicons name="notifications" size={30} color={Colors.primary} />,
       onPress: () => {
         setMemberModalVisible(true);
@@ -96,6 +95,18 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
       },
     },
   ];
+  useEffect(() => {
+    const getNotificaitonState = async () => {
+      const { status } = await Notification.getPermissionsAsync();
+      console.log("Notification status:", status);
+      if (status === "granted") {
+        setNotificationsState(true);
+      } else {
+        setNotificationsState(false);
+      }
+    };
+    getNotificaitonState();
+  }, []);
 
   const handleNotificationToggle = (state: boolean) => {
     setNotificationsState(!notificationsState);

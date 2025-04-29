@@ -13,7 +13,6 @@ export const fetchRoleAndProfile = async (
         profileData: response.data.formData,
       };
     } catch (err) {
-      console.log(err, "pisda");
       throw new Error("Failed to fetch role and profile data");
     }
   } else {

@@ -3,8 +3,8 @@ import "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Stack, useRouter } from "expo-router";
-import React, { useEffect, ReactNode, useState } from "react";
+import { router, Stack, useRouter } from "expo-router";
+import React, { useEffect, ReactNode, useState, useRef } from "react";
 import { TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
 import * as Sentry from "@sentry/react-native";
 import Colors from "@/constants/Colors";
@@ -15,7 +15,7 @@ import { AuthProvider } from "./(modals)/context/authContext";
 import { SavedHallsProvider } from "@/app/(modals)/context/savedHall";
 import Layout, { TabsLayout } from "./(tabs)/_layout";
 import { CustomErrorBoundary } from "./(modals)/context/errorContext";
-import { PermissionContextProvider } from "./(modals)/context/permissionContext";
+import * as Notifications from "expo-notifications";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
@@ -29,6 +29,11 @@ Sentry.init({
 interface RootLayoutProps {
   children: ReactNode;
 }
+type SimpleNotificationContent = {
+  title: string;
+  body: string;
+  data?: any;
+};
 
 function RootLayout({ children }: RootLayoutProps) {
   const [loaded, error] = useFonts({
@@ -46,6 +51,83 @@ function RootLayout({ children }: RootLayoutProps) {
     }
   }, [error, loaded]);
 
+  const [notificationData, setNotificationData] =
+    useState<SimpleNotificationContent | null>(null);
+  const notificationListener = useRef<Notifications.Subscription | null>(null);
+  const notificationResponseListener =
+    useRef<Notifications.Subscription | null>(null);
+
+  useEffect(() => {
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        const { title, body, data } = notification.request.content;
+
+        setNotificationData((prev) => {
+          // Avoid setting the same data repeatedly
+          if (
+            prev?.title === title &&
+            prev?.body === body &&
+            JSON.stringify(prev?.data) === JSON.stringify(data)
+          ) {
+            return prev;
+          }
+
+          return {
+            title: typeof title === "string" ? title : "New Notification",
+            body: typeof body === "string" ? body : "You have a new message",
+            data: {
+              ...data,
+              isLocal: true,
+            },
+          };
+        });
+      });
+
+    notificationResponseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const { data } = response.notification.request.content;
+        if (data.targetScreen) {
+          router.push(data.targetScreen);
+        }
+      });
+
+    return () => {
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+      }
+    };
+  }, []);
+  Notifications.setNotificationHandler({
+    handleNotification: async () => {
+      return {
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      };
+    },
+  });
+  useEffect(() => {
+    if (notificationData) {
+      if (notificationData.data?.isLocal) return;
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: notificationData.title,
+          body: notificationData.body,
+          data: {
+            ...notificationData.data,
+            isLocal: true,
+          },
+          sound: "default",
+          badge: 1,
+        },
+        trigger: null,
+      });
+      console.log("Notification data:", notificationData);
+    }
+  }, [notificationData]);
+
   if (!loaded || fontError) {
     // Show a loading/fallback UI if fonts are still loading or if there's an error
     return (
@@ -61,6 +143,7 @@ function RootLayout({ children }: RootLayoutProps) {
 function RootLayoutNav() {
   const router = useRouter();
   const { t } = useTranslation();
+
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -131,16 +214,14 @@ function RootLayoutNav() {
 export default Sentry.wrap(() => (
   <CustomErrorBoundary>
     <AuthProvider>
-      <PermissionContextProvider>
-        <LanguageProvider>
-          <SavedHallsProvider>
-            <RootLayout>
-              <Layout />
-              <TabsLayout />
-            </RootLayout>
-          </SavedHallsProvider>
-        </LanguageProvider>
-      </PermissionContextProvider>
+      <LanguageProvider>
+        <SavedHallsProvider>
+          <RootLayout>
+            <Layout />
+            <TabsLayout />
+          </RootLayout>
+        </SavedHallsProvider>
+      </LanguageProvider>
     </AuthProvider>
   </CustomErrorBoundary>
 ));
