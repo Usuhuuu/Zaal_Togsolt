@@ -14,6 +14,7 @@ import {
   Animated,
   StyleSheet,
   Alert,
+  StatusBar,
 } from "react-native";
 import { useAuth } from "../context/authContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,6 +24,7 @@ import { axiosInstanceRegular } from "./axiosInstance";
 import * as SecureStore from "expo-secure-store";
 import { Avatar, Badge, TextInput } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
+import StepIndicator from "react-native-step-indicator";
 
 type LoginInput = {
   userName: string;
@@ -104,6 +106,33 @@ const SignupModal = ({
 
   const [timeLeft, setTimeLeft] = useState(600);
 
+  const labels = ['Name', 'Email', 'Username', 'Image', 'Final'];
+  const [currentPosition, setCurrentPosition] = useState(0);
+
+  const customStyles = {
+    stepIndicatorSize: 30,
+    currentStepIndicatorSize: 35,
+    separatorStrokeWidth: 2,
+    currentStepStrokeWidth: 3,
+    stepStrokeCurrentColor: Colors.primary,
+    stepStrokeWidth: 2,
+    stepStrokeFinishedColor: Colors.primary,
+    stepStrokeUnFinishedColor: "#bebebe",
+    separatorFinishedColor: Colors.primary,
+    separatorUnFinishedColor: "#bebebe",
+    stepIndicatorFinishedColor: Colors.primary,
+    stepIndicatorUnFinishedColor: "#bebebe",
+    stepIndicatorCurrentColor: Colors.primary,
+    stepIndicatorLabelFontSize: 15,
+    currentStepIndicatorLabelFontSize: 15,
+    stepIndicatorLabelCurrentColor: Colors.light,
+    stepIndicatorLabelFinishedColor: Colors.light,
+    stepIndicatorLabelUnFinishedColor: "#ffffff",
+    labelColor: "#999999",
+    labelSize: 14,
+    currentStepLabelColor: Colors.primary,
+  };
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
@@ -184,6 +213,23 @@ const SignupModal = ({
     console.log(steps);
   }, [steps]);
 
+
+  const nextStep = () => {
+    if (steps < initSteps.length - 1) {
+      setSteps((prev) => prev + 1);
+      setCurrentPosition((prev) => prev + 1);
+      fadeInStep();
+    }
+  };
+  
+  const previousStep = () => {
+    if (steps > 0) {
+      setSteps((prev) => prev - 1);
+      setCurrentPosition((prev) => prev - 1);
+      fadeInStep();
+    }
+  };
+
   return (
     <Modal
       visible={isModalVisible}
@@ -200,6 +246,7 @@ const SignupModal = ({
           },
         ]}
       >
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.dark} />
         <View
           style={[
             styles.modalHeader,
@@ -227,62 +274,30 @@ const SignupModal = ({
               }}
             />
           </TouchableOpacity>
-          <View
-            style={{
-              flex: 1,
-              width: "100%",
-              flexDirection: "row",
-              justifyContent: "space-evenly",
-              alignItems: "center",
-            }}
-          >
-            {initSteps.map((item) => {
-              return (
-                <View
-                  key={item.steps}
-                  style={{
-                    alignItems: "center",
-                    padding: 5,
-                  }}
-                >
-                  <View
-                    style={{
-                      backgroundColor:
-                        steps === item.steps ? Colors.primary : "#bebebe",
-                      borderWidth: 1,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderRadius: 25,
-                      padding: 5,
-                      paddingHorizontal: 10,
-                      borderColor: "#bebebe",
-                    }}
-                  >
-                    <Text style={{ color: Colors.light, fontSize: 20 }}>
-                      {item.steps}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      borderBottomWidth: 1,
-                      borderColor:
-                        steps === item.steps ? Colors.primary : Colors.white,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color:
-                          steps === item.steps ? Colors.primary : "#bebebe",
-                      }}
-                    >
-                      {item.title}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
+
+          <Text style={{ fontSize: 20, color: Colors.primary }}>
+          Буртгэл үүсгэх 
+          </Text>
+
           </View>
-        </View>
+
+          <View
+  style={{
+    flex: 1,
+    alignItems:"center",
+  }}
+>
+  
+          <View style={styles.IndicatorContainer}>
+<StepIndicator
+  customStyles={customStyles}
+  currentPosition={currentPosition} // convert 1-based to 0-based
+  labels={labels} 
+/>
+</View>
+  
+</View>
+
         {steps === 0 && (
           <View style={styles.modalInputContainer}>
             <TextInput
@@ -329,6 +344,7 @@ const SignupModal = ({
                 onPress={() => {
                   setSteps(steps + 1);
                   fadeInStep();
+                  nextStep()
                 }}
               >
                 <Text style={styles.modalButtonText}>Next</Text>
@@ -364,6 +380,7 @@ const SignupModal = ({
                 onPress={() => {
                   setSteps(steps - 1);
                   fadeInStep();
+                  previousStep();
                 }}
               >
                 <Text style={styles.modalButtonText}>Preview</Text>
@@ -537,7 +554,7 @@ const SignupModal = ({
             </TouchableOpacity>
           </Animated.View>
         )}
-      </View>
+     </View>
     </Modal>
   );
 };
@@ -550,21 +567,37 @@ const styles = StyleSheet.create({
     width: "95%",
     height: "100%",
     marginHorizontal: 10,
+    backgroundColor: Colors.white,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor: Colors.white,
   },
   modalInputContainer: {
     gap: 20,
     justifyContent: "center",
     flex: 1,
+    backgroundColor: Colors.white,
+    marginBottom: 20,
   },
   modalInput: {
     paddingHorizontal: 15,
     marginHorizontal: 20,
     marginVertical: 5,
+  },
+  IndicatorContainer:{
+    height: "40%",
+    width: "100%",
+    elevation: 10,
+    marginTop: 20,
+    borderRadius: 20,
+    shadowColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.light,
+    paddingTop: 10,
   },
   modalButtonContainer: {
     flexDirection: "row",
@@ -573,7 +606,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalButtonContainerFirst: {
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   modalNextButton: {
     backgroundColor: Colors.primary,

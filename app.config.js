@@ -1,4 +1,5 @@
 import 'dotenv/config';
+console.log("DEBUG: GOOGLE_MAPS_API_KEY:", process.env.GOOGLE_MAPS_API_KEY);
 
 export default {
   expo: {
@@ -44,7 +45,6 @@ export default {
     ],
     android: {
       package: "com.usuhbayr.zaalproject",
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
@@ -52,15 +52,7 @@ export default {
       permissions: [
         "NOTIFICATIONS", // Request notification permissions for Android
         "ACCESS_FINE_LOCATION", // Optional: for location services
-      ],
-      manifest: {
-        "meta-data": [
-          {
-            "android:name": "com.google.android.geo.API_KEY",
-            "android:value": process.env.GOOGLE_MAPS_API_KEY || "AIzaSyDezC8XCeVeRY1lh34mbxAjuhe1OWJhLRc",
-          },
-        ],
-      }
+      ]
     },
     web: {
       bundler: "metro",
@@ -81,11 +73,10 @@ export default {
           "recordAudioAndroid": true,
         }
       ],
-      // Other plugins...
       [
         "@react-native-google-signin/google-signin",
         {
-          iosUrlScheme: "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6" || `${process.env.GOOGLE_URL}`,
+          iosUrlScheme: process.env.GOOGLE_URL || "com.googleusercontent.apps.56931783205-78eeaknokj0nah74h5d53eis9ebj77r6",
         }
       ],
       [
