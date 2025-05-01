@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from "react-native";
 import React, { useMemo, useRef, useState } from "react";
 import Listings from "@/components/Listing";
 import BottomSheet from "@gorhom/bottom-sheet";
@@ -21,12 +21,14 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
     setrefresh(refresh + 1);
   };
   const { bottom, top } = useSafeAreaInsets();
-  const snapPoints = useMemo(() => [bottom + 90, "100%"], []);
+  const screenHeight = Dimensions.get("window").height;
+  const snapPoints = useMemo(() => [bottom + 90, screenHeight * 0.83], []);
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
+      enableOverDrag={false}
       handleIndicatorStyle={{
         backgroundColor: Colors.primary,
         width: 60,
@@ -56,19 +58,26 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   absoluteBtn: {
-    bottom: 20,
-    alignSelf: "center",
-    width: "90%",
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'flex-end',
+    width: '30%',
   },
   btn: {
     backgroundColor: Colors.primary,
-    borderRadius: 10,
+    borderRadius: 20,
     height: 50,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
-    gap: 8,
+    paddingHorizontal: 20,
+    marginRight: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+    bottom: 30,
 
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.2,

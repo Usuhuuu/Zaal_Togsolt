@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ListRenderItem,
   ImageBackground,
+  StyleProp,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { Listing } from "@/interfaces/listing";
@@ -18,6 +19,9 @@ import {
   BottomSheetFlatListMethods,
 } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
+import { ViewStyle } from "react-native";
+
+
 
 interface Props {
   listings: Listing[];
@@ -25,10 +29,21 @@ interface Props {
   refresh: number;
 }
 
+
+
+
+
 const ListingComponent = ({ listings: items, category }: Props) => {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<BottomSheetFlatListMethods>(null);
   const router = useRouter();
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const handleCategoryPress = (label: string): void => {
+    setSelected(label); // Set selected label
+  };
+
+  
 
   useEffect(() => {
     setLoading(true);
@@ -94,11 +109,25 @@ const ListingComponent = ({ listings: items, category }: Props) => {
     [handlePress]
   );
 
-  const CategoryButton = ({ label }: { label: string }) => (
-    <TouchableOpacity style={styles.categoryButton}>
-      <Text style={styles.categoryTitle}>{label}</Text>
+  const CategoryButton = ({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.categoryButton,
+        selected && { backgroundColor: Colors.primary, borderRadius: 10, elevation: 5 }, // Selected button styling
+      ]}
+    >
+      <Text
+        style={[
+          styles.categoryTitle,
+          selected && { color: "white" }, // Change text color to white when selected
+        ]}
+      >
+        {label}
+      </Text>
     </TouchableOpacity>
   );
+  
 
   return (
     <LinearGradient
@@ -107,23 +136,17 @@ const ListingComponent = ({ listings: items, category }: Props) => {
       end={[0, 1]}
       style={styles.container}
     >
-      <Link href={`/(modals)/sags`} asChild>
-        <TouchableOpacity style={styles.searchbtn}>
-          <Image
-            source={require("../assets/images/ranking.png")}
-            style={styles.icon}
-          />
-          <Text style={styles.buttonText}>Search</Text>
-          <Image
-            source={require("../assets/images/listingicons/adjust.png")}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-      </Link>
+     
 
+    
       <View style={styles.categoryContainer}>
-        {["oirhon", "shildeg", "zovloh"].map((label) => (
-          <CategoryButton key={label} label={label} />
+        {["ойрхон ", "шилдэг", "зөвлөx"].map((label) => (
+          <CategoryButton
+            key={label}
+            label={label}
+            selected={selected === label}
+            onPress={() => handleCategoryPress(label)}
+          />
         ))}
       </View>
 
@@ -159,9 +182,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 20,
     overflow: "hidden",
-    // shadowOpacity: 0.35,
-    // shadowRadius: 6,
-    // elevation: 6,
   },
   backgroundImage: {
     width: "100%",
@@ -197,23 +217,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   flatListContent: {},
-  searchbtn: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 45,
-    paddingHorizontal: "5%",
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-  },
   icon: {
     width: 23,
     height: 23,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   categoryContainer: {
     flexDirection: "row",
@@ -222,9 +228,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 8,
     marginVertical: 10,
+    borderColor: Colors.primary,
+    borderWidth: 1,
+    elevation: 10,
+    shadowOpacity: 0.3,
   },
   categoryButton: {
     paddingHorizontal: 10,
+    paddingVertical: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5, // Optional for round corners
   },
   categoryTitle: {
     fontSize: 18,
@@ -232,7 +246,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   viewButton: {
-    backgroundColor: "rgba(97, 179, 250, 0)",
+    backgroundColor: "rgba(97, 179, 250, 0) ",
     height: 200,
     width: 40,
     position: "absolute",
@@ -241,5 +255,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
 
 export default ListingComponent;
