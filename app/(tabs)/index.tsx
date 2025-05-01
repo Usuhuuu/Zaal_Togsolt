@@ -18,20 +18,20 @@ const Page = () => {
   const listingsData = require("@/assets/Data/airbnb-listings.json");
   const [category, setCategory] = useState<string>("Sags");
   const items = useMemo(() => listingsData as any[], []);
+  const height = Dimensions.get("window").height;
   // Category change handler
   const onDataChanged = (category: string) => {
     console.log(`CHANGED_`, category);
     setCategory(category);
   };
   const { top, bottom } = useSafeAreaInsets();
-  const height = Dimensions.get("window").height;
 
   return (
     <GestureHandlerRootView
       style={[
         {
           marginTop: top,
-          height: height - top - bottom - 100,
+          height: height - top - (Platform.select({ ios: 20, android: 10 }) ?? 0),
         },
       ]}
     >
@@ -47,10 +47,5 @@ const Page = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default Page;
