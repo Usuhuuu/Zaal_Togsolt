@@ -35,7 +35,7 @@ interface Message {
 export interface GroupChat {
   group_ID: string;
   group_chat_name: string;
-  members: string;
+  members: string[];
   chat_image: string;
   sportHallName?: string;
   date?: string;
@@ -253,10 +253,6 @@ const ChatComponent: React.FC = () => {
               setIsitReady(false);
             });
           }
-          socketRef.current?.on("chat-active", (data) => {
-            console.log("Chat is active");
-            console.log("Chat data:", JSON.stringify(data));
-          });
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
             const newMsj: Message = {
@@ -355,29 +351,16 @@ const ChatComponent: React.FC = () => {
   }, [mainModalShow]);
   useEffect(() => {
     if (!socketRef.current) return;
-
     socketRef.current?.on("user-active-change", (data) => {
-      setActiveUserData((prevUsers: any) => {
-        const updatedUsers = [...prevUsers];
-
-        data.forEach((incomingUser: ActiveUserType) => {
-          const existingIndex = updatedUsers.findIndex(
-            (u) => u.unique_user_ID === incomingUser.unique_user_ID
-          );
-
-          if (existingIndex !== -1) {
-            // Update status if user exists
-            updatedUsers[existingIndex].status = incomingUser.status;
-          } else {
-            // Add new user if doesn't exist
-            updatedUsers.push(incomingUser);
-          }
-        });
-
-        return updatedUsers;
-      });
+      setActiveUserData(
+        data
+          .filter((user: ActiveUserType) => user.status === "active")
+          .map((user: ActiveUserType) => ({
+            unique_user_ID: user.unique_user_ID,
+            status: user.status,
+          }))
+      );
     });
-
     return () => {
       socketRef.current?.off("user-active-change");
     };

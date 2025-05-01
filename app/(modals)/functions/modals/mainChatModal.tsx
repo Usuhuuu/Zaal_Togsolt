@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors";
-import { AntDesign, Ionicons, Entypo } from "@expo/vector-icons";
-import React from "react";
+import { AntDesign, Ionicons, Entypo, Feather } from "@expo/vector-icons";
+import React, { useEffect } from "react";
 import {
   FlatList,
   Modal,
@@ -68,10 +68,14 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   activeUserData,
 }) => {
   const [menuVisible, setMenuVisible] = React.useState(false);
+  const [activeUserMember, setActiveUserMember] = React.useState<number>(0);
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
-  console.log(activeUserData);
+  useEffect(() => {
+    console.log("activeUserData", activeUserData);
+    setActiveUserMember(activeUserData.length);
+  }, [activeUserData]);
 
   return (
     <Modal
@@ -111,6 +115,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   borderBottomColor: Colors.lightGrey,
                   borderBottomWidth: 1,
                   maxWidth: "100%",
+                  marginHorizontal: 10,
                 }}
               >
                 <TouchableOpacity
@@ -139,13 +144,12 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       }}
                     />
                   )}
-
                   {memberData[0] ? (
                     memberData[0].sportHallName &&
                     memberData[0].date &&
                     memberData[0].startTime &&
                     memberData[0].endTime ? (
-                      <>
+                      <View style={{ width: "70%" }}>
                         <Text style={{ color: Colors.primary, fontSize: 18 }}>
                           {memberData[0].sportHallName}
                         </Text>
@@ -153,42 +157,43 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                           {memberData[0].date} {memberData[0].startTime} –{" "}
                           {memberData[0].endTime}
                         </Text>
-                      </>
+                      </View>
                     ) : (
-                      <View style={{ width: "60%" }}>
+                      <View style={{ width: "70%", marginLeft: 8 }}>
                         <Text
                           style={{
                             fontSize: 17,
                             flexWrap: "wrap",
                             writingDirection: "ltr",
+                            fontWeight: "700",
+                            color: Colors.primary,
                           }}
                         >
-                          {(memberData[0].group_chat_name ?? "").replace(
-                            / /g,
-                            "\n"
-                          )}
+                          {memberData[0].group_chat_name ?? ""}
                         </Text>
+                        <View style={{ flexDirection: "row", gap: 5 }}>
+                          <Text style={{ color: "green" }}>
+                            online:
+                            {activeUserMember}
+                          </Text>
+                          <Text style={{ color: Colors.darkGrey }}>
+                            members: {memberData[0].members.length}
+                          </Text>
+                        </View>
                       </View>
                     )
                   ) : (
                     <ActivityIndicator size={24} color={Colors.primary} />
                   )}
-                  {activeUserData.map((data, index) => {
-                    return (
-                      <Text key={index}>
-                        {data.unique_user_ID ?? "Unknown User"}
-                      </Text>
-                    );
-                  })}
                 </View>
                 <TouchableOpacity
                   onPress={() => {
                     setChildModalVisible(true);
                   }}
                 >
-                  <AntDesign
-                    name="exclamationcircleo"
-                    size={24}
+                  <Feather
+                    name="more-vertical"
+                    size={30}
                     color={Colors.primary}
                   />
                 </TouchableOpacity>
@@ -250,19 +255,29 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                           right: 0,
                           justifyContent: "center",
                           alignItems: "center",
-                          padding: 10,
+                          padding: 5,
                           width: 40,
+                          gap: 10,
+                          borderRadius: 10,
                         }}
                       >
                         <TouchableOpacity
                           onPress={() => console.log("Option 1")}
                         >
-                          <Ionicons name="camera" size={24} />
+                          <Ionicons
+                            name="camera"
+                            size={24}
+                            color={Colors.primary}
+                          />
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => console.log("Option 2")}
                         >
-                          <Ionicons name="camera" size={24} />
+                          <Ionicons
+                            name="camera"
+                            size={24}
+                            color={Colors.primary}
+                          />
                         </TouchableOpacity>
                       </View>
                     )}
