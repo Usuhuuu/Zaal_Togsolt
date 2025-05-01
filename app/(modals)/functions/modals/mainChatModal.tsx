@@ -18,8 +18,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
-import { GroupChat } from "@/app/(tabs)/chat";
-import { List } from "react-native-paper";
+import { ActiveUserType, GroupChat } from "@/app/(tabs)/chat";
+import { Avatar, List } from "react-native-paper";
 
 interface Message {
   sender_unique_name: string;
@@ -31,8 +31,6 @@ interface Message {
 interface MainChatModalProps {
   mainModalShow: boolean;
   setmainModalShow: React.Dispatch<React.SetStateAction<boolean>>;
-  socketRef: React.RefObject<any>;
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   isitReady: boolean;
   setChildModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   childModalVisible: boolean;
@@ -48,13 +46,12 @@ interface MainChatModalProps {
     enterMessage: string;
   };
   memberData: GroupChat[];
+  activeUserData: ActiveUserType[];
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
   mainModalShow,
   setmainModalShow,
-  socketRef,
-  setMessages,
   isitReady,
   setChildModalVisible,
   childModalVisible,
@@ -68,12 +65,13 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   renderChatItem,
   chatInitLang,
   memberData,
+  activeUserData,
 }) => {
   const [menuVisible, setMenuVisible] = React.useState(false);
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
-  const { bottom } = useSafeAreaInsets();
+  console.log(activeUserData);
 
   return (
     <Modal
@@ -106,7 +104,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
             >
               <View
                 style={{
-                  height: headerHeight / 2,
+                  height: headerHeight,
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -126,7 +124,19 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     color={Colors.primary}
                   />
                 </TouchableOpacity>
-                <View style={{ alignItems: "center" }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View>
+                    {memberData?.[0]?.chat_image && (
+                      <Avatar.Icon icon={memberData[0].chat_image} />
+                    )}
+                  </View>
+
                   {memberData[0] ? (
                     memberData[0].sportHallName &&
                     memberData[0].date &&
@@ -149,6 +159,13 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       <ActivityIndicator size={24} color={Colors.primary} />
                     </Text>
                   )}
+                  {activeUserData.map((data, index) => {
+                    return (
+                      <Text key={index}>
+                        {data.unique_user_ID ?? "Unknown User"}
+                      </Text>
+                    );
+                  })}
                 </View>
                 <TouchableOpacity
                   onPress={() => {
@@ -166,7 +183,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 data={message}
                 style={[
                   {
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.lightGrey,
                     paddingBottom: 40,
                   },
                 ]}

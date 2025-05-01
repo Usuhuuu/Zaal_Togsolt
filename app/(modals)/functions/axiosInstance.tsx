@@ -2,6 +2,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 import { Alert } from "react-native";
+import { fetch, ReactNativeSSLPinning } from "react-native-ssl-pinning";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
@@ -26,8 +27,8 @@ const tokenWithRetry = async (
   }
   return token;
 };
-
 // Create the main axios instance for normal requests
+
 export const axiosInstance = axios.create({
   baseURL: apiUrl,
   timeout: 1000,

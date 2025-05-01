@@ -89,6 +89,10 @@ const newMsjPrepare = (previewMsj: any, newMsj: any) => {
   }
 };
 
+export interface ActiveUserType {
+  unique_user_ID: string;
+  status: string;
+}
 const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -101,6 +105,7 @@ const ChatComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
+  const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
@@ -223,7 +228,6 @@ const ChatComponent: React.FC = () => {
 
         socketRef.current.on("connect", () => {
           socketRef.current?.emit("joinGroup", groupId);
-
           if (!(socketRef.current as any).hasFetchedHistory) {
             socketRef.current?.emit("chatHistory", { timer: Date.now() });
             socketRef.current?.once("chatHistory", (message) => {
@@ -249,6 +253,10 @@ const ChatComponent: React.FC = () => {
               setIsitReady(false);
             });
           }
+          socketRef.current?.on("chat-active", (data) => {
+            console.log("Chat is active");
+            console.log("Chat data:", JSON.stringify(data));
+          });
 
           socketRef.current?.on("receiveMessage", (data: Message) => {
             const newMsj: Message = {
@@ -344,6 +352,35 @@ const ChatComponent: React.FC = () => {
   useEffect(() => {
     handleSocket();
   }, [mainModalShow]);
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    socketRef.current?.on("user-active-change", (data) => {
+      setActiveUserData((prevUsers: any) => {
+        const updatedUsers = [...prevUsers];
+
+        data.forEach((incomingUser: ActiveUserType) => {
+          const existingIndex = updatedUsers.findIndex(
+            (u) => u.unique_user_ID === incomingUser.unique_user_ID
+          );
+
+          if (existingIndex !== -1) {
+            // Update status if user exists
+            updatedUsers[existingIndex].status = incomingUser.status;
+          } else {
+            // Add new user if doesn't exist
+            updatedUsers.push(incomingUser);
+          }
+        });
+
+        return updatedUsers;
+      });
+    });
+
+    return () => {
+      socketRef.current?.off("user-active-change");
+    };
+  }, []);
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
@@ -434,8 +471,8 @@ const ChatComponent: React.FC = () => {
                           borderBottomLeftRadius: 10,
                           borderBottomRightRadius: 10,
                           borderTopRightRadius: 10,
-                          backgroundColor: Colors.lightGrey,
-                          borderColor: Colors.lightGrey,
+                          backgroundColor: Colors.white,
+                          borderColor: Colors.white,
                           marginRight: 100,
                         },
                   ]}
@@ -570,8 +607,6 @@ const ChatComponent: React.FC = () => {
       <MainChatModal
         mainModalShow={mainModalShow}
         setmainModalShow={setmainModalShow}
-        socketRef={socketRef}
-        setMessages={setMessages}
         isitReady={isitReady}
         setChildModalVisible={setChildModalVisible}
         childModalVisible={childModalVisible}
@@ -585,6 +620,7 @@ const ChatComponent: React.FC = () => {
         renderChatItem={renderChatItem}
         chatInitLang={chatInitLang}
         memberData={chatGroups}
+        activeUserData={activeUserData}
       />
     </View>
   );

@@ -44,6 +44,7 @@ export default {
     ],
     android: {
       package: "com.usuhbayr.zaalproject",
+      googleServicesFile: "./android/app/google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
@@ -105,7 +106,8 @@ export default {
                   "android:value": process.env.GOOGLE_MAPS_API_KEY
                 }
               ]
-            }
+            },
+            googleServicesFile: "./android/app/google-services.json",
           },
           ios: {
             deploymentTarget: "15.1",

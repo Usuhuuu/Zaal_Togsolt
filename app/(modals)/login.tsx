@@ -47,7 +47,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -72,6 +72,7 @@ const Page = () => {
         email,
         userPassword: password,
       });
+      console.log("Login response", response);
       if (response.data.success) {
         try {
           await SecureStore.setItemAsync(
@@ -91,8 +92,8 @@ const Page = () => {
       } else if (response.status == 404) {
         Alert.alert("Check your internet connection");
       }
-    } catch (err) {
-      console.log("Pisda", err);
+    } catch (err: any) {
+      console.log("Pisda", err?.response);
       Alert.alert("Login Failed", "Please Try Again");
       Sentry.captureException(err);
     } finally {

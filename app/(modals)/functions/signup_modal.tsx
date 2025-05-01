@@ -95,6 +95,7 @@ const SignupModal = ({
   const [modalPasswordHide, setModalPasswordHide] = useState<boolean>(true);
   const [disableButton, setDisableButton] = useState<boolean>(true);
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [notificationToken, setNotificationToken] = useState<string>("");
 
   const fadeCheckUsername = useRef(new Animated.Value(0)).current;
   const fadeConfirm = useRef(new Animated.Value(0)).current;
@@ -106,7 +107,7 @@ const SignupModal = ({
 
   const [timeLeft, setTimeLeft] = useState(600);
 
-  const labels = ['Name', 'Email', 'Username', 'Image', 'Final'];
+  const labels = ["Name", "Email", "Username", "Image", "Final"];
   const [currentPosition, setCurrentPosition] = useState(0);
 
   const customStyles = {
@@ -164,7 +165,6 @@ const SignupModal = ({
 
   const handleSubmit = async () => {
     try {
-      console.log(path);
       const response = await axiosInstanceRegular.post(`/auth/${path}`, {
         fbData: {
           userName: formData.userName,
@@ -172,6 +172,7 @@ const SignupModal = ({
           lastName: formData.lastName,
           email: formData.email,
           signUpTimer: formData.signUpTimer,
+          userNotificationToken: notificationToken,
         },
       });
       if (response.status === 200 && response.data.success) {
@@ -209,11 +210,6 @@ const SignupModal = ({
       }).start();
     });
   };
-  useEffect(() => {
-    console.log(steps);
-  }, [steps]);
-
-
   const nextStep = () => {
     if (steps < initSteps.length - 1) {
       setSteps((prev) => prev + 1);
@@ -221,7 +217,7 @@ const SignupModal = ({
       fadeInStep();
     }
   };
-  
+
   const previousStep = () => {
     if (steps > 0) {
       setSteps((prev) => prev - 1);
@@ -229,6 +225,15 @@ const SignupModal = ({
       fadeInStep();
     }
   };
+  const getNotificationToken = async () => {
+    const notificationtoken = await SecureStore.getItemAsync(
+      "notificationToken"
+    );
+    setNotificationToken(notificationtoken || "");
+  };
+  useEffect(() => {
+    getNotificationToken();
+  }, []);
 
   return (
     <Modal
@@ -246,7 +251,7 @@ const SignupModal = ({
           },
         ]}
       >
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.dark} />
+        <StatusBar barStyle="dark-content" backgroundColor={Colors.dark} />
         <View
           style={[
             styles.modalHeader,
@@ -276,27 +281,24 @@ const SignupModal = ({
           </TouchableOpacity>
 
           <Text style={{ fontSize: 20, color: Colors.primary }}>
-          Буртгэл үүсгэх 
+            Буртгэл үүсгэх
           </Text>
+        </View>
 
-          </View>
-
-          <View
-  style={{
-    flex: 1,
-    alignItems:"center",
-  }}
->
-  
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+          }}
+        >
           <View style={styles.IndicatorContainer}>
-<StepIndicator
-  customStyles={customStyles}
-  currentPosition={currentPosition} // convert 1-based to 0-based
-  labels={labels} 
-/>
-</View>
-  
-</View>
+            <StepIndicator
+              customStyles={customStyles}
+              currentPosition={currentPosition} // convert 1-based to 0-based
+              labels={labels}
+            />
+          </View>
+        </View>
 
         {steps === 0 && (
           <View style={styles.modalInputContainer}>
@@ -344,7 +346,7 @@ const SignupModal = ({
                 onPress={() => {
                   setSteps(steps + 1);
                   fadeInStep();
-                  nextStep()
+                  nextStep();
                 }}
               >
                 <Text style={styles.modalButtonText}>Next</Text>
@@ -554,7 +556,7 @@ const SignupModal = ({
             </TouchableOpacity>
           </Animated.View>
         )}
-     </View>
+      </View>
     </Modal>
   );
 };
@@ -587,7 +589,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 5,
   },
-  IndicatorContainer:{
+  IndicatorContainer: {
     height: "40%",
     width: "100%",
     elevation: 10,

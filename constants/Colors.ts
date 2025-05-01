@@ -6,5 +6,6 @@ export default {
   lightGrey: `#F4F4F4`,
   light: `#F9F9F9`,
   secondary: `#b0d9fc`,
-  darkGrey: `#767676`
+  darkGrey: `#767676`,
+  blue: `#007AFF`,
 };
