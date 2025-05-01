@@ -43,6 +43,7 @@
     "expo-clipboard": "~6.0.3",
     "expo-constants": "^16.0.2",
     "expo-dev-client": "~5.0.19",
+    "expo-device": "^7.1.4",
     "expo-haptics": "~13.0.1",
     "expo-linear-gradient": "~13.0.2",
     "expo-linking": "~6.3.1",

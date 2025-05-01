@@ -221,7 +221,7 @@ const ChatComponent: React.FC = () => {
           reconnectionAttempts: 5,
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
-          path: "/socket.io/",
+          path: "/socket.io",
         });
 
         (socketRef.current as any).hasFetchedHistory = false;
@@ -288,6 +288,7 @@ const ChatComponent: React.FC = () => {
 
         // 🔹 Handle token expiration & reconnection
         socketRef.current.on("connect_error", async (error) => {
+          console.log("Connection error:", error);
           console.log("Connection error:", error.message);
           if (error.message === "websocket error") {
             console.log("WebSocket error, retrying...");

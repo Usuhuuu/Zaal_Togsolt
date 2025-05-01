@@ -108,9 +108,9 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  paddingHorizontal: 16,
-                  borderBottomColor: "#ddd",
+                  borderBottomColor: Colors.lightGrey,
                   borderBottomWidth: 1,
+                  maxWidth: "100%",
                 }}
               >
                 <TouchableOpacity
@@ -131,11 +131,14 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     alignItems: "center",
                   }}
                 >
-                  <View>
-                    {memberData?.[0]?.chat_image && (
-                      <Avatar.Icon icon={memberData[0].chat_image} />
-                    )}
-                  </View>
+                  {memberData?.[0]?.chat_image && (
+                    <Avatar.Image
+                      source={{ uri: memberData[0].chat_image }}
+                      style={{
+                        backgroundColor: Colors.light,
+                      }}
+                    />
+                  )}
 
                   {memberData[0] ? (
                     memberData[0].sportHallName &&
@@ -152,12 +155,23 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                         </Text>
                       </>
                     ) : (
-                      <Text>{memberData[0].group_chat_name ?? ""}</Text>
+                      <View style={{ width: "60%" }}>
+                        <Text
+                          style={{
+                            fontSize: 17,
+                            flexWrap: "wrap",
+                            writingDirection: "ltr",
+                          }}
+                        >
+                          {(memberData[0].group_chat_name ?? "").replace(
+                            / /g,
+                            "\n"
+                          )}
+                        </Text>
+                      </View>
                     )
                   ) : (
-                    <Text>
-                      <ActivityIndicator size={24} color={Colors.primary} />
-                    </Text>
+                    <ActivityIndicator size={24} color={Colors.primary} />
                   )}
                   {activeUserData.map((data, index) => {
                     return (

@@ -98,7 +98,6 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
   useEffect(() => {
     const getNotificaitonState = async () => {
       const { status } = await Notification.getPermissionsAsync();
-      console.log("Notification status:", status);
       if (status === "granted") {
         setNotificationsState(true);
       } else {
