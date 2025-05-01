@@ -1,4 +1,10 @@
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+} from "react-native";
 import React, { useMemo, useRef, useState } from "react";
 import Listings from "@/components/Listing";
 import BottomSheet from "@gorhom/bottom-sheet";
@@ -22,7 +28,7 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
   };
   const { bottom, top } = useSafeAreaInsets();
   const screenHeight = Dimensions.get("window").height;
-  const snapPoints = useMemo(() => [bottom + 90, screenHeight * 0.83], []);
+  const snapPoints = useMemo(() => [bottom + 90, "70%"], []);
 
   return (
     <BottomSheet
@@ -58,10 +64,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   absoluteBtn: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 50,
-    alignSelf: 'flex-end',
-    width: '30%',
+    alignSelf: "flex-end",
+    width: "30%",
   },
   btn: {
     backgroundColor: Colors.primary,

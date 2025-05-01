@@ -349,6 +349,7 @@ const ChatComponent: React.FC = () => {
   useEffect(() => {
     handleSocket();
   }, [mainModalShow]);
+
   useEffect(() => {
     if (!socketRef.current) return;
     socketRef.current?.on("user-active-change", (data) => {

@@ -31,7 +31,7 @@ const Page = () => {
       style={[
         {
           marginTop: top,
-          height: height - top - (Platform.select({ ios: 20, android: 10 }) ?? 0),
+          height: "96%",
         },
       ]}
     >
@@ -46,6 +46,5 @@ const Page = () => {
     </GestureHandlerRootView>
   );
 };
-
 
 export default Page;
