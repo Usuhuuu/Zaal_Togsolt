@@ -92,6 +92,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
         <SafeAreaProvider
           style={{
             backgroundColor: Colors.light,
+            marginBottom: Platform.OS === "ios" ? 0 : 40,
           }}
         >
           <SafeAreaView
@@ -102,7 +103,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
           >
             <View
               style={{
-                height: height,
+                height: height,  
               }}
             >
               <View
@@ -115,6 +116,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   borderBottomWidth: 1,
                   maxWidth: "100%",
                   marginHorizontal: 10,
+                  
                 }}
               >
                 <TouchableOpacity
