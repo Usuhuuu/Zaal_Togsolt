@@ -91,7 +91,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
       ) : (
         <SafeAreaProvider
           style={{
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.light,
           }}
         >
           <SafeAreaView
@@ -102,7 +102,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
           >
             <View
               style={{
-                height: height - headerHeight,
+                height: height,
               }}
             >
               <View
@@ -197,12 +197,12 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   />
                 </TouchableOpacity>
               </View>
+              
               <FlatList
                 data={message}
                 style={[
                   {
                     backgroundColor: Colors.lightGrey,
-                    paddingBottom: 40,
                   },
                 ]}
                 renderItem={renderChatItem}
@@ -218,11 +218,21 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 removeClippedSubviews={true}
               />
               <KeyboardAvoidingView
-                behavior={Platform.OS == "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={headerHeight / 2 + 10}
+               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+               keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight / 2 + 20: 0}
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: Colors.light,
+                  paddingBottom: 10,
+                }}
+              
+                enabled={true}
               >
                 <View style={[styles.inputContainer]}>
-                  <View>
+                 
                     <TouchableOpacity
                       onPress={() => {
                         setMenuVisible(!menuVisible);
@@ -234,9 +244,9 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       }}
                     >
                       <AntDesign
-                        name="plus"
+                        name="pluscircleo"
                         size={24}
-                        color={Colors.darkGrey}
+                        color={Colors.primary}
                       />
                     </TouchableOpacity>
                     {menuVisible && (
@@ -280,7 +290,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                         </TouchableOpacity>
                       </View>
                     )}
-                  </View>
+                 
 
                   <View style={styles.input}>
                     <TextInput
@@ -288,7 +298,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       value={newMessage}
                       onChangeText={(newMsj) => setNewMessage(newMsj)}
                       maxLength={2000}
-                      style={{ flex: 1 }}
+                      style={{ flex:1}}
                       placeholderTextColor={Colors.darkGrey}
                       clearTextOnFocus={false}
                       multiline

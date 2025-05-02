@@ -18,6 +18,7 @@ import { axiosInstanceRegular } from "./functions/axiosInstance";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./context/authContext";
+import { Href } from "expo-router";
 import {
   loginWithFacebook,
   loginWithGoogle,
@@ -47,7 +48,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -261,9 +262,15 @@ const Page = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
+           
+           
             onPress={() => loginWithApple()}
             style={styles.btnOutline}
           >
+            <Ionicons name="logo-apple" size={24} style={styles.btnIcon} />
+            <Text style={styles.btnOutlineText}>
+              Continue with Apple
+            </Text>
             {isItApple ? (
               <>
                 <AppleAuthentication.AppleAuthenticationButton
@@ -311,6 +318,18 @@ const Page = () => {
             ) : (
               <></>
             )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.btnOutline}
+            onPress={() => {
+              router.push("/functions/signup_modal.tsx" as Href<"/functions/signup_modal.tsx">);
+            }}
+          >
+            <Ionicons name="person-add" size={24} style={styles.btnIcon} />
+            <Text style={styles.btnOutlineText}>
+              Sign up
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
