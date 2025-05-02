@@ -17,7 +17,6 @@ import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import "@/utils/i18";
- 
 
 const iconMap: { [key: string]: any } = {
   basketball: require("../assets/sport-icons/test_icons/basketball.png"),
@@ -36,7 +35,6 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const navigation = useNavigation(); // Initialize navigation hook
-
 
   const { t } = useTranslation();
   const sportDetail: any = t("sportTextIcons", { returnObjects: true });
@@ -59,7 +57,6 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
   };
-
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -116,9 +113,8 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
           <ScrollView
             ref={scrollRef}
             horizontal
-            showsHorizontalScrollIndicator={true}
+            showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollViewContent}
-            style={{ paddingVertical: 10,             }}
           >
             {sportDetail?.map((item: any, index: any) => (
               <TouchableOpacity
@@ -172,6 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     paddingBottom: 6,
+    backgroundColor: "transparent",
   },
   search: {
     justifyContent: "center",
@@ -195,6 +192,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: Colors.light,
     elevation: 10,
+
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },

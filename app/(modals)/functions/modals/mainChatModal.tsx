@@ -293,6 +293,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       placeholderTextColor={Colors.darkGrey}
                       clearTextOnFocus={false}
                       multiline
+                      
                     />
                   </View>
 
@@ -300,7 +301,11 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     style={styles.sendButton}
                     onPress={() => sendMessage(newMessage)}
                   >
-                    <Ionicons name="send" size={32} color={Colors.primary} />
+                    <Entypo
+                      name="paper-plane"
+                      size={24}
+                      color={Colors.light}
+                    />
                   </TouchableOpacity>
                 </View>
               </KeyboardAvoidingView>
@@ -366,19 +371,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
+    paddingVertical: 10,
     gap: 10,
   },
   sendButton: {
-    padding: 12,
+    padding: 10,
     borderRadius: 25,
     marginLeft: 8,
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.primary,
+    elevation: 5,
   },
   sendButtonText: {
     fontSize: 16,
-    color: "#fff",
     fontWeight: "bold",
   },
 
