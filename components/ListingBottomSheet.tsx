@@ -28,7 +28,7 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
   };
   const { bottom, top } = useSafeAreaInsets();
   const screenHeight = Dimensions.get("window").height;
-  const snapPoints = useMemo(() => [bottom + 90, "70%"], []);
+  const snapPoints = useMemo(() => [bottom + 90, "87%"], []);
 
   return (
     <BottomSheet
@@ -40,7 +40,7 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
         width: 60,
         borderRadius: 2,
       }}
-      style={[styles.sheetContainer, { marginTop: top }]}
+      style={[styles.sheetContainer, { marginTop: top+20 }]}
     >
       <View style={styles.contentContainer}>
         <Listings listings={listing} category={category} refresh={refresh} />
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    overflow: "hidden",
+   
   },
   absoluteBtn: {
     position: "absolute",

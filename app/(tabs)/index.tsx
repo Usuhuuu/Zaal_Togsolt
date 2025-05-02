@@ -31,7 +31,7 @@ const Page = () => {
       style={[
         {
           marginTop: top,
-          height: "96%",
+          height: "100%",
         },
       ]}
     >

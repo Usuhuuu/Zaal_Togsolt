@@ -527,7 +527,7 @@ const ChatComponent: React.FC = () => {
     <View style={[styles.container]}>
       {isLoading ? (
         <View>
-          <ActivityIndicator color={Colors.primary} size={"large"} />
+          <ActivityIndicator color={Colors.primary} size={"small"} />
         </View>
       ) : (
         <View
@@ -546,7 +546,7 @@ const ChatComponent: React.FC = () => {
                   style={{ flexDirection: "row", padding: 5, gap: 5 }}
                 >
                   <Avatar.Image
-                    size={35}
+                    size={40}
                     source={require("@/assets/images/sportHall_Icon_full_primary.png")}
                     theme={{
                       colors: { primary: Colors.white },
