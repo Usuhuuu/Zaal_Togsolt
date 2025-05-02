@@ -16,10 +16,9 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
 import { ActiveUserType, GroupChat } from "@/app/(tabs)/chat";
-import { Avatar, List } from "react-native-paper";
+import { Avatar } from "react-native-paper";
 
 interface Message {
   sender_unique_name: string;

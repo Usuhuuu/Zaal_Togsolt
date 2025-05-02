@@ -353,6 +353,7 @@ const ChatComponent: React.FC = () => {
   useEffect(() => {
     if (!socketRef.current) return;
     socketRef.current?.on("user-active-change", (data) => {
+      console.log("User active change data:", data);
       setActiveUserData(
         data
           .filter((user: ActiveUserType) => user.status === "active")
@@ -365,7 +366,7 @@ const ChatComponent: React.FC = () => {
     return () => {
       socketRef.current?.off("user-active-change");
     };
-  }, []);
+  }, [socketRef.current]);
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
