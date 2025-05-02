@@ -194,7 +194,7 @@ function RootLayoutNav() {
           ),
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="listing/friendRequest"
         options={{
           title: "Friend Request",
@@ -206,7 +206,7 @@ function RootLayoutNav() {
             </TouchableOpacity>
           ),
         }}
-      />
+      /> */}
     </Stack>
   );
 }

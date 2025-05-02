@@ -40,7 +40,6 @@ export const TabsLayout = () => {
         tabBarStyle: {
           borderColor: Colors.primary,
         },
-     
 
         tabBarBackground: () => (
           <LinearGradient
@@ -61,26 +60,24 @@ export const TabsLayout = () => {
               onCategoryChanged={(category) => console.log(category)}
             />
           ),
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
-        style={{
-          padding: 5,
-          borderRadius: 20,
-          backgroundColor: focused ? Colors.light : "transparent",
-        }}
-      >
-        <Image
-          source={require("../../assets/tab-icons/home.png")}
-          style={{
-            width: 26,
-            height: 26,
-           
-          }}
-          accessibilityLabel="Home Tab"
-          accessibilityHint="Navigates to the home screen"
-        />
-      </View>
-
+              style={{
+                padding: 5,
+                borderRadius: 20,
+                backgroundColor: focused ? Colors.light : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../assets/tab-icons/home.png")}
+                style={{
+                  width: 26,
+                  height: 26,
+                }}
+                accessibilityLabel="Home Tab"
+                accessibilityHint="Navigates to the home screen"
+              />
+            </View>
           ),
         }}
       />
@@ -88,44 +85,45 @@ export const TabsLayout = () => {
         name="inbox"
         options={{
           tabBarLabel: t("together"),
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
-        style={{
-          padding: 5,
-          borderRadius: 20,
-          backgroundColor: focused ? Colors.light : "transparent",
-        }}
-      >
-            <Image
-              source={require("../../assets/tab-icons/teamwork.png")}
-              style={{ width: 26, height: 26 }}
-              accessibilityLabel="Inbox Tab"
-              accessibilityHint="Navigates to the inbox screen"
-            />
-          </View>
+              style={{
+                padding: 5,
+                borderRadius: 20,
+                backgroundColor: focused ? Colors.light : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../assets/tab-icons/teamwork.png")}
+                style={{ width: 26, height: 26 }}
+                accessibilityLabel="Inbox Tab"
+                accessibilityHint="Navigates to the inbox screen"
+              />
+            </View>
           ),
         }}
       />
 
       <Tabs.Screen
-        name="explore"
+        name="friend"
         options={{
-          tabBarLabel: `${t("friends")}`, // Explore Tab
-          tabBarIcon: ({focused}) => (
+          tabBarLabel: `${t("Friends")}`,
+          headerTitle: "Friends",
+          tabBarIcon: ({ focused }) => (
             <View
-        style={{
-          padding: 5,
-          borderRadius: 20,
-          backgroundColor: focused ? Colors.light : "transparent",
-        }}
-      >
-            <Image
-              source={require("../../assets/tab-icons/friends.png")}
-              style={{ width: 28, height: 28 }}
-              accessibilityLabel="Explore Tab"
-              accessibilityHint="Navigates to the explore screen"
-            />
-          </View>
+              style={{
+                padding: 5,
+                borderRadius: 20,
+                backgroundColor: focused ? Colors.light : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../assets/tab-icons/friends.png")}
+                style={{ width: 28, height: 28 }}
+                accessibilityLabel="Explore Tab"
+                accessibilityHint="Navigates to the explore screen"
+              />
+            </View>
           ),
         }}
       />
@@ -133,22 +131,21 @@ export const TabsLayout = () => {
         name="chat"
         options={{
           tabBarLabel: `${t("chat")}`,
-         tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
-        style={{
-          padding: 5,
-          borderRadius: 20,
-          backgroundColor: focused ? Colors.light : "transparent",
-        }}
-      >
-            <Image
-              source={require("../../assets/tab-icons/chat.png")}
-              style={{ width: 30, height: 30 }}
-              accessibilityLabel="Chat Tab"
-              accessibilityHint="Navigates to the chat screen"
-            />
-       
-          </View>
+              style={{
+                padding: 5,
+                borderRadius: 20,
+                backgroundColor: focused ? Colors.light : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../assets/tab-icons/chat.png")}
+                style={{ width: 30, height: 30 }}
+                accessibilityLabel="Chat Tab"
+                accessibilityHint="Navigates to the chat screen"
+              />
+            </View>
           ),
           headerShown: true,
           headerTitle: t("chat"),
@@ -187,21 +184,21 @@ export const TabsLayout = () => {
         name="profile"
         options={{
           tabBarLabel: `${t("profile")}`, // Profile Tab
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <View
-        style={{
-          padding: 5,
-          borderRadius: 20,
-          backgroundColor: focused ? Colors.light : "transparent",
-        }}
-      >
-            <Image
-              source={require("../../assets/tab-icons/athlete.png")}
-              style={{ width: 28, height: 28 }}
-              accessibilityLabel="Profile Tab"
-              accessibilityHint="Navigates to the profile screen"
-            />
-          </View>
+              style={{
+                padding: 5,
+                borderRadius: 20,
+                backgroundColor: focused ? Colors.light : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../assets/tab-icons/athlete.png")}
+                style={{ width: 28, height: 28 }}
+                accessibilityLabel="Profile Tab"
+                accessibilityHint="Navigates to the profile screen"
+              />
+            </View>
           ),
           headerShown: !LoginStatus ? true : false,
           headerTitle: !LoginStatus ? t("aboutUs.login") : t("profile"),

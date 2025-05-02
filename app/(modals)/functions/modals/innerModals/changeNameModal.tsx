@@ -14,6 +14,7 @@ import {
 import { HelperText, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import axiosInstance from "../../axiosInstance";
+import { router } from "expo-router";
 
 interface ChangeNameModalProps {
   changeNameModalVisible: boolean;
@@ -56,6 +57,7 @@ const ChangeNameModal: React.FC<ChangeNameModalProps> = ({
       );
       if (response.status === 200 && response.data.success) {
         setGroupName(chatName);
+        router.replace("/");
         Alert.alert("Group name updated successfully");
       } else {
         Alert.alert("Failed to update group name", "Please try again later");

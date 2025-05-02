@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from "react-native";
 import { mutate } from "swr";
 import Colors from "@/constants/Colors";
@@ -34,14 +35,27 @@ const FriendRequest = () => {
   const { t } = useTranslation();
   const { LoginStatus } = useAuth();
 
+  const options: ("Friend" | "Friend Request" | "Send Request")[] = [
+    "Friend",
+    "Friend Request",
+    "Send Request",
+  ];
+
+  const currentData =
+    friendShow === "Friend"
+      ? friendData
+      : friendShow === "Friend Request"
+      ? userRequestData
+      : sendRequests;
+
   const handleAccept = async (friend_ID: string) => {
     try {
       const response = await axiosInstance.post("/auth/friend_accept", {
         friend_unique_ID: friend_ID,
       });
-      console.log(response.data);
       if (response.status == 200) {
         mutate("User_Friend");
+        Alert.alert("Success", "Friend request accepted");
       }
     } catch (err) {
       console.log(err);
@@ -55,6 +69,31 @@ const FriendRequest = () => {
       if (response.status == 200) {
         mutate("User_Friend");
       }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const handleRequestSend = async () => {
+    try {
+      const enterMessageLength = searchQuery.length;
+      if (enterMessageLength < 1) {
+        Alert.alert("Error", "Please enter a valid ID");
+        return;
+      }
+
+      const response = await axiosInstance.post("/auth/friend_request", {
+        friend_unique_ID: searchQuery,
+      });
+      console.log("Friend Request Response:", response.data);
+      if (response.status === 200) {
+        mutate("User_Friend");
+        Alert.alert("Success", "Friend request sent");
+      } else if (response.status === 400) {
+        Alert.alert("Error", "Request already sent");
+      } else if (response.status === 400 && !response.data.find) {
+        Alert.alert("Error", "User not found");
+      }
+      console.log(response.data);
     } catch (err) {
       console.log(err);
     }
@@ -86,7 +125,6 @@ const FriendRequest = () => {
           console.error("Error parsing profileData:", err);
         }
       }
-      console.log("Profile Data:", profileData);
       setFriendData(profileData.friends || []);
       setUserRequestData(profileData.recieved_requests || []);
       setSendRequests(profileData.send_requests || []);
@@ -102,26 +140,15 @@ const FriendRequest = () => {
     setIsitLoading(isLoading);
   }, [data, error, isLoading]);
 
-  const handleRequestSend = async () => {
-    try {
-      const response = await axiosInstance.post("/auth/friend_request", {
-        friend_unique_ID: searchQuery,
-      });
-      console.log(response.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
+        console.log("entireFriendData:", entireFriendData);
         const response = await axiosInstance.get("/auth/friend_data", {
           params: {
             friend_unique_ID: entireFriendData,
           },
         });
-        console.log("User Info:", response.data);
         setFriendInfo(response.data);
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -129,23 +156,11 @@ const FriendRequest = () => {
     };
     fetchUserInfo();
   }, [entireFriendData]);
-  const options: ("Friend" | "Friend Request" | "Send Request")[] = [
-    "Friend",
-    "Friend Request",
-    "Send Request",
-  ];
-
-  const currentData =
-    friendShow === "Friend"
-      ? friendData
-      : friendShow === "Friend Request"
-      ? userRequestData
-      : sendRequests;
 
   return (
     <View style={{ backgroundColor: Colors.lightGrey, flex: 1 }}>
       {isitLoading ? (
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={Colors.secondary} />
       ) : (
         <View
           style={{
@@ -228,9 +243,64 @@ const FriendRequest = () => {
                       borderRadius: 10,
                       marginTop: 10,
                       flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
                     }}
                   >
-                    <Text>{item}</Text>
+                    <Avatar.Icon icon={"account"} size={50} />
+
+                    <View style={{ flex: 1, marginLeft: 10 }}>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          textAlign: "center",
+                          color: Colors.darkGrey,
+                        }}
+                      >
+                        {item}
+                      </Text>
+                    </View>
+
+                    {currentData === userRequestData && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          gap: 10,
+                        }}
+                      >
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: Colors.secondary,
+                            borderRadius: 10,
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            width: 90,
+                            alignItems: "center",
+                          }}
+                          onPress={() => {
+                            handleAccept(item);
+                          }}
+                        >
+                          <Text style={{ color: Colors.white }}>Accept</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: Colors.secondary,
+                            borderRadius: 10,
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            width: 90,
+                            alignItems: "center",
+                          }}
+                          onPress={() => {
+                            handleCancel(item);
+                          }}
+                        >
+                          <Text style={{ color: Colors.white }}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 )}
               />

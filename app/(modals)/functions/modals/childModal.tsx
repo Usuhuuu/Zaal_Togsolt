@@ -123,7 +123,15 @@ const ChildModal: React.FC<ChildModalProps> = ({ MemberData }) => {
     >
       <View>
         <View style={{ alignItems: "center", marginTop: 20, marginBottom: 50 }}>
-          <Avatar.Icon icon={MemberData[0].chat_image} size={100} />
+          <Avatar.Image
+            source={{ uri: MemberData[0].chat_image }}
+            size={100}
+            theme={{
+              colors: {
+                primary: Colors.white,
+              },
+            }}
+          />
         </View>
         <FlatList
           data={childModalNested}

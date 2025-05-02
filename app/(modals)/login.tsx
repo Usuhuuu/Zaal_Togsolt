@@ -72,7 +72,6 @@ const Page = () => {
         email,
         userPassword: password,
       });
-      console.log("Login response", response);
       if (response.data.success) {
         try {
           await SecureStore.setItemAsync(

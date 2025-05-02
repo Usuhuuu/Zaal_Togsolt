@@ -272,8 +272,8 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                         <TouchableOpacity
                           onPress={() => console.log("Option 2")}
                         >
-                          <Ionicons
-                            name="camera"
+                          <AntDesign
+                            name="addfile"
                             size={24}
                             color={Colors.primary}
                           />
@@ -292,7 +292,6 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       placeholderTextColor={Colors.darkGrey}
                       clearTextOnFocus={false}
                       multiline
-                      
                     />
                   </View>
 
@@ -300,11 +299,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     style={styles.sendButton}
                     onPress={() => sendMessage(newMessage)}
                   >
-                    <Entypo
-                      name="paper-plane"
-                      size={24}
-                      color={Colors.light}
-                    />
+                    <Entypo name="paper-plane" size={24} color={Colors.light} />
                   </TouchableOpacity>
                 </View>
               </KeyboardAvoidingView>
