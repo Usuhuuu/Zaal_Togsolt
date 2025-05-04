@@ -47,7 +47,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("LoginStatus");
-      mutate(() => true, undefined, { revalidate: false });
+      mutate((key) => Array.isArray(key) && key[1] === true, undefined, {
+        revalidate: true,
+      });
       // Optionally, you can also clear other user-related data here
       setIsAuthenticated(false);
     } catch (error) {

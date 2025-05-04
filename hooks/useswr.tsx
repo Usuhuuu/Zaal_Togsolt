@@ -10,17 +10,21 @@ interface useSWRProps {
   loginStatus?: boolean;
 }
 
-export const regular_swr = ({ item }: { item: useSWRProps }) => {
-  const { pathname, cacheKey } = item;
+export const regular_swr = (
+  { item }: { item: useSWRProps },
+  config?: SWRConfiguration
+) => {
+  const { pathname, cacheKey, loginStatus } = item;
   const {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = useSWR(`${cacheKey}`, {
+  } = useSWR(loginStatus ? [cacheKey, loginStatus] : null, {
     fetcher: () => normalFetch(`${pathname}`),
     revalidateOnFocus: false,
     shouldRetryOnError: true,
     errorRetryCount: 3,
+    ...config,
   });
 
   return {
@@ -29,6 +33,7 @@ export const regular_swr = ({ item }: { item: useSWRProps }) => {
     isLoading: userLoading,
   };
 };
+
 export const auth_swr = (
   { item }: { item: useSWRProps },
   config?: SWRConfiguration

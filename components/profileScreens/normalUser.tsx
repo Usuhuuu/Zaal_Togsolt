@@ -47,7 +47,6 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
   const closeModal = () => {
     setModalVisible(false); // Close the modal
   };
-  console.log(formData);
 
   return (
     <>

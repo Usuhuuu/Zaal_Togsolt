@@ -48,7 +48,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -262,15 +262,11 @@ const Page = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-           
-           
             onPress={() => loginWithApple()}
             style={styles.btnOutline}
           >
             <Ionicons name="logo-apple" size={24} style={styles.btnIcon} />
-            <Text style={styles.btnOutlineText}>
-              Continue with Apple
-            </Text>
+            <Text style={styles.btnOutlineText}>Continue with Apple</Text>
             {isItApple ? (
               <>
                 <AppleAuthentication.AppleAuthenticationButton
@@ -323,13 +319,13 @@ const Page = () => {
           <TouchableOpacity
             style={styles.btnOutline}
             onPress={() => {
-              router.push("/functions/signup_modal.tsx" as Href<"/functions/signup_modal.tsx">);
+              router.push(
+                "/functions/signup_modal.tsx" as Href<"/functions/signup_modal.tsx">
+              );
             }}
           >
             <Ionicons name="person-add" size={24} style={styles.btnIcon} />
-            <Text style={styles.btnOutlineText}>
-              Sign up
-            </Text>
+            <Text style={styles.btnOutlineText}>Sign up</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -369,12 +365,9 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
     paddingHorizontal: 15,
     backgroundColor: "#fff",
     fontSize: 16,
-    color: "#333",
   },
   eyeIcon: {
     position: "absolute",
@@ -398,8 +391,8 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: Colors.primary,
-    padding: 10,
-    borderRadius: 30,
+    padding: 15,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },

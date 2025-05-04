@@ -15,6 +15,7 @@ import { AntDesign } from "@expo/vector-icons";
 import axiosInstance from "../../axiosInstance";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
+import { useAuth } from "@/app/(modals)/context/authContext";
 
 interface MemberModalProps {
   memberModalVisible: boolean;
@@ -35,6 +36,7 @@ const MemberModal: React.FC<MemberModalProps> = ({
 }) => {
   const [showAll, setShowAll] = useState(false);
   const [qrLink, setQrLink] = useState<string | null>(null);
+  const { LoginStatus } = useAuth();
 
   const snapPoints = useMemo(() => ["10%"], ["40%"]);
 
@@ -42,6 +44,7 @@ const MemberModal: React.FC<MemberModalProps> = ({
     item: {
       pathname: `/auth/profile/${memberData[0].group_ID}?page=${1}&limit=${10}`,
       cacheKey: `${memberData[0].group_ID}_group_members`,
+      loginStatus: LoginStatus,
     },
   });
 

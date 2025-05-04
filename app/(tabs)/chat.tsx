@@ -131,7 +131,11 @@ const ChatComponent: React.FC = () => {
     error: chatError,
     isLoading: chatLoading,
   } = regular_swr({
-    item: { pathname: "/auth/chatcheck", cacheKey: "group_chat" },
+    item: {
+      pathname: "/auth/chatcheck",
+      cacheKey: "group_chat",
+      loginStatus: LoginStatus,
+    },
   });
 
   useEffect(() => {
@@ -353,7 +357,6 @@ const ChatComponent: React.FC = () => {
   useEffect(() => {
     if (!socketRef.current) return;
     socketRef.current?.on("user-active-change", (data) => {
-      console.log("User active change data:", data);
       setActiveUserData(
         data
           .filter((user: ActiveUserType) => user.status === "active")

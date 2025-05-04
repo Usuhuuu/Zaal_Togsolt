@@ -164,7 +164,9 @@ const FriendRequest = () => {
         console.log("Error fetching user info:", error);
       }
     };
-    fetchUserInfo();
+    if (LoginStatus) {
+      fetchUserInfo();
+    }
   }, [entireFriendData]);
 
   const uniqueCurrentData = Array.from(new Set(currentData));
