@@ -32,7 +32,7 @@ interface Props {
 }
 const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
-  const itemsRef = useRef<React.RefObject<TouchableOpacity>[]>([]);
+  const itemsRef = useRef<React.RefObject<typeof TouchableOpacity>[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const navigation = useNavigation(); // Initialize navigation hook
 

@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Text,
   Dimensions,
+  Platform,
 } from "react-native";
 import React, { useMemo, useRef, useState } from "react";
 import Listings from "@/components/Listing";
@@ -28,7 +29,7 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
   };
   const { bottom, top } = useSafeAreaInsets();
   const screenHeight = Dimensions.get("window").height;
-  const snapPoints = useMemo(() => [bottom + 90, "87%"], []);
+  const snapPoints = useMemo(() => ["10%", "87%"], []);
 
   return (
     <BottomSheet
@@ -40,7 +41,7 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
         width: 60,
         borderRadius: 2,
       }}
-      style={[styles.sheetContainer, { marginTop: top+20 }]}
+      style={[styles.sheetContainer]}
     >
       <View style={styles.contentContainer}>
         <Listings listings={listing} category={category} refresh={refresh} />
@@ -57,11 +58,9 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
 
 const styles = StyleSheet.create({
   contentContainer: {
-    flex: 1,
     backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-   
   },
   absoluteBtn: {
     position: "absolute",

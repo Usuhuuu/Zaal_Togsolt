@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
 import { Avatar, Searchbar } from "react-native-paper";
-import FriendReqModal from "../(modals)/friendReqModal";
+import { Ionicons } from "@expo/vector-icons";
 
 type FriendProfileType = {
   unique_user_ID: string;
@@ -196,19 +196,13 @@ const FriendRequest = () => {
                 marginTop: 10,
               }}
               placeholderTextColor={Colors.darkGrey}
-              right={(props) => (
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: Colors.secondary,
-                    borderRadius: 10,
-                    padding: 15,
-                  }}
-                  onPress={() => {
-                    handleRequestSend();
-                  }}
-                >
-                  <Text style={{ color: Colors.white }}>Send Request</Text>
-                </TouchableOpacity>
+              icon={() => (
+                <Ionicons
+                  name="search"
+                  size={20}
+                  color={Colors.darkGrey}
+                  style={{ marginLeft: 10 }}
+                />
               )}
             />
 
