@@ -16,9 +16,10 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
 import { ActiveUserType, GroupChat } from "@/app/(tabs)/chat";
-import { Avatar } from "react-native-paper";
+import { Avatar, List } from "react-native-paper";
 
 interface Message {
   sender_unique_name: string;
@@ -72,7 +73,6 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   const width = Dimensions.get("window").width;
   const headerHeight = useHeaderHeight();
   useEffect(() => {
-    console.log("activeUserData", activeUserData);
     setActiveUserMember(activeUserData.length);
   }, [activeUserData]);
 
@@ -91,8 +91,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
       ) : (
         <SafeAreaProvider
           style={{
-            backgroundColor: Colors.light,
-            marginBottom: Platform.OS === "ios" ? 0 : 40,
+            backgroundColor: Colors.white,
           }}
         >
           <SafeAreaView
@@ -103,7 +102,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
           >
             <View
               style={{
-                height: height,  
+                height: height - headerHeight,
               }}
             >
               <View
@@ -116,7 +115,6 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   borderBottomWidth: 1,
                   maxWidth: "100%",
                   marginHorizontal: 10,
-                  
                 }}
               >
                 <TouchableOpacity
@@ -145,6 +143,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       }}
                     />
                   )}
+
                   {memberData[0] ? (
                     memberData[0].sportHallName &&
                     memberData[0].date &&
@@ -199,12 +198,12 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                   />
                 </TouchableOpacity>
               </View>
-              
               <FlatList
                 data={message}
                 style={[
                   {
                     backgroundColor: Colors.lightGrey,
+                    paddingBottom: 40,
                   },
                 ]}
                 renderItem={renderChatItem}
@@ -220,21 +219,11 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 removeClippedSubviews={true}
               />
               <KeyboardAvoidingView
-               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-               keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight / 2 + 20: 0}
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  backgroundColor: Colors.light,
-                  paddingBottom: 10,
-                }}
-              
-                enabled={true}
+                behavior={Platform.OS == "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={headerHeight / 2 + 10}
               >
                 <View style={[styles.inputContainer]}>
-                 
+                  <View>
                     <TouchableOpacity
                       onPress={() => {
                         setMenuVisible(!menuVisible);
@@ -246,9 +235,9 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       }}
                     >
                       <AntDesign
-                        name="pluscircleo"
+                        name="plus"
                         size={24}
-                        color={Colors.primary}
+                        color={Colors.darkGrey}
                       />
                     </TouchableOpacity>
                     {menuVisible && (
@@ -284,15 +273,15 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                         <TouchableOpacity
                           onPress={() => console.log("Option 2")}
                         >
-                          <AntDesign
-                            name="addfile"
+                          <Ionicons
+                            name="camera"
                             size={24}
                             color={Colors.primary}
                           />
                         </TouchableOpacity>
                       </View>
                     )}
-                 
+                  </View>
 
                   <View style={styles.input}>
                     <TextInput
@@ -300,7 +289,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                       value={newMessage}
                       onChangeText={(newMsj) => setNewMessage(newMsj)}
                       maxLength={2000}
-                      style={{ flex:1}}
+                      style={{ flex: 1 }}
                       placeholderTextColor={Colors.darkGrey}
                       clearTextOnFocus={false}
                       multiline
@@ -311,7 +300,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                     style={styles.sendButton}
                     onPress={() => sendMessage(newMessage)}
                   >
-                    <Entypo name="paper-plane" size={24} color={Colors.light} />
+                    <Ionicons name="send" size={32} color={Colors.primary} />
                   </TouchableOpacity>
                 </View>
               </KeyboardAvoidingView>
@@ -377,18 +366,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-    paddingVertical: 10,
     gap: 10,
   },
   sendButton: {
-    padding: 10,
+    padding: 12,
     borderRadius: 25,
     marginLeft: 8,
-    backgroundColor: Colors.primary,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sendButtonText: {
     fontSize: 16,
+    color: "#fff",
     fontWeight: "bold",
   },
 

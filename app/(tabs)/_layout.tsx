@@ -19,6 +19,7 @@ import {
   Entypo,
   Ionicons,
   MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
 import ProfileNotification from "@/components/profileScreens/drawerScreen/notification";
 import ProfileStatistical from "@/components/profileScreens/contractorScreen/statistical";
@@ -27,6 +28,7 @@ import { useTranslation } from "react-i18next";
 import ProfileSettings from "../settings/profileSettings";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
+import FriendReqModal from "../(modals)/friendReqModal";
 // Create a Drawer Navigator
 export const TabsLayout = () => {
   const { t } = useTranslation();
@@ -109,6 +111,27 @@ export const TabsLayout = () => {
         options={{
           tabBarLabel: `${t("Friends")}`,
           headerTitle: "Friends",
+          headerTitleStyle: { color: Colors.primary, fontSize: 24 },
+          headerRight: () => {
+            const [modalVisible, setModalVisible] = useState(false);
+
+            return (
+              <TouchableOpacity
+                style={{ marginRight: 10 }}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+                <MaterialIcons
+                  name="person-add"
+                  size={30}
+                  color={Colors.primary}
+                />
+                <FriendReqModal
+                  modalVisible={modalVisible}
+                  setModalVisible={setModalVisible}
+                />
+              </TouchableOpacity>
+            );
+          },
           tabBarIcon: ({ focused }) => (
             <View
               style={{

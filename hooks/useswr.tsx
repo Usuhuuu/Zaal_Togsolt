@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWR, { SWRConfiguration } from "swr";
 import {
   fetchRoleAndProfile,
   normalFetch,
@@ -19,7 +19,6 @@ export const regular_swr = ({ item }: { item: useSWRProps }) => {
   } = useSWR(`${cacheKey}`, {
     fetcher: () => normalFetch(`${pathname}`),
     revalidateOnFocus: false,
-    revalidateOnReconnect: true,
     shouldRetryOnError: true,
     errorRetryCount: 3,
   });
@@ -30,7 +29,10 @@ export const regular_swr = ({ item }: { item: useSWRProps }) => {
     isLoading: userLoading,
   };
 };
-export const auth_swr = ({ item }: { item: useSWRProps }) => {
+export const auth_swr = (
+  { item }: { item: useSWRProps },
+  config?: SWRConfiguration
+) => {
   const { pathname, cacheKey, loginStatus } = item;
   const {
     data: userData,
@@ -38,12 +40,12 @@ export const auth_swr = ({ item }: { item: useSWRProps }) => {
     isLoading: userLoading,
   } = useSWR(loginStatus ? [cacheKey, loginStatus] : null, {
     fetcher: () => fetchRoleAndProfile(`${pathname}`, loginStatus ?? false),
-    revalidateOnFocus: false,
+    revalidateOnFocus: config?.revalidateOnFocus ?? false,
+    refreshInterval: config?.refreshInterval ?? 30 * 1000,
     shouldRetryOnError: false,
-    dedupingInterval: 10000,
     errorRetryInterval: 4000,
     errorRetryCount: 3,
-    dedupeInterval: 3000,
+    ...config,
   });
 
   return {

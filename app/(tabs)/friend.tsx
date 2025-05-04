@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Modal,
 } from "react-native";
 import { mutate } from "swr";
 import Colors from "@/constants/Colors";
@@ -17,7 +18,13 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
 import { Avatar, Searchbar } from "react-native-paper";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import FriendReqModal from "../(modals)/friendReqModal";
+
+type FriendProfileType = {
+  unique_user_ID: string;
+  email: string;
+  userImage?: string;
+};
 
 const FriendRequest = () => {
   const [friendData, setFriendData] = useState<string[]>([]);
@@ -26,7 +33,7 @@ const FriendRequest = () => {
   const [friendShow, setFriendShow] = useState<
     "Friend" | "Friend Request" | "Send Request"
   >("Friend Request");
-  const [friendInfo, setFriendInfo] = useState<any>(null);
+  const [friendInfo, setFriendInfo] = useState<FriendProfileType[]>([]);
   const [entireFriendData, setEntireFriendData] = useState<any>(null);
 
   const [isitLoading, setIsitLoading] = useState<boolean>(false);
@@ -54,7 +61,7 @@ const FriendRequest = () => {
         friend_unique_ID: friend_ID,
       });
       if (response.status == 200) {
-        mutate("User_Friend");
+        mutate(["User_Friend", LoginStatus], undefined, { revalidate: true });
         Alert.alert("Success", "Friend request accepted");
       }
     } catch (err) {
@@ -67,7 +74,7 @@ const FriendRequest = () => {
         friend_unique_ID: friend_ID,
       });
       if (response.status == 200) {
-        mutate("User_Friend");
+        mutate(["User_Friend", LoginStatus], undefined, { revalidate: true });
       }
     } catch (err) {
       console.log(err);
@@ -86,26 +93,31 @@ const FriendRequest = () => {
       });
       console.log("Friend Request Response:", response.data);
       if (response.status === 200) {
-        mutate("User_Friend");
+        mutate(["User_Friend", LoginStatus], undefined, { revalidate: true });
         Alert.alert("Success", "Friend request sent");
       } else if (response.status === 400) {
         Alert.alert("Error", "Request already sent");
       } else if (response.status === 400 && !response.data.find) {
         Alert.alert("Error", "User not found");
       }
-      console.log(response.data);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const { data, error, isLoading } = auth_swr({
-    item: {
-      pathname: "friends",
-      cacheKey: "User_Friend",
-      loginStatus: LoginStatus,
+  const { data, error, isLoading } = auth_swr(
+    {
+      item: {
+        pathname: "friends",
+        cacheKey: "User_Friend",
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnFocus: false,
+      refreshInterval: 60 * 1000,
+    }
+  );
 
   useEffect(() => {
     if (data) {
@@ -135,7 +147,7 @@ const FriendRequest = () => {
       ];
       setEntireFriendData(allValues);
     } else if (error) {
-      console.error("Error fetching user friend data:", error);
+      console.log("Error fetching user friend data:", error);
     }
     setIsitLoading(isLoading);
   }, [data, error, isLoading]);
@@ -143,19 +155,19 @@ const FriendRequest = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        console.log("entireFriendData:", entireFriendData);
-        const response = await axiosInstance.get("/auth/friend_data", {
-          params: {
-            friend_unique_ID: entireFriendData,
-          },
+        const response = await axiosInstance.post("/auth/friend_data", {
+          friend_unique_ID: entireFriendData,
         });
-        setFriendInfo(response.data);
+        setFriendInfo(response.data.friendData || []);
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        setFriendInfo([]);
+        console.log("Error fetching user info:", error);
       }
     };
     fetchUserInfo();
   }, [entireFriendData]);
+
+  const uniqueCurrentData = Array.from(new Set(currentData));
 
   return (
     <View style={{ backgroundColor: Colors.lightGrey, flex: 1 }}>
@@ -213,7 +225,7 @@ const FriendRequest = () => {
                       },
                     ]}
                     onPress={() => {
-                      setFriendShow(label); // ✅ Now TypeScript knows it's a valid value
+                      setFriendShow(label);
                     }}
                   >
                     <Text
@@ -232,77 +244,107 @@ const FriendRequest = () => {
             </View>
             <View style={style.outFriendContainer}>
               <FlatList
-                data={currentData}
-                keyExtractor={(item, index) => `${item}-${index}`}
-                renderItem={({ item }) => (
-                  <View
-                    style={{
-                      backgroundColor: Colors.grey,
-                      marginHorizontal: 20,
-                      padding: 15,
-                      borderRadius: 10,
-                      marginTop: 10,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Avatar.Icon icon={"account"} size={50} />
+                data={uniqueCurrentData}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => {
+                  const matchedFriend = friendInfo?.find(
+                    (friend) => friend.unique_user_ID === item
+                  );
 
-                    <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          textAlign: "center",
-                          color: Colors.darkGrey,
-                        }}
-                      >
-                        {item}
-                      </Text>
+                  return (
+                    <View
+                      style={{
+                        backgroundColor: Colors.grey,
+                        marginHorizontal: 20,
+                        padding: 15,
+                        borderRadius: 10,
+                        marginTop: 10,
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      {matchedFriend && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                          }}
+                        >
+                          <Avatar.Image
+                            source={{ uri: matchedFriend.userImage }}
+                            size={60}
+                            style={{
+                              backgroundColor: Colors.primary,
+                            }}
+                          />
+                          <View
+                            style={{
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                color: Colors.dark,
+                                fontWeight: "bold",
+                                alignSelf: "flex-start",
+                              }}
+                            >
+                              {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                color: Colors.darkGrey,
+                              }}
+                            >
+                              {matchedFriend.email}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {currentData === userRequestData && (
+                        <View
+                          style={{
+                            flexDirection: "column",
+                          }}
+                        >
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: Colors.secondary,
+                              borderRadius: 10,
+                              padding: 10,
+                              width: 90,
+                              alignItems: "center",
+                            }}
+                            onPress={() => handleAccept(item)}
+                          >
+                            <Text style={{ color: Colors.white, fontSize: 17 }}>
+                              Accept
+                            </Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={{
+                              borderRadius: 10,
+                              width: 90,
+                              alignItems: "center",
+                            }}
+                            onPress={() => handleCancel(item)}
+                          >
+                            <Text
+                              style={{ color: Colors.darkGrey, fontSize: 17 }}
+                            >
+                              Cancel
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
                     </View>
-
-                    {currentData === userRequestData && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          gap: 10,
-                        }}
-                      >
-                        <TouchableOpacity
-                          style={{
-                            backgroundColor: Colors.secondary,
-                            borderRadius: 10,
-                            paddingVertical: 10,
-                            paddingHorizontal: 12,
-                            width: 90,
-                            alignItems: "center",
-                          }}
-                          onPress={() => {
-                            handleAccept(item);
-                          }}
-                        >
-                          <Text style={{ color: Colors.white }}>Accept</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          style={{
-                            backgroundColor: Colors.secondary,
-                            borderRadius: 10,
-                            paddingVertical: 10,
-                            paddingHorizontal: 12,
-                            width: 90,
-                            alignItems: "center",
-                          }}
-                          onPress={() => {
-                            handleCancel(item);
-                          }}
-                        >
-                          <Text style={{ color: Colors.white }}>Cancel</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                )}
+                  );
+                }}
               />
             </View>
           </View>
