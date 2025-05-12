@@ -195,7 +195,7 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
-        name="(modals)/chat/[userID]"
+        name="(modals)/chat/[item]"
         options={{
           headerTintColor: Colors.primary,
 
