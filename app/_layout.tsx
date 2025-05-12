@@ -194,19 +194,28 @@ function RootLayoutNav() {
           ),
         }}
       />
-      {/* <Stack.Screen
-        name="listing/friendRequest"
+      <Stack.Screen
+        name="(modals)/chat/[userID]"
         options={{
-          title: "Friend Request",
-          headerTitleStyle: { fontSize: 25, color: Colors.primary },
-          headerShown: true,
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={28} color={Colors.primary} />
-            </TouchableOpacity>
-          ),
+          headerTintColor: Colors.primary,
+
+          headerShown: false,
+          headerLeft: () => {
+            return (
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={28} color={Colors.primary} />
+              </TouchableOpacity>
+            );
+          },
+          headerRight: () => {
+            return (
+              <TouchableOpacity>
+                <Ionicons />
+              </TouchableOpacity>
+            );
+          },
         }}
-      /> */}
+      />
     </Stack>
   );
 }

@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import { AntDesign, Ionicons, Entypo, Feather } from "@expo/vector-icons";
+import { AntDesign, Ionicons, Feather } from "@expo/vector-icons";
 import React, { useEffect } from "react";
 import {
   FlatList,
@@ -16,10 +16,11 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ChildModal from "./childModal";
 import { ActiveUserType, GroupChat } from "@/app/(tabs)/chat";
-import { Avatar, List } from "react-native-paper";
+import { Avatar } from "react-native-paper";
+import { Socket } from "socket.io-client";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   sender_unique_name: string;
@@ -42,11 +43,10 @@ interface MainChatModalProps {
   setNewMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (message: string) => void;
   renderChatItem: ({ item }: { item: Message }) => JSX.Element;
-  chatInitLang: {
-    enterMessage: string;
-  };
+
   memberData: GroupChat[];
   activeUserData: ActiveUserType[];
+  socketRef: React.RefObject<Socket | null>;
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
@@ -63,10 +63,11 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   setNewMessage,
   sendMessage,
   renderChatItem,
-  chatInitLang,
   memberData,
   activeUserData,
+  socketRef,
 }) => {
+  const { t } = useTranslation();
   const [menuVisible, setMenuVisible] = React.useState(false);
   const [activeUserMember, setActiveUserMember] = React.useState<number>(0);
   const height = Dimensions.get("window").height;
@@ -75,6 +76,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   useEffect(() => {
     setActiveUserMember(activeUserData.length);
   }, [activeUserData]);
+  const chatInitLang: any = t("chatRoom", { returnObjects: true });
 
   return (
     <Modal
@@ -95,8 +97,9 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
           }}
         >
           <SafeAreaView
+            edges={["top"]}
             style={{
-              height: height,
+              height: "100%",
               width: width,
             }}
           >
@@ -107,7 +110,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
             >
               <View
                 style={{
-                  height: headerHeight,
+                  height: "10%",
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -219,7 +222,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 removeClippedSubviews={true}
               />
               <KeyboardAvoidingView
-                behavior={Platform.OS == "ios" ? "padding" : "height"}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={headerHeight / 2 + 10}
               >
                 <View style={[styles.inputContainer]}>
@@ -314,11 +317,11 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
         visible={childModalVisible}
         style={{ zIndex: 2 }}
       >
-        <SafeAreaProvider style={{ backgroundColor: "#fff" }}>
-          <SafeAreaView>
+        <SafeAreaProvider style={{ backgroundColor: Colors.white }}>
+          <SafeAreaView style={{ height: "100%", width: width }}>
             <View
               style={{
-                height: headerHeight / 2,
+                height: "10%",
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",

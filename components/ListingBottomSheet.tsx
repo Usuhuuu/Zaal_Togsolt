@@ -12,7 +12,6 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { Listing } from "@/interfaces/listing";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ListingBottomSheetProps {
   listing: Listing[];
@@ -27,8 +26,6 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
     bottomSheetRef.current?.collapse();
     setrefresh(refresh + 1);
   };
-  const { bottom, top } = useSafeAreaInsets();
-  const screenHeight = Dimensions.get("window").height;
   const snapPoints = useMemo(() => ["10%", "87%"], []);
 
   return (
@@ -61,6 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    flex: 1,
   },
   absoluteBtn: {
     position: "absolute",

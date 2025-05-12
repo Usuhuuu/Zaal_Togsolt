@@ -21,7 +21,7 @@ export const regular_swr = (
     isLoading: userLoading,
   } = useSWR(loginStatus ? [cacheKey, loginStatus] : null, {
     fetcher: () => normalFetch(`${pathname}`),
-    revalidateOnFocus: false,
+    revalidateOnFocus: config?.revalidateOnFocus ?? false,
     shouldRetryOnError: true,
     errorRetryCount: 3,
     ...config,

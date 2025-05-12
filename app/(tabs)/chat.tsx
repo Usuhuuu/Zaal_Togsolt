@@ -4,24 +4,23 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  Alert,
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import * as SecureStore from "expo-secure-store";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
 import Constants from "expo-constants";
 import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import axios from "axios";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr, regular_swr } from "../../hooks/useswr";
 import MainChatModal from "../(modals)/functions/modals/mainChatModal";
 import { Avatar } from "react-native-paper";
+import { useFocusEffect } from "expo-router";
+import { connectSocket, getSocket } from "@/hooks/socketConnection";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
@@ -43,7 +42,7 @@ export interface GroupChat {
   endTime?: string;
 }
 
-const prepareMessages = (messages: Message[]) => {
+export const prepareMessages = (messages: Message[]) => {
   const result = [...messages];
   const dateGroups: Record<string, number[]> = {};
 
@@ -74,7 +73,7 @@ const prepareMessages = (messages: Message[]) => {
   return result;
 };
 
-const newMsjPrepare = (previewMsj: any, newMsj: any) => {
+export const newMsjPrepare = (previewMsj: any, newMsj: any) => {
   const diff = differenceInDays(newMsj.timestamp, previewMsj);
   if (diff > 0) {
     return {
@@ -102,16 +101,15 @@ const ChatComponent: React.FC = () => {
   const [userDatas, setUserDatas] = useState<any>([]);
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
   const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
+
   const { t } = useTranslation();
 
-  const chatInitLang: any = t("chatRoom", { returnObjects: true });
   const { LoginStatus } = useAuth();
 
   const {
@@ -198,150 +196,97 @@ const ChatComponent: React.FC = () => {
     }
   }, [userData, userError, userLoading]);
 
-  const chatInit = async (groupId: string) => {
-    try {
-      setCurrentGroupId(groupId);
-      const token = await SecureStore.getItemAsync("Tokens");
+  const joinSpecificChat = async (groupId: string) => {
+    let socket = getSocket();
 
-      if (!token) {
-        return Alert.alert("Login required to join group.");
-      }
-      const notificationToken = await SecureStore.getItemAsync(
-        "notificationToken"
-      );
-      const { accessToken, refreshToken } = JSON.parse(token);
-      // Initialize socket if not already connected
-      if (!socketRef.current || socketRef.current.disconnected) {
-        socketRef.current = io(`${apiUrl}`, {
-          auth: { token: accessToken },
-          query: { groupId, notificationToken },
-          extraHeaders: {
-            "x-app-source": "MobileApp",
-          },
-          transports: ["websocket"],
-          secure: true,
-          autoConnect: true,
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          path: "/socket.io",
-        });
-
-        (socketRef.current as any).hasFetchedHistory = false;
-
-        socketRef.current.on("connect", () => {
-          socketRef.current?.emit("joinGroup", groupId);
-          if (!(socketRef.current as any).hasFetchedHistory) {
-            socketRef.current?.emit("chatHistory", { timer: Date.now() });
-            socketRef.current?.once("chatHistory", (message) => {
-              setIsitReady(true);
-              if (message.nextCursor === null) {
-                setLoading(false);
-                setIsitReady(false);
-                return;
-              }
-              const formattedMessages = prepareMessages(message.messages);
-              setMessages((prevMsj: Message[]) => {
-                const merged = [...formattedMessages, ...prevMsj];
-                const seen = new Set();
-                //hash map almost gshh sda
-                return merged.filter((item) => {
-                  if (seen.has(item.timestamp)) return false;
-                  seen.add(item.timestamp);
-                  return true;
-                });
-              });
-
-              setCursor(message.nextCursor);
-              setIsitReady(false);
-            });
-          }
-
-          socketRef.current?.on("receiveMessage", (data: Message) => {
-            const newMsj: Message = {
-              sender_unique_name: data.sender_unique_name,
-              groupId: data.groupId,
-              message: data.message,
-              timestamp: new Date(data.timestamp),
-            };
-            setMessages((prevMessages: Message[]) => {
-              const merged = [newMsj, ...prevMessages];
-              const seen = new Set();
-              return merged.filter((item) => {
-                if (seen.has(item.timestamp)) return false;
-                seen.add(item.timestamp);
-                return true;
-              });
-            });
-
-            flatListRef.current?.scrollToIndex({
-              index: 0,
-              animated: true,
-            });
-          });
-
-          socketRef.current?.on("reconnect", (attempt) => {
-            console.log(`Reconnected successfully after ${attempt} attempts`);
-          });
-        });
-
-        // 🔹 Handle token expiration & reconnection
-        socketRef.current.on("connect_error", async (error) => {
-          console.log("Connection error:", error);
-          console.log("Connection error:", error.message);
-          if (error.message === "websocket error") {
-            console.log("WebSocket error, retrying...");
-            return;
-          }
-          try {
-            const res = await axios.post(
-              `${apiUrl}/auth/refresh`,
-              {},
-              {
-                headers: {
-                  Authorization: `Bearer ${refreshToken}`,
-                  "x-app-source": "MobileApp",
-                },
-              }
-            );
-            if (res.status == 200 && res.data.success) {
-              await SecureStore.setItemAsync(
-                "Tokens",
-                JSON.stringify({
-                  accessToken: res.data.newAccessToken,
-                  refreshToken,
-                })
-              );
-              if (socketRef.current) {
-                socketRef.current.auth = {
-                  token: res.data.newAccessToken,
-                };
-                socketRef.current.connect();
-                //socketRef.current?.off("chatHistory");
-              }
-            } else if (res.status === 400) {
-              await SecureStore.deleteItemAsync("Tokens");
-              alert("Token has expired. Please login again.");
-            }
-          } catch (err) {
-            console.log(err);
-          }
-        });
-
-        // 🔹 Handle disconnection
-        socketRef.current.on("disconnect", async (reason) => {
-          console.log(`Disconnected from chat. Reason: ${reason}`);
-        });
-      }
-
-      setmainModalShow(true);
-    } catch (error) {
-      console.error("Error joining group:", error);
-      Sentry.captureException(error);
+    if (!socket || !socket.connected) {
+      console.warn("Socket not ready");
+      socket = await connectSocket();
     }
-  };
 
+    if (!socket) {
+      console.warn("Failed to establish socket connection");
+      return;
+    }
+
+    if ((socket as any).currentGroupId === groupId) {
+      setmainModalShow(true);
+      return;
+    }
+
+    setMessages([]);
+
+    if ((socket as any).currentGroupId) {
+      socket.emit("leave_group", (socket as any).currentGroupId);
+    }
+
+    socket.emit("joinGroup", { item: groupId });
+    (socket as any).currentGroupId = groupId;
+
+    socket.emit("chatHistory", { timer: Date.now() });
+
+    socket.once("chatHistory", (message) => {
+      setIsitReady(true);
+
+      if (message.nextCursor === null) {
+        setLoading(false);
+        setIsitReady(false);
+        return;
+      }
+
+      const formattedMessages = prepareMessages(message.messages);
+      setMessages((prevMsj: Message[]) => {
+        const merged = [...formattedMessages, ...prevMsj];
+        const seen = new Set();
+        return merged.filter((item) => {
+          if (seen.has(item.timestamp)) return false;
+          seen.add(item.timestamp);
+          return true;
+        });
+      });
+      setCursor(message.nextCursor);
+      setIsitReady(false);
+    });
+
+    setmainModalShow(true);
+
+    // 🧼 Clean previous listener
+    socket.off("receiveMessage");
+
+    socket.on("receiveMessage", (data: Message) => {
+      const newMsj: Message = {
+        sender_unique_name: data.sender_unique_name,
+        groupId: data.groupId,
+        message: data.message,
+        timestamp: new Date(data.timestamp),
+      };
+
+      setMessages((prevMessages: Message[]) => {
+        const merged = [newMsj, ...prevMessages];
+        const seen = new Set();
+        return merged.filter((item) => {
+          if (seen.has(item.timestamp)) return false;
+          seen.add(item.timestamp);
+          return true;
+        });
+      });
+
+      flatListRef.current?.scrollToIndex({
+        index: 0,
+        animated: true,
+      });
+    });
+  };
+  useFocusEffect(
+    useCallback(() => {
+      const initSocket = async () => {
+        const socket = await connectSocket();
+        if (!socket) return;
+        socketRef.current = socket;
+      };
+      initSocket();
+    }, [])
+  );
   const handleSocket = useCallback(() => {
     if (mainModalShow) {
       socketRef.current?.emit("chat-active");
@@ -373,7 +318,7 @@ const ChatComponent: React.FC = () => {
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
-    const groupId = currentGroupId;
+    const groupId = (socketRef.current as any).currentGroupId;
     if (!groupId || !socketRef.current) return;
 
     const newMessage = {
@@ -395,6 +340,7 @@ const ChatComponent: React.FC = () => {
       const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
       setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
     }
+    console.log(newMessage);
     socketRef.current.emit("sendMessage", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
@@ -528,7 +474,7 @@ const ChatComponent: React.FC = () => {
 
   return (
     <View style={[styles.container]}>
-      {isLoading ? (
+      {userLoading ? (
         <View>
           <ActivityIndicator color={Colors.primary} size={"small"} />
         </View>
@@ -545,7 +491,7 @@ const ChatComponent: React.FC = () => {
             renderItem={({ item }) => (
               <View style={styles.groupItem}>
                 <TouchableOpacity
-                  onPress={() => chatInit(item.group_ID)}
+                  onPress={() => joinSpecificChat(item.group_ID)}
                   style={{ flexDirection: "row", padding: 5, gap: 5 }}
                 >
                   <Avatar.Image
@@ -607,9 +553,9 @@ const ChatComponent: React.FC = () => {
         setNewMessage={setNewMessage}
         sendMessage={sendMessage}
         renderChatItem={renderChatItem}
-        chatInitLang={chatInitLang}
         memberData={chatGroups}
         activeUserData={activeUserData}
+        socketRef={socketRef}
       />
     </View>
   );
