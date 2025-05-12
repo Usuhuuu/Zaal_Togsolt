@@ -51,18 +51,17 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
   return (
     <>
       <LinearGradient
-        colors={[Colors.primary, Colors.light]}
-        start={[0, 0]}
-        end={[0, 1.2]}
-        locations={[0, 1]}
+        colors={[Colors.primary, "#ffffff"]}
         style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.titleBar}>
-          <TouchableOpacity onPress={handleBackPress}>
+          <TouchableOpacity onPress={handleBackPress} style={{ backgroundColor: Colors.primary , borderRadius: 20, padding: 5}}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSharePress}>
+          <TouchableOpacity onPress={handleSharePress} style={{ backgroundColor: Colors.primary , borderRadius: 20, padding: 5}}>
             <Ionicons name="share-social" size={24} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -71,6 +70,7 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
                 "/settings/profileSettings" as Href<"/settings/profileSettings">
               )
             }
+            style={{ backgroundColor: Colors.primary , borderRadius: 20, padding: 5}}
           >
             <Ionicons name="settings" size={24} color="#fff" />
           </TouchableOpacity>
@@ -82,7 +82,7 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
           firstName={formData[0]?.firstName}
           unique_user_ID={formData[0].unique_user_ID}
         />
-        <Team />
+        
         <ProfileData />
 
         {/* Button to open modal */}
@@ -129,7 +129,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    flexGrow: 1,
     paddingVertical: 20,
   },
   background: {
@@ -138,13 +137,21 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     height: "100%",
+    zIndex: -10, // Ensure the background is behind other components",
   },
   titleBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 50, // Adjust for safe area / image space
     marginHorizontal: 15,
+    backgroundColor: "transparent", // ✅ make background transparent
+    position: "absolute", // ✅ position it on top of the content
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10, // ✅ ensure it's above the profile image
+    
   },
   saved: {
     justifyContent: "center",

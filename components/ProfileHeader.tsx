@@ -4,6 +4,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "@/constants/Colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { router } from "expo-router";
+import { ScrollView } from "react-native-gesture-handler";
+import { Dimensions } from "react-native";
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -11,6 +13,7 @@ interface ProfileHeaderProps {
   firstName: string;
   unique_user_ID: string;
 }
+const { width } = Dimensions.get("window");
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   copyToClipboard,
@@ -19,108 +22,122 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   profileImageUri,
 }) => {
   return (
-    <View>
+    <ScrollView>
       {/* Profile Header */}
       <View style={styles.profileContainer}>
-        <View style={styles.nameContainer}>
-          <Text style={styles.profileName}>{firstName}</Text>
-          <View style={styles.userIdContainer}>
-            <Text style={{ color: Colors.dark }}> ID: {unique_user_ID} </Text>
-            <TouchableOpacity onPress={copyToClipboard}>
-              <Ionicons name="copy" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={styles.friend}
-            onPress={() => router.push("/(tabs)/chat")}
-          >
-            <Image
-              source={require("@/assets/tab-icons/teamwork.png")}
-              style={{ width: 20, height: 20 }}
-            />
-            <Text style={styles.socialCount}> Naiz</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Profile Image */}
         <View style={styles.profileImageContainer}>
           <Image
-            source={require("@/assets/images/profileIcons/profile.png")}
+            source={require("@/assets/images/profileIcons/profile.jpg")}
             style={styles.profileImage}
           />
-          <TouchableOpacity style={styles.useredit}>
-            <FontAwesome5 name="user-edit" size={24} color={Colors.primary} />
-          </TouchableOpacity>
         </View>
+        <View style={styles.infoContainer}>
+        <Text style={styles.profileName}>ojhn silvia</Text>        
+        <View style={styles.user}>
+          <TouchableOpacity style={styles.friend}>
+            <Text style={{ color: Colors.dark }}>Friend</Text>
+          </TouchableOpacity>
+          <View style={styles.friend}>
+            <Text style={{ color: Colors.dark }}>@</Text>
+            <Text style={{ color: Colors.dark }}>{unique_user_ID}</Text>
+
+            </View> 
+            <TouchableOpacity onPress={() => router.push("/(modals)/SavedHalls")} style={styles.friend}>
+              <FontAwesome5 name="share-alt" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+          <TouchableOpacity onPress={copyToClipboard} style={styles.friend}>
+              <Ionicons name="copy-outline" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+        </View>
+        </View>
+         
+           
+       
       </View>
 
       {/* Friends and Followers Section */}
-      <View style={styles.socialContainer}>
-        <View style={styles.socialItem}>
-          <Text style={styles.socialCount}>150</Text>
-          <Text style={styles.socialLabel}>Naiz</Text>
-        </View>
-        <View style={styles.socialItem}>
-          <Text style={styles.socialCount}>250</Text>
-          <Text style={styles.socialLabel}>Teams</Text>
-        </View>
-        <View style={styles.socialItem}>
-          <Text style={styles.socialCount}>180</Text>
-          <Text style={styles.socialLabel}>toglolt</Text>
-        </View>
-      </View>
-    </View>
+     
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   profileContainer: {
-    flexDirection: "row", // Align text and image horizontally
+    flexDirection: "column", // Align text and image horizontally
     alignItems: "center", // Center the content vertically
-    marginTop: 20,
-    paddingHorizontal: 20,
+    
+   // Space between the header and the content
   },
-  nameContainer: {
+  infoContainer: {
     flex: 1,
-    marginLeft: 10,
+    padding: 10,
     justifyContent: "center",
-    marginBottom: 10,
-    height: 100,
+    alignItems: "center",
+    width: width/1.2,
+    backgroundColor: "transparent",
+    height: width/2.5, 
+    
+    
+   
+    marginTop: -width/3,
+     // Move it up to overlap with the image
   },
   profileName: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#000",
+    backgroundColor:Colors.light,
+    padding: 10,
+    borderRadius: 10,
   },
   friend: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: Colors.primary,
+    padding: 20,
+    backgroundColor: Colors.light,
     borderRadius: 15,
     marginTop: 10,
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: Colors.primary,
+   
   },
   userIdContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 10,
   },
   profileImageContainer: {
-    marginLeft: 20, // Space between the text and the profile picture
+    width: width,  // 30% of screen width
+    height: width , // same as width for a square
+    
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomLeftRadius: 180,
+    borderBottomRightRadius: 110,
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
+     // Space between the text and the profile picture
+  
   profileImage: {
-    width: 150, // Set the size of the profile image
-    height: 150,
-    borderRadius: 25, // Make the image round
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
-  useredit: {
-    position: "absolute",
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 5,
+  user: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    
+    width: "100%",
+    marginTop: 20,
+
   },
   socialContainer: {
     flexDirection: "row",
