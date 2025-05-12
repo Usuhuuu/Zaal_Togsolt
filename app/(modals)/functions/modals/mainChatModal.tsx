@@ -72,7 +72,6 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   const [activeUserMember, setActiveUserMember] = React.useState<number>(0);
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
-  const headerHeight = useHeaderHeight();
   useEffect(() => {
     setActiveUserMember(activeUserData.length);
   }, [activeUserData]);
@@ -96,16 +95,10 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
             backgroundColor: Colors.white,
           }}
         >
-          <SafeAreaView
-            edges={["top"]}
-            style={{
-              height: "100%",
-              width: width,
-            }}
-          >
+          <SafeAreaView>
             <View
               style={{
-                height: height - headerHeight,
+                height: "100%",
               }}
             >
               <View
@@ -223,7 +216,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
               />
               <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={headerHeight / 2 + 10}
+                keyboardVerticalOffset={100 / 2 + 10}
               >
                 <View style={[styles.inputContainer]}>
                   <View>

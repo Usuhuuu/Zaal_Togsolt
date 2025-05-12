@@ -21,12 +21,10 @@ import {
 import { Socket } from "socket.io-client";
 import Colors from "@/constants/Colors";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-paper";
 import { format } from "date-fns";
-import { useTranslation } from "react-i18next";
-import ChildModal from "../functions/modals/childModal";
+import { connectSocket, getSocket } from "@/hooks/socketConnection";
 
 interface Message {
   sender_unique_name: string;
@@ -37,7 +35,7 @@ interface Message {
 }
 
 const DirectChatScreen: React.FC = ({}) => {
-  const { userId } = useLocalSearchParams();
+  const { item } = useLocalSearchParams();
   const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
@@ -55,8 +53,7 @@ const DirectChatScreen: React.FC = ({}) => {
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
-    const groupId = (socketRef.current as any).currentGroupId;
-    if (!groupId || !socketRef.current) return;
+    if (!socketRef.current?.connected) return;
 
     const newMessage = {
       sender_unique_name: userDatas.unique_user_ID,
@@ -66,7 +63,7 @@ const DirectChatScreen: React.FC = ({}) => {
     };
 
     const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-
+    console.log("New message", newMessage);
     if (!prevMsj) {
       const newMsjPrepared = {
         ...newMessage,
@@ -78,7 +75,7 @@ const DirectChatScreen: React.FC = ({}) => {
       setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
     }
     console.log(newMessage);
-    socketRef.current.emit("sendMessage", newMessage);
+    socketRef.current.emit("directChatSend", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
       animated: true,
@@ -203,15 +200,50 @@ const DirectChatScreen: React.FC = ({}) => {
     [userDatas]
   );
 
-  const { t } = useTranslation();
-  const [activeUserMember, setActiveUserMember] = React.useState<number>(0);
-  const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
-  const headerHeight = useHeaderHeight();
   const [menuVisible, setMenuVisible] = React.useState(false);
+
+  const initIndividualChat = async () => {
+    if (!socketRef.current?.connected) {
+      await connectSocket();
+    }
+    socketRef.current = getSocket();
+    socketRef.current?.emit("directChatJoin", {
+      initFriend: item,
+    });
+    socketRef.current?.emit(
+      "directChatHistory",
+      {
+        timer: new Date(),
+        initFriend: item,
+      },
+      (message: any) => {
+        console.log(message);
+        setIsitReady(true);
+        if (message.nextCursor === null) {
+          setLoading(false);
+          setIsitReady(false);
+          return;
+        }
+        const formatMessages = prepareMessages(message.messages);
+        setMessages((prevMsj: Message[]) => {
+          const merged = [...formatMessages, ...prevMsj];
+          const seen = new Set();
+          return merged.filter((item) => {
+            if (seen.has(item.timestamp)) return false;
+            seen.add(item.timestamp);
+            return true;
+          });
+        });
+        setCursor(message.nextCursor);
+        setIsitReady(false);
+      }
+    );
+    socketRef.current?.on("directMessageReceived", () => {});
+  };
   useEffect(() => {
-    setActiveUserMember(activeUserData.length);
-  }, [activeUserData]);
+    initIndividualChat();
+  }, []);
 
   return (
     <SafeAreaProvider>
