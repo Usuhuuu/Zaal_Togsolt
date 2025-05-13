@@ -315,13 +315,18 @@ const Layout = () => {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = auth_swr({
-    item: {
-      pathname: "main",
-      cacheKey: "RoleAndProfile_main",
-      loginStatus: LoginStatus,
+  } = auth_swr(
+    {
+      item: {
+        pathname: "main",
+        cacheKey: "RoleAndProfile_main",
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnMount: true,
+    }
+  );
 
   useEffect(() => {
     if (userData) {

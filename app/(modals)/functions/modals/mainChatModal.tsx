@@ -15,7 +15,6 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
 import ChildModal from "./childModal";
 import { ActiveUserType, GroupChat } from "@/app/(tabs)/chat";
 import { Avatar } from "react-native-paper";
@@ -29,13 +28,14 @@ interface Message {
   timestamp: Date;
   grouped?: boolean;
 }
+
 interface MainChatModalProps {
   mainModalShow: boolean;
   setmainModalShow: React.Dispatch<React.SetStateAction<boolean>>;
   isitReady: boolean;
   setChildModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   childModalVisible: boolean;
-  message: Message[];
+  message: Map<string, Message[]>;
   loadOlderMsj: () => void;
   loading: boolean;
   flatListRef: React.RefObject<FlatList>;
@@ -43,10 +43,10 @@ interface MainChatModalProps {
   setNewMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (message: string) => void;
   renderChatItem: ({ item }: { item: Message }) => JSX.Element;
-
   memberData: GroupChat[];
   activeUserData: ActiveUserType[];
   socketRef: React.RefObject<Socket | null>;
+  groupID: string;
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
@@ -65,18 +65,17 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   renderChatItem,
   memberData,
   activeUserData,
-  socketRef,
+  groupID,
 }) => {
   const { t } = useTranslation();
   const [menuVisible, setMenuVisible] = React.useState(false);
   const [activeUserMember, setActiveUserMember] = React.useState<number>(0);
-  const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   useEffect(() => {
     setActiveUserMember(activeUserData.length);
   }, [activeUserData]);
   const chatInitLang: any = t("chatRoom", { returnObjects: true });
-
+  const messageData = message.get(groupID);
   return (
     <Modal
       animationType="fade"
@@ -195,7 +194,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 </TouchableOpacity>
               </View>
               <FlatList
-                data={message}
+                data={messageData}
                 style={[
                   {
                     backgroundColor: Colors.lightGrey,

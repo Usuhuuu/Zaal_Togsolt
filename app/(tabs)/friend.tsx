@@ -17,7 +17,6 @@ import { auth_swr } from "../../hooks/useswr";
 import { Avatar, Searchbar } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { getSocket } from "@/hooks/socketConnection";
 
 type FriendProfileType = {
   unique_user_ID: string;
@@ -127,6 +126,7 @@ const FriendRequest = () => {
     },
     {
       revalidateOnFocus: true,
+      revalidateOnMount: true,
       refreshInterval: 60 * 1000,
     }
   );
@@ -359,7 +359,6 @@ const FriendRequest = () => {
                             <TouchableOpacity
                               onPress={() => {
                                 router.push(`/(modals)/chat/${item}`);
-                                console.log("pisda");
                               }}
                             >
                               <Ionicons

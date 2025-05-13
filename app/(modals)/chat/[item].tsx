@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import {
   ActiveUserType,
-  GroupChat,
   newMsjPrepare,
   prepareMessages,
 } from "@/app/(tabs)/chat";
@@ -25,10 +24,12 @@ import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-paper";
 import { format } from "date-fns";
 import { connectSocket, getSocket } from "@/hooks/socketConnection";
+import { auth_swr } from "@/hooks/useswr";
+import { useAuth } from "../context/authContext";
 
 interface Message {
   sender_unique_name: string;
-  groupId: string;
+  groupId?: string;
   message: string;
   timestamp: Date;
   showDateSeparator?: boolean;
@@ -36,56 +37,60 @@ interface Message {
 
 const DirectChatScreen: React.FC = ({}) => {
   const { item } = useLocalSearchParams();
-  const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [currentGroupId, setCurrentGroupId] = useState<string>("");
-  const [mainModalShow, setmainModalShow] = useState<boolean>(true);
-  const [userDatas, setUserDatas] = useState<any>([]);
+  const [userDataParsed, setuserDataParsed] = useState<any>([]);
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
   const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
+  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
+    new Map()
+  );
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
+  const isMounted = useRef(false);
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
     if (!socketRef.current?.connected) return;
 
     const newMessage = {
-      sender_unique_name: userDatas.unique_user_ID,
-      groupId: currentGroupId,
+      sender_unique_name: userDataParsed.unique_user_ID,
       message: messageText,
       timestamp: new Date(),
     };
 
     const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-    console.log("New message", newMessage);
     if (!prevMsj) {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: true,
       };
-      setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+      setMessages((prevMsj: any) => {
+        return [newMsjPrepared, ...prevMsj];
+      });
     } else {
       const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
-      setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+      setMessages((prevMsj: any) => {
+        return [newMsjPrepared, ...prevMsj];
+      });
     }
-    console.log(newMessage);
+
     socketRef.current.emit("directChatSend", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
       animated: true,
     });
   };
+
   const loadOlderMsj = async () => {
     if (!socketRef.current?.connected || !cursor) return;
 
-    socketRef.current?.emit("chatHistory", { timer: cursor });
-    socketRef.current?.once("chatHistory", (message) => {
+    socketRef.current?.emit("directChatHistory", { timer: cursor });
+    socketRef.current?.once("directChatHistory", (message) => {
       if (
         !message.messages ||
         message.messages.length === 0 ||
@@ -96,17 +101,43 @@ const DirectChatScreen: React.FC = ({}) => {
       }
       const formattedMessages = prepareMessages(message.messages);
       setMessages((prevMessages) => [...prevMessages, ...formattedMessages]);
+
       setCursor(message.nextCursor);
       setLoading(false);
     });
   };
+  const { LoginStatus } = useAuth();
+  const {
+    data: userData,
+    error: userError,
+    isLoading: userLoading,
+  } = auth_swr({
+    item: {
+      pathname: "main",
+      cacheKey: "RoleAndProfile_main",
+      loginStatus: LoginStatus,
+    },
+  });
+  useEffect(() => {
+    if (userLoading) {
+      setLoading(true);
+    } else if (userData) {
+      const parsedData =
+        typeof userData.profileData == "string"
+          ? JSON.parse(userData.profileData)
+          : userData.profileData;
+
+      setuserDataParsed(Array.isArray(parsedData) ? parsedData[0] : parsedData);
+    }
+  }, [userData, userError, userLoading]);
+
   const MemoizedChatItem = React.memo(
     ({ item, userDatas }: { item: Message; userDatas: any }) => {
       //본인
       const userSelf: boolean =
         item.sender_unique_name === userDatas.unique_user_ID;
       return (
-        <View>
+        <View style={{ marginHorizontal: 10 }}>
           {item.showDateSeparator && (
             <View style={styles.dateSeparator}>
               <View style={styles.line} />
@@ -126,7 +157,10 @@ const DirectChatScreen: React.FC = ({}) => {
             <View style={{ flexDirection: "row" }}>
               {!userSelf && (
                 <View style={{ marginRight: 6 }}>
-                  <Avatar.Icon size={40} icon={"account"} />
+                  <Avatar.Image
+                    size={40}
+                    source={{ uri: userDataParsed.userImage }}
+                  />
                 </View>
               )}
 
@@ -195,14 +229,13 @@ const DirectChatScreen: React.FC = ({}) => {
 
   const renderChatItem = useCallback(
     ({ item }: { item: Message }) => {
-      return <MemoizedChatItem item={item} userDatas={userDatas} />;
+      return <MemoizedChatItem item={item} userDatas={userDataParsed} />;
     },
-    [userDatas]
+    [userDataParsed]
   );
 
   const width = Dimensions.get("window").width;
   const [menuVisible, setMenuVisible] = React.useState(false);
-
   const initIndividualChat = async () => {
     if (!socketRef.current?.connected) {
       await connectSocket();
@@ -218,7 +251,6 @@ const DirectChatScreen: React.FC = ({}) => {
         initFriend: item,
       },
       (message: any) => {
-        console.log(message);
         setIsitReady(true);
         if (message.nextCursor === null) {
           setLoading(false);
@@ -239,10 +271,49 @@ const DirectChatScreen: React.FC = ({}) => {
         setIsitReady(false);
       }
     );
-    socketRef.current?.on("directMessageReceived", () => {});
+    socketRef.current?.on("directMessageReceived", async (data) => {
+      console.log(data);
+      if (!socketRef.current?.connected) {
+        await connectSocket();
+      }
+      setMessages((prevMsj) => {
+        return [data.messages, ...prevMsj];
+      });
+    });
   };
   useEffect(() => {
     initIndividualChat();
+  }, [item]);
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Emitting direct-active-user");
+      socketRef.current?.emit("direct-active-user");
+
+      return () => {
+        socketRef.current?.emit("direct-inactive-user");
+      };
+    }, [])
+  );
+  useEffect(() => {
+    if (!socketRef.current) return;
+    socketRef.current?.on("direct-active-user", (data) => {
+      console.log(data);
+      setActiveUserData(
+        data
+          .filter((user: ActiveUserType) => user.status === "active")
+          .map((user: ActiveUserType) => ({
+            unique_user_ID: user.unique_user_ID,
+            status: user.status,
+          }))
+      );
+    });
+    return () => {
+      socketRef.current?.off("direct-inactive-user");
+    };
+  }, [socketRef.current]);
+  useEffect(() => {
+    console.log(activeUserData);
   }, []);
 
   return (
@@ -266,24 +337,42 @@ const DirectChatScreen: React.FC = ({}) => {
               height: "10%",
             }}
           >
-            <TouchableOpacity
-              onPress={() => {
-                router.back();
-              }}
-            >
-              <Ionicons
-                name="arrow-back-sharp"
-                size={24}
-                color={Colors.primary}
-              />
-            </TouchableOpacity>
             <View
               style={{
                 flexDirection: "row",
-                justifyContent: "center",
                 alignItems: "center",
+                gap: 5,
               }}
-            ></View>
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  router.back();
+                }}
+              >
+                <Ionicons
+                  name="arrow-back-sharp"
+                  size={24}
+                  color={Colors.primary}
+                />
+              </TouchableOpacity>
+              <View
+                style={{
+                  flexDirection: "row",
+                  paddingLeft: 10,
+                }}
+              >
+                <Avatar.Image source={{ uri: userDataParsed.userImage }} />
+                <View style={{ gap: 5, alignSelf: "center" }}>
+                  <Text style={{ fontSize: 20, fontWeight: "500" }}>
+                    {userDataParsed.unique_user_ID
+                      ? userDataParsed.unique_user_ID[0].toUpperCase() +
+                        userDataParsed.unique_user_ID.slice(1)
+                      : "Username"}
+                  </Text>
+                  <Text style={{ color: Colors.darkGrey }}>{"offlane"}</Text>
+                </View>
+              </View>
+            </View>
             <TouchableOpacity
               onPress={() => {
                 setChildModalVisible(true);

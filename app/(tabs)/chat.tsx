@@ -19,7 +19,7 @@ import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr, regular_swr } from "../../hooks/useswr";
 import MainChatModal from "../(modals)/functions/modals/mainChatModal";
 import { Avatar } from "react-native-paper";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { connectSocket, getSocket } from "@/hooks/socketConnection";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
@@ -32,7 +32,7 @@ interface Message {
   showDateSeparator?: boolean;
 }
 export interface GroupChat {
-  group_ID: string;
+  group_ID?: string | undefined;
   group_chat_name: string;
   members: string[];
   chat_image: string;
@@ -40,7 +40,13 @@ export interface GroupChat {
   date?: string;
   startTime?: string;
   endTime?: string;
+  individualChat?: string | undefined;
 }
+type MessageHistory = {
+  nextCursor: Date | null;
+  messages: Message[];
+  groupId: string;
+};
 
 export const prepareMessages = (messages: Message[]) => {
   const result = [...messages];
@@ -96,10 +102,9 @@ const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [currentGroupId, setCurrentGroupId] = useState<string>("");
   const [mainModalShow, setmainModalShow] = useState<boolean>(false);
   const [userDatas, setUserDatas] = useState<any>([]);
-  const [cursor, setCursor] = useState(null);
+  const [cursor, setCursor] = useState<Date | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
@@ -107,9 +112,11 @@ const ChatComponent: React.FC = () => {
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
-
+  const currentChatId = useRef<string>("");
+  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
+    new Map()
+  );
   const { t } = useTranslation();
-
   const { LoginStatus } = useAuth();
 
   const {
@@ -140,40 +147,59 @@ const ChatComponent: React.FC = () => {
     if (chatLoading) {
       setLoading(true);
     } else if (chatData && chatData.success) {
+      const allGroups = [
+        ...(chatData.chatGroupIDs.chat || []),
+        ...(chatData.chatGroupIDs.directChat || []),
+      ];
+
       setChatGroups(
-        chatData.chatGroupIDs.map((groupID: any) => {
+        allGroups.map((groupID: any) => {
           const groupChatName = groupID.group_chat_name;
           const regex =
             /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+[–-]\s+(\d{2}:\d{2})/;
-          const match = groupChatName.match(regex);
-          if (match) {
-            const [_, date, startTime, endTime] = match;
-            const indexOfDate = groupChatName.indexOf(date);
 
-            const sportHallName = groupChatName
-              .substring(0, indexOfDate)
-              .replace(/-\s*$/, "")
-              .trim();
+          if (typeof groupChatName === "string") {
+            const match = groupChatName.match(regex);
+            if (match) {
+              const [_, date, startTime, endTime] = match;
+              const indexOfDate = groupChatName.indexOf(date);
+              const sportHallName = groupChatName
+                .substring(0, indexOfDate)
+                .replace(/-\s*$/, "")
+                .trim();
 
+              return {
+                group_ID: groupID._id,
+                members: groupID.members,
+                group_chat_name: `${sportHallName} - ${date} ${startTime} – ${endTime}`,
+                chat_image: groupID.chat_image,
+                sportHallName,
+                date,
+                startTime,
+                endTime,
+              };
+            }
+          }
+          // Handle direct (individual) chat
+          if (groupID.individualChat && Array.isArray(groupID.members)) {
+            const otherMember = groupID.members.filter(
+              (member: string) => member !== userDatas.unique_user_ID
+            );
+            console.log(otherMember);
             return {
-              group_ID: groupID._id,
+              individualChat: groupID._id,
               members: groupID.members,
-              group_chat_name: `${sportHallName} - ${date} ${startTime} – ${endTime}`,
-              chat_image: groupID.chat_image,
-              // splitted data
-              sportHallName,
-              date,
-              startTime,
-              endTime,
-            };
-          } else if (match === null) {
-            return {
-              group_ID: groupID._id,
-              members: groupID.members,
-              group_chat_name: groupChatName,
+              group_chat_name: otherMember || "Direct Chat",
               chat_image: groupID.chat_image,
             };
           }
+          // Default fallback
+          return {
+            group_ID: groupID._id,
+            members: groupID.members,
+            group_chat_name: groupChatName,
+            chat_image: groupID.chat_image,
+          };
         })
       );
     } else if (chatError) {
@@ -190,70 +216,96 @@ const ChatComponent: React.FC = () => {
         typeof userData.profileData == "string"
           ? JSON.parse(userData.profileData)
           : userData.profileData;
+      console.log(userDatas);
       setUserDatas(Array.isArray(parsedData) ? parsedData[0] : parsedData);
     } else if (userError) {
       Sentry.captureException(chatError);
     }
   }, [userData, userError, userLoading]);
 
+  const saveMessageToMap = ({
+    chat_ID,
+    messages,
+    newSendedMsj,
+  }: {
+    chat_ID: string;
+    messages: Message[];
+    newSendedMsj: boolean;
+  }) => {
+    setMessagesMap((prevMsj) => {
+      const newMap = new Map(prevMsj); // clone existing map
+      const existingMessages = newMap.get(chat_ID) || [];
+      let combined;
+      if (!newSendedMsj) {
+        combined = [...existingMessages, ...messages];
+      } else {
+        combined = [...messages, ...existingMessages];
+      }
+      const seen = new Set();
+      const unique = combined.filter((msj) => {
+        const key = `${msj.sender_unique_name}-${msj.timestamp}-${msj.message}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      newMap.set(chat_ID, unique);
+      return newMap; // Return the updated map
+    });
+  };
+
   const joinSpecificChat = async (groupId: string) => {
-    let socket = getSocket();
-
-    if (!socket || !socket.connected) {
+    socketRef.current = getSocket();
+    if (!socketRef || !socketRef.current?.connected) {
       console.warn("Socket not ready");
-      socket = await connectSocket();
+      await connectSocket();
     }
 
-    if (!socket) {
-      console.warn("Failed to establish socket connection");
-      return;
-    }
-
-    if ((socket as any).currentGroupId === groupId) {
+    if ((socketRef as any).currentGroupId === groupId) {
       setmainModalShow(true);
       return;
     }
 
     setMessages([]);
 
-    if ((socket as any).currentGroupId) {
-      socket.emit("leave_group", (socket as any).currentGroupId);
+    if ((socketRef as any).currentGroupId) {
+      socketRef.current?.emit(
+        "leave_group",
+        ((socketRef.current as any).currentGroupId = groupId)
+      );
     }
 
-    socket.emit("joinGroup", { item: groupId });
-    (socket as any).currentGroupId = groupId;
+    socketRef.current?.emit("joinGroup", { item: groupId });
+    currentChatId.current = groupId;
 
-    socket.emit("chatHistory", { timer: Date.now() });
+    socketRef.current?.emit(
+      "chatHistory",
+      { timer: Date.now() },
+      (message: MessageHistory) => {
+        setIsitReady(true);
 
-    socket.once("chatHistory", (message) => {
-      setIsitReady(true);
+        if (message.nextCursor === null) {
+          setLoading(false);
+          setIsitReady(false);
+          return;
+        }
 
-      if (message.nextCursor === null) {
-        setLoading(false);
-        setIsitReady(false);
-        return;
-      }
+        const formattedMessages = prepareMessages(message.messages);
 
-      const formattedMessages = prepareMessages(message.messages);
-      setMessages((prevMsj: Message[]) => {
-        const merged = [...formattedMessages, ...prevMsj];
-        const seen = new Set();
-        return merged.filter((item) => {
-          if (seen.has(item.timestamp)) return false;
-          seen.add(item.timestamp);
-          return true;
+        saveMessageToMap({
+          chat_ID: currentChatId.current,
+          messages: formattedMessages,
+          newSendedMsj: false,
         });
-      });
-      setCursor(message.nextCursor);
-      setIsitReady(false);
-    });
-
+        setCursor(message.nextCursor);
+        setIsitReady(false);
+      }
+    );
     setmainModalShow(true);
 
     // 🧼 Clean previous listener
-    socket.off("receiveMessage");
+    socketRef.current?.off("receiveMessage");
 
-    socket.on("receiveMessage", (data: Message) => {
+    socketRef.current?.on("receiveMessage", (data: Message) => {
       const newMsj: Message = {
         sender_unique_name: data.sender_unique_name,
         groupId: data.groupId,
@@ -261,15 +313,12 @@ const ChatComponent: React.FC = () => {
         timestamp: new Date(data.timestamp),
       };
 
-      setMessages((prevMessages: Message[]) => {
-        const merged = [newMsj, ...prevMessages];
-        const seen = new Set();
-        return merged.filter((item) => {
-          if (seen.has(item.timestamp)) return false;
-          seen.add(item.timestamp);
-          return true;
-        });
+      const messageHash = saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: [newMsj],
+        newSendedMsj: true,
       });
+      console.log(messageHash);
 
       flatListRef.current?.scrollToIndex({
         index: 0,
@@ -277,6 +326,7 @@ const ChatComponent: React.FC = () => {
       });
     });
   };
+
   useFocusEffect(
     useCallback(() => {
       const initSocket = async () => {
@@ -318,27 +368,34 @@ const ChatComponent: React.FC = () => {
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
-    const groupId = (socketRef.current as any).currentGroupId;
-    if (!groupId || !socketRef.current) return;
+
+    if (!socketRef.current?.connected) return;
 
     const newMessage = {
       sender_unique_name: userDatas.unique_user_ID,
-      groupId: currentGroupId,
+      groupId: currentChatId.current,
       message: messageText,
       timestamp: new Date(),
     };
 
     const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-
     if (!prevMsj) {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: true,
       };
-      setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+      saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: [newMsjPrepared],
+        newSendedMsj: true,
+      });
     } else {
       const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
-      setMessages((prevMessages) => [newMsjPrepared, ...prevMessages]);
+      saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: [newMsjPrepared],
+        newSendedMsj: true,
+      });
     }
     console.log(newMessage);
     socketRef.current.emit("sendMessage", newMessage);
@@ -454,22 +511,30 @@ const ChatComponent: React.FC = () => {
 
   const loadOlderMsj = async () => {
     if (!socketRef.current?.connected || !cursor) return;
+    socketRef.current?.emit(
+      "chatHistory",
+      { timer: cursor },
+      (message: MessageHistory) => {
+        if (
+          !message.messages ||
+          message.messages.length === 0 ||
+          message.nextCursor == null
+        ) {
+          setLoading(false);
+          return;
+        }
+        const formattedMessages = prepareMessages(message.messages);
+        const pisdaMsj = saveMessageToMap({
+          chat_ID: currentChatId.current,
+          messages: formattedMessages,
+          newSendedMsj: false,
+        });
+        console.log(pisdaMsj);
 
-    socketRef.current?.emit("chatHistory", { timer: cursor });
-    socketRef.current?.once("chatHistory", (message) => {
-      if (
-        !message.messages ||
-        message.messages.length === 0 ||
-        message.nextCursor == null
-      ) {
+        setCursor(message.nextCursor);
         setLoading(false);
-        return;
       }
-      const formattedMessages = prepareMessages(message.messages);
-      setMessages((prevMessages) => [...prevMessages, ...formattedMessages]);
-      setCursor(message.nextCursor);
-      setLoading(false);
-    });
+    );
   };
 
   return (
@@ -489,52 +554,65 @@ const ChatComponent: React.FC = () => {
             data={chatGroups}
             style={styles.groupItemContainer}
             renderItem={({ item }) => (
-              <View style={styles.groupItem}>
-                <TouchableOpacity
-                  onPress={() => joinSpecificChat(item.group_ID)}
-                  style={{ flexDirection: "row", padding: 5, gap: 5 }}
-                >
-                  <Avatar.Image
-                    size={40}
-                    source={require("@/assets/images/sportHall_Icon_full_primary.png")}
-                    theme={{
-                      colors: { primary: Colors.white },
-                    }}
-                  />
-                  <View
-                    style={{
-                      flex: 1,
-                      flexWrap: "wrap",
-                      flexDirection: "row",
-                      gap: 5,
-                    }}
-                  >
-                    {item.sportHallName &&
-                    item.date &&
-                    item.startTime &&
-                    item.endTime ? (
-                      <>
-                        <Text style={{ fontWeight: 600 }}>
-                          {item.sportHallName}
-                        </Text>
-                        <Text style={{ fontWeight: 800 }}>-</Text>
-                        <Text style={{ fontWeight: 300 }}>
-                          {item.date
-                            ? format(new Date(item.date), "MMMM dd")
-                            : ""}
-                        </Text>
-                        <Text>
-                          {item.startTime} - {item.endTime}
-                        </Text>
-                      </>
-                    ) : (
-                      <Text>{item.group_chat_name}</Text>
-                    )}
+              <>
+                {item.group_chat_name !== "Direct Chat" && (
+                  <View style={styles.groupItem}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (item.individualChat) {
+                          router.push(`/(modals)/chat/${item.group_chat_name}`);
+                        } else {
+                          joinSpecificChat(item.group_ID ?? "");
+                        }
+                      }}
+                      style={{ flexDirection: "row", padding: 5, gap: 5 }}
+                    >
+                      <Avatar.Image
+                        size={40}
+                        source={require("@/assets/images/sportHall_Icon_full_primary.png")}
+                        theme={{
+                          colors: { primary: Colors.white },
+                        }}
+                      />
+                      <View
+                        style={{
+                          flex: 1,
+                          flexWrap: "wrap",
+                          flexDirection: "row",
+                          gap: 5,
+                        }}
+                      >
+                        {item.sportHallName &&
+                        item.date &&
+                        item.startTime &&
+                        item.endTime ? (
+                          <>
+                            <Text style={{ fontWeight: 600 }}>
+                              {item.sportHallName}
+                            </Text>
+                            <Text style={{ fontWeight: 800 }}>-</Text>
+                            <Text style={{ fontWeight: 300 }}>
+                              {item.date
+                                ? format(new Date(item.date), "MMMM dd")
+                                : ""}
+                            </Text>
+                            <Text>
+                              {item.startTime} - {item.endTime}
+                            </Text>
+                          </>
+                        ) : (
+                          <Text>{item.group_chat_name}</Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
-              </View>
+                )}
+              </>
             )}
-            keyExtractor={(item) => item.group_ID}
+            keyExtractor={(item) =>
+              item.group_ID ||
+              (item.individualChat ?? JSON.stringify(Math.random()))
+            }
           />
         </View>
       )}
@@ -545,7 +623,7 @@ const ChatComponent: React.FC = () => {
         isitReady={isitReady}
         setChildModalVisible={setChildModalVisible}
         childModalVisible={childModalVisible}
-        message={messages}
+        message={messagesMap}
         loadOlderMsj={loadOlderMsj}
         loading={loading}
         flatListRef={flatListRef}
@@ -556,6 +634,7 @@ const ChatComponent: React.FC = () => {
         memberData={chatGroups}
         activeUserData={activeUserData}
         socketRef={socketRef}
+        groupID={currentChatId.current}
       />
     </View>
   );
