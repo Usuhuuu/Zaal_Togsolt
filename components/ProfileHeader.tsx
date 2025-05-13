@@ -1,11 +1,25 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Colors from "@/constants/Colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { router } from "expo-router";
-import { ScrollView } from "react-native-gesture-handler";
-import { Dimensions } from "react-native";
+import Colors from "@/constants/Colors";
+import { FlatList } from "react-native-gesture-handler";
+import Animated, { interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, Extrapolate } from "react-native-reanimated";
+import { it } from "node:test";
+
+
+
+
+
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -13,7 +27,71 @@ interface ProfileHeaderProps {
   firstName: string;
   unique_user_ID: string;
 }
+
 const { width } = Dimensions.get("window");
+
+const _itemSize = width / 3.5;
+const _spacing = 12;
+const _itemTotalSize = _itemSize + _spacing;
+
+
+// Dummy menu items
+const menu = [
+  { name: "Settings",
+  icon: require("@/assets/tab-icons/athlete.png") },
+
+  { name: "Achievements"
+  ,  icon: require("@/assets/tab-icons/athlete.png")
+   },
+  { name: "Rewards"
+  ,  icon: require("@/assets/tab-icons/athlete.png")
+   },
+   
+];
+
+function CarouselItem({ item, index, scrollX }: { item: any; index: number; scrollX: SharedValue<number> }) {
+  const animatedStyle = useAnimatedStyle(() => {
+
+    const inputRange = [index - 1, index, index + 1];
+
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.8, 1, 0.8],
+      Extrapolate.CLAMP
+    );
+
+    const rotateY = interpolate(
+      scrollX.value,
+      inputRange,
+      [30, 0, -30], // degrees
+      Extrapolate.CLAMP
+    );
+
+    const translateY = interpolate(
+      scrollX.value,
+      inputRange,
+      [20, 0, 20],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [
+        { perspective: 1000 },
+        { scale },
+        { rotateY: `${rotateY}deg` },
+        { translateY },
+      ],
+    };
+  });
+  
+ return (
+    <Animated.View style={[styles.menuItem, animatedStyle]}>
+      <Image source={item.icon} style={{ width: 50, height: 50 }} />
+      <Text style={styles.titleText}>{item.name}</Text>
+    </Animated.View>
+  );
+}
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   copyToClipboard,
@@ -21,11 +99,19 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   unique_user_ID,
   profileImageUri,
 }) => {
+
+  const scrollX = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler(e => {
+    console.log(scrollX.value);
+    scrollX.value = e.contentOffset.x / _itemTotalSize;
+
+
+  })
+
   return (
     <ScrollView>
       {/* Profile Header */}
       <View style={styles.profileContainer}>
-        {/* Profile Image */}
         <View style={styles.profileImageContainer}>
           <Image
             source={require("@/assets/images/profileIcons/profile.jpg")}
@@ -33,63 +119,84 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           />
         </View>
         <View style={styles.infoContainer}>
-        <Text style={styles.profileName}>ojhn silvia</Text>        
-        <View style={styles.user}>
-          <TouchableOpacity style={styles.friend}>
-            <Text style={{ color: Colors.dark }}>Friend</Text>
-          </TouchableOpacity>
-          <View style={styles.friend}>
-            <Text style={{ color: Colors.dark }}>@</Text>
-            <Text style={{ color: Colors.dark }}>{unique_user_ID}</Text>
-
-            </View> 
-            <TouchableOpacity onPress={() => router.push("/(modals)/SavedHalls")} style={styles.friend}>
+          <Text style={styles.profileName}>ojhn silvia</Text>
+          <View style={styles.user}>
+            <TouchableOpacity style={styles.friend}>
+              <Text style={{ color: Colors.dark }}>Friend</Text>
+            </TouchableOpacity>
+            <View style={styles.friend}>
+              <Text style={{ color: Colors.dark }}>@</Text>
+              <Text style={{ color: Colors.dark }}>{unique_user_ID}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push("/(modals)/SavedHalls")}
+              style={styles.friend}
+            >
               <FontAwesome5 name="share-alt" size={20} color={Colors.dark} />
             </TouchableOpacity>
-
-          <TouchableOpacity onPress={copyToClipboard} style={styles.friend}>
+            <TouchableOpacity onPress={copyToClipboard} style={styles.friend}>
               <Ionicons name="copy-outline" size={20} color={Colors.dark} />
             </TouchableOpacity>
-
+          </View>
         </View>
-        </View>
-         
-           
-       
       </View>
 
-      {/* Friends and Followers Section */}
-     
+      {/* Menu Section */}
+      <View style={styles.menuContainer}>
+
+        
+        <Animated.FlatList
+        data = {menu}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <CarouselItem item={item} index={index} scrollX={scrollX} />
+        )}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+
+        onScroll ={onScroll}
+        scrollEventThrottle={1000/60}
+        snapToInterval={_itemSize + _spacing}
+        decelerationRate="fast"
+        contentContainerStyle={{
+          paddingHorizontal: width / 2 - _itemSize / 2,
+         
+         
+          height: 200,
+          gap: _spacing,
+        }}
+        style={{
+          flexGrow: 0,
+          paddingVertical: 20,
+          borderRadius: 20,
+        }}
+        
+          
+        />
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   profileContainer: {
-    flexDirection: "column", // Align text and image horizontally
-    alignItems: "center", // Center the content vertically
-    
-   // Space between the header and the content
+    alignItems: "center",
   },
   infoContainer: {
     flex: 1,
     padding: 10,
     justifyContent: "center",
     alignItems: "center",
-    width: width/1.2,
+    width: width / 1.2,
     backgroundColor: "transparent",
-    height: width/2.5, 
-    
-    
-   
-    marginTop: -width/3,
-     // Move it up to overlap with the image
+    height: width / 2.5,
+    marginTop: -width / 3,
   },
   profileName: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#000",
-    backgroundColor:Colors.light,
+    backgroundColor: Colors.light,
     padding: 10,
     borderRadius: 10,
   },
@@ -101,20 +208,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
     borderWidth: 1,
     borderColor: Colors.primary,
-   
-  },
-  userIdContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
   },
   profileImageContainer: {
-    width: width,  // 30% of screen width
-    height: width , // same as width for a square
-    
+    width: width,
+    height: width,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
@@ -123,8 +222,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primary,
   },
-     // Space between the text and the profile picture
-  
   profileImage: {
     width: "100%",
     height: "100%",
@@ -134,30 +231,55 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    
     width: "100%",
     marginTop: 20,
-
+    flexWrap: "wrap",
+    gap: 10,
   },
-  socialContainer: {
+  menuContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  socialItem: {
     alignItems: "center",
+   
+    marginTop: 40,
+    height: 200,
+  },
+  menuItem: {
+   flex: 1,
+   flexDirection:"column",
     padding: 10,
-    borderRadius: 10,
+    width: _itemSize+10,
+    height: _itemSize+10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 50,
+    
+    backgroundColor: Colors.light,
+    borderWidth: 1,
+   
+   
+   
+  },  
+  categoriesBtn: {
+    backgroundColor: Colors.light,
+   
+    width: 100,
+    height: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 50,
+    marginHorizontal: 5,
+    flexDirection: "row",
   },
-  socialCount: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: Colors.light,
+  categoriesBtnActive: {
+    padding: 10,
+    backgroundColor: Colors.light,
+    borderRadius: 70,
+   
   },
-  socialLabel: {
-    fontSize: 16,
+  titleText: {
     color: Colors.dark,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

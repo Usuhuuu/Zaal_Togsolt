@@ -18,7 +18,7 @@ const categories = [
   {
     name: "Basketball",
     source: require("../assets/sport-icons/basketball.png"),
-    details: { name: "", timesPlayed: 5, goal: 10 },
+    details: { timesPlayed: 5, goal: 10 },
   },
   {
     name: "Volleyball",
@@ -48,9 +48,12 @@ const categories = [
 ];
 
 const ProfileData = () => {
-  const scrollRef = useRef<ScrollView>(null);
-  const itemsRef = useRef<(TouchableOpacity | null)[]>([]);
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+ const menuScrollRef = useRef<ScrollView>(null);
+const categoryScrollRef = useRef<ScrollView>(null);
+const menuItemsRef = useRef<(TouchableOpacity | null)[]>([]);
+const categoryItemsRef = useRef<(TouchableOpacity | null)[]>([]);
+const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
+const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
   const [selectedDetails, setSelectedDetails] = useState<null | {
     timesPlayed: number;
     goal: number;
@@ -58,24 +61,37 @@ const ProfileData = () => {
   const [showDetails, setShowDetails] = useState(false);
   const animatedHeight = useRef(new Animated.Value(0)).current;
 
-  const selectCategory = (index: number) => {
-    const selected = itemsRef.current[index];
-    setActiveIndex(index);
-    setSelectedDetails(categories[index].details);
-    if (selected) {
-      (selected as unknown as View).measure(
-        (_fx, fy, width, height, px, py) => {
-          scrollRef.current?.scrollTo({ x: px - 16, animated: true });
-        }
-      );
-    }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
+  const selectMenu = (index: number) => {
+  const selected = menuItemsRef.current[index];
+  setActiveMenuIndex(index);
+  if (selected) {
+    (selected as unknown as View).measure(
+      (_fx, fy, width, height, px, py) => {
+        menuScrollRef.current?.scrollTo({ x: px - 16, animated: true });
+      }
+    );
+  }
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+};
+
+ const selectCategory = (index: number) => {
+  const selected = categoryItemsRef.current[index];
+  setActiveCategoryIndex(index);
+  setSelectedDetails(categories[index].details);
+  if (selected) {
+    (selected as unknown as View).measure(
+      (_fx, fy, width, height, px, py) => {
+        categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
+      }
+    );
+  }
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+};
 
   const toggleDetails = () => {
     setShowDetails((prev) => !prev);
     Animated.timing(animatedHeight, {
-      toValue: showDetails ? 0 : 200, // Adjust the value to your desired height for showing details
+      toValue: showDetails ? 0 : 200,
       duration: 300,
       useNativeDriver: false,
     }).start();
@@ -90,9 +106,8 @@ const ProfileData = () => {
       name: "Played",
     },
     {
-      population: selectedDetails
-        ? selectedDetails.goal - (selectedDetails.timesPlayed || 0)
-        : 0,
+      population:
+        selectedDetails && selectedDetails.goal - selectedDetails.timesPlayed,
       color: "#ffffff",
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
@@ -108,6 +123,11 @@ const ProfileData = () => {
         end={{ x: 1, y: 1 }}
         style={styles.gradientBackground}
       />
+
+      {/* MENU */}
+
+     
+
       <View style={styles.header}>
         <Text style={styles.activityTitle}>minii amjilt</Text>
         <TouchableOpacity style={styles.goalContainer} onPress={toggleDetails}>
@@ -118,29 +138,31 @@ const ProfileData = () => {
           />
         </TouchableOpacity>
       </View>
+
+      {/* CATEGORIES */}
       <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-      >
-        {categories?.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            ref={(el) => (itemsRef.current[index] = el)}
-            style={
-              activeIndex === index
-                ? styles.categoriesBtnActive
-                : styles.categoriesBtn
-            }
-            onPress={() => selectCategory(index)}
-          >
-            <View style={styles.iconContainer}>
-              <Image source={item.source} style={iconStyles} />
-            </View>
-            <Text style={styles.titleText}>{item.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+  ref={categoryScrollRef}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+>
+  {categories.map((item, index) => (
+    <TouchableOpacity
+      key={index}
+      ref={(el) => (categoryItemsRef.current[index] = el)}
+      style={
+        activeCategoryIndex === index
+          ? styles.categoriesBtnActive
+          : styles.categoriesBtn
+      }
+      onPress={() => selectCategory(index)}
+    >
+      <View style={styles.iconContainer}>
+        <Image source={item.source} style={iconStyles} />
+      </View>
+      <Text style={styles.titleText}>{item.name}</Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
 
       <Animated.View
         style={[styles.detailsContainer, { height: animatedHeight }]}
@@ -154,7 +176,6 @@ const ProfileData = () => {
                 height={150}
                 chartConfig={{
                   color: (opacity = 1) => `rgba(35, 34, 34, ${opacity})`,
-                  style: { borderRadius: 1 },
                   decimalPlaces: 0,
                 }}
                 backgroundColor="transparent"
@@ -163,14 +184,14 @@ const ProfileData = () => {
                 accessor="population"
                 hasLegend={false}
               />
-            </View>
-            <View style={styles.centerOverlay}>
-              <Text style={styles.centerText}>
-                {selectedDetails.timesPlayed} / {selectedDetails.goal}
-              </Text>
+              <View style={styles.centerOverlay}>
+                <Text style={styles.centerText}>
+                  {selectedDetails.timesPlayed} / {selectedDetails.goal}
+                </Text>
+              </View>
             </View>
             <View style={styles.chartLegend}>
-              {doughnutData?.map((data) => (
+              {doughnutData.map((data) => (
                 <View key={data.name} style={styles.legendItem}>
                   <View
                     style={[
@@ -225,6 +246,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
+  
   activityTitle: {
     fontSize: 18,
     fontWeight: "bold",
