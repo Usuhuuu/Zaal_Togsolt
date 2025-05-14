@@ -12,17 +12,13 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
-import {
-  ActiveUserType,
-  newMsjPrepare,
-  prepareMessages,
-} from "@/app/(tabs)/chat";
+import { newMsjPrepare, prepareMessages } from "@/app/(tabs)/chat";
 import { Socket } from "socket.io-client";
 import Colors from "@/constants/Colors";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
-import { Avatar } from "react-native-paper";
-import { format } from "date-fns";
+import { ActivityIndicator, Avatar } from "react-native-paper";
+import { differenceInDays, format } from "date-fns";
 import { connectSocket, getSocket } from "@/hooks/socketConnection";
 import { auth_swr } from "@/hooks/useswr";
 import { useAuth } from "../context/authContext";
@@ -34,6 +30,10 @@ interface Message {
   timestamp: Date;
   showDateSeparator?: boolean;
 }
+type ActiveUserType = {
+  unique_user_ID: string;
+  status: string;
+};
 
 const DirectChatScreen: React.FC = ({}) => {
   const { item } = useLocalSearchParams();
@@ -45,13 +45,9 @@ const DirectChatScreen: React.FC = ({}) => {
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
   const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
-  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
-    new Map()
-  );
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
-  const isMounted = useRef(false);
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
@@ -64,7 +60,9 @@ const DirectChatScreen: React.FC = ({}) => {
     };
 
     const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-    if (!prevMsj) {
+    const diff = differenceInDays(newMessage.timestamp, prevMsj || new Date(0));
+    console.log(diff);
+    if (diff > 0) {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: true,
@@ -73,12 +71,14 @@ const DirectChatScreen: React.FC = ({}) => {
         return [newMsjPrepared, ...prevMsj];
       });
     } else {
-      const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
+      const newMsjPrepared = {
+        ...newMessage,
+        showDateSeparator: false,
+      };
       setMessages((prevMsj: any) => {
         return [newMsjPrepared, ...prevMsj];
       });
     }
-
     socketRef.current.emit("directChatSend", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
@@ -236,14 +236,21 @@ const DirectChatScreen: React.FC = ({}) => {
 
   const width = Dimensions.get("window").width;
   const [menuVisible, setMenuVisible] = React.useState(false);
+
   const initIndividualChat = async () => {
-    if (!socketRef.current?.connected) {
-      await connectSocket();
-    }
     socketRef.current = getSocket();
+    if (!socketRef.current?.connected) {
+      const socket = await connectSocket();
+      if (socket) {
+        socketRef.current = socket;
+      }
+    }
+    setIsitReady(true);
     socketRef.current?.emit("directChatJoin", {
       initFriend: item,
     });
+    setIsitReady(false);
+    socketRef.current?.emit("direct-active-user");
     socketRef.current?.emit(
       "directChatHistory",
       {
@@ -285,238 +292,264 @@ const DirectChatScreen: React.FC = ({}) => {
     initIndividualChat();
   }, [item]);
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log("Emitting direct-active-user");
-      socketRef.current?.emit("direct-active-user");
+  useEffect(() => {
+    if (socketRef.current?.connected) {
+      socketRef.current.on("direct-activity-change", (data) => {
+        setActiveUserData(
+          data
+            .filter(
+              (filterData: any) =>
+                filterData.unique_user_ID === item &&
+                filterData.status === "active"
+            )
+            .map((data: any) => ({
+              unique_user_ID: data.unique_user_ID,
+              status: data.status,
+            }))
+        );
+      });
+    }
+    socketRef.current = getSocket();
 
-      return () => {
-        socketRef.current?.emit("direct-inactive-user");
-      };
-    }, [])
-  );
-  useEffect(() => {
-    if (!socketRef.current) return;
-    socketRef.current?.on("direct-active-user", (data) => {
-      console.log(data);
-      setActiveUserData(
-        data
-          .filter((user: ActiveUserType) => user.status === "active")
-          .map((user: ActiveUserType) => ({
-            unique_user_ID: user.unique_user_ID,
-            status: user.status,
-          }))
-      );
-    });
     return () => {
-      socketRef.current?.off("direct-inactive-user");
+      socketRef.current?.off("direct-activity-change");
     };
-  }, [socketRef.current]);
-  useEffect(() => {
-    console.log(activeUserData);
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={{ backgroundColor: Colors.white }}>
+    <>
+      {isitReady ? (
         <View
-          style={{
-            height: "100%",
-            width: width,
-          }}
+          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottomColor: Colors.lightGrey,
-              borderBottomWidth: 1,
-              maxWidth: "100%",
-              marginHorizontal: 10,
-              height: "10%",
-            }}
-          >
+          <ActivityIndicator size={40} color={Colors.primary} />
+        </View>
+      ) : (
+        <SafeAreaProvider>
+          <SafeAreaView style={{ backgroundColor: Colors.white }}>
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
+                height: "100%",
+                width: width,
               }}
             >
-              <TouchableOpacity
-                onPress={() => {
-                  router.back();
-                }}
-              >
-                <Ionicons
-                  name="arrow-back-sharp"
-                  size={24}
-                  color={Colors.primary}
-                />
-              </TouchableOpacity>
-              <View
-                style={{
-                  flexDirection: "row",
-                  paddingLeft: 10,
-                }}
-              >
-                <Avatar.Image source={{ uri: userDataParsed.userImage }} />
-                <View style={{ gap: 5, alignSelf: "center" }}>
-                  <Text style={{ fontSize: 20, fontWeight: "500" }}>
-                    {userDataParsed.unique_user_ID
-                      ? userDataParsed.unique_user_ID[0].toUpperCase() +
-                        userDataParsed.unique_user_ID.slice(1)
-                      : "Username"}
-                  </Text>
-                  <Text style={{ color: Colors.darkGrey }}>{"offlane"}</Text>
-                </View>
-              </View>
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                setChildModalVisible(true);
-              }}
-            >
-              <Feather name="more-vertical" size={30} color={Colors.primary} />
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderChatItem}
-            keyExtractor={(item) => item.timestamp.toString()}
-            inverted
-            style={[
-              {
-                backgroundColor: Colors.lightGrey,
-                paddingBottom: 40,
-              },
-            ]}
-            onEndReachedThreshold={0.5}
-            onEndReached={() => {
-              if (!loading) {
-                setLoading(true);
-                loadOlderMsj();
-              }
-            }}
-          />
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={100 / 2 + 10}
-          >
-            <View style={[styles.inputContainer]}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setMenuVisible(!menuVisible);
-                  }}
-                  style={{
-                    backgroundColor: Colors.lightGrey,
-                    padding: 7,
-                    borderRadius: 20,
-                  }}
-                >
-                  <AntDesign name="plus" size={24} color={Colors.darkGrey} />
-                </TouchableOpacity>
-                {menuVisible && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      backgroundColor: "white",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.25,
-                      shadowRadius: 4,
-                      elevation: 5,
-                      top: -80,
-                      flex: 1,
-                      left: 0,
-                      right: 0,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      padding: 5,
-                      width: 40,
-                      gap: 10,
-                      borderRadius: 10,
-                    }}
-                  >
-                    <TouchableOpacity onPress={() => console.log("Option 1")}>
-                      <Ionicons
-                        name="camera"
-                        size={24}
-                        color={Colors.primary}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => console.log("Option 2")}>
-                      <Ionicons
-                        name="camera"
-                        size={24}
-                        color={Colors.primary}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.input}>
-                <TextInput
-                  value={newMessage}
-                  onChangeText={(newMsj) => setNewMessage(newMsj)}
-                  maxLength={2000}
-                  style={{ flex: 1 }}
-                  placeholderTextColor={Colors.darkGrey}
-                  clearTextOnFocus={false}
-                  multiline
-                />
-              </View>
-
-              <TouchableOpacity
-                style={styles.sendButton}
-                onPress={() => sendMessage(newMessage)}
-              >
-                <Ionicons name="send" size={32} color={Colors.primary} />
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
-        </View>
-        <Modal
-          animationType="fade"
-          visible={childModalVisible}
-          style={{ zIndex: 2 }}
-        >
-          <SafeAreaProvider style={{ backgroundColor: Colors.white }}>
-            <SafeAreaView style={{ width: width, height: "100%" }}>
               <View
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  paddingHorizontal: 16,
-                  borderBottomColor: "#ddd",
+                  borderBottomColor: Colors.lightGrey,
                   borderBottomWidth: 1,
+                  maxWidth: "100%",
+                  marginHorizontal: 10,
                   height: "10%",
                 }}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    setChildModalVisible(false);
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 5,
                   }}
                 >
-                  <Ionicons
-                    name="arrow-back-sharp"
-                    size={24}
+                  <TouchableOpacity
+                    onPress={() => {
+                      socketRef.current?.emit("direct-inactive-user");
+                      router.back();
+                    }}
+                  >
+                    <Ionicons
+                      name="arrow-back-sharp"
+                      size={24}
+                      color={Colors.primary}
+                    />
+                  </TouchableOpacity>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      paddingLeft: 10,
+                    }}
+                  >
+                    <Avatar.Image source={{ uri: userDataParsed.userImage }} />
+                    <View style={{ gap: 5, alignSelf: "center" }}>
+                      <Text style={{ fontSize: 20, fontWeight: "500" }}>
+                        {typeof item === "string"
+                          ? item.toUpperCase()[0] + item.slice(1)
+                          : ""}
+                      </Text>
+                      <Text
+                        style={{
+                          color:
+                            activeUserData[0]?.status === "active"
+                              ? "green"
+                              : Colors.darkGrey,
+                        }}
+                      >
+                        {activeUserData[0]?.status === "active"
+                          ? "Online"
+                          : "Offline"}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setChildModalVisible(true);
+                  }}
+                >
+                  <Feather
+                    name="more-vertical"
+                    size={30}
                     color={Colors.primary}
                   />
                 </TouchableOpacity>
-                <Text style={{ fontSize: 24, color: Colors.primary }}>
-                  Group Chat Settings
-                </Text>
               </View>
-            </SafeAreaView>
-          </SafeAreaProvider>
-        </Modal>
-      </SafeAreaView>
-    </SafeAreaProvider>
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                renderItem={renderChatItem}
+                keyExtractor={(item) => item.timestamp.toString()}
+                inverted
+                style={[
+                  {
+                    backgroundColor: Colors.lightGrey,
+                    paddingBottom: 40,
+                  },
+                ]}
+                onEndReachedThreshold={0.5}
+                onEndReached={() => {
+                  if (!loading) {
+                    setLoading(true);
+                    loadOlderMsj();
+                  }
+                }}
+              />
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={100 / 2 + 10}
+              >
+                <View style={[styles.inputContainer]}>
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setMenuVisible(!menuVisible);
+                      }}
+                      style={{
+                        backgroundColor: Colors.lightGrey,
+                        padding: 7,
+                        borderRadius: 20,
+                      }}
+                    >
+                      <AntDesign
+                        name="plus"
+                        size={24}
+                        color={Colors.darkGrey}
+                      />
+                    </TouchableOpacity>
+                    {menuVisible && (
+                      <View
+                        style={{
+                          position: "absolute",
+                          backgroundColor: "white",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 4,
+                          elevation: 5,
+                          top: -80,
+                          flex: 1,
+                          left: 0,
+                          right: 0,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          padding: 5,
+                          width: 40,
+                          gap: 10,
+                          borderRadius: 10,
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => console.log("Option 1")}
+                        >
+                          <Ionicons
+                            name="camera"
+                            size={24}
+                            color={Colors.primary}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => console.log("Option 2")}
+                        >
+                          <Ionicons
+                            name="camera"
+                            size={24}
+                            color={Colors.primary}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.input}>
+                    <TextInput
+                      value={newMessage}
+                      onChangeText={(newMsj) => setNewMessage(newMsj)}
+                      maxLength={2000}
+                      style={{ flex: 1 }}
+                      placeholderTextColor={Colors.darkGrey}
+                      clearTextOnFocus={false}
+                      multiline
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.sendButton}
+                    onPress={() => sendMessage(newMessage)}
+                  >
+                    <Ionicons name="send" size={32} color={Colors.primary} />
+                  </TouchableOpacity>
+                </View>
+              </KeyboardAvoidingView>
+            </View>
+            <Modal
+              animationType="fade"
+              visible={childModalVisible}
+              style={{ zIndex: 2 }}
+            >
+              <SafeAreaProvider style={{ backgroundColor: Colors.white }}>
+                <SafeAreaView style={{ width: width, height: "100%" }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      paddingHorizontal: 16,
+                      borderBottomColor: "#ddd",
+                      borderBottomWidth: 1,
+                      height: "10%",
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        setChildModalVisible(false);
+                      }}
+                    >
+                      <Ionicons
+                        name="arrow-back-sharp"
+                        size={24}
+                        color={Colors.primary}
+                      />
+                    </TouchableOpacity>
+                    <Text style={{ fontSize: 24, color: Colors.primary }}>
+                      Group Chat Settings
+                    </Text>
+                  </View>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </Modal>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      )}
+    </>
   );
 };
 

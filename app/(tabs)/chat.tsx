@@ -81,6 +81,7 @@ export const prepareMessages = (messages: Message[]) => {
 
 export const newMsjPrepare = (previewMsj: any, newMsj: any) => {
   const diff = differenceInDays(newMsj.timestamp, previewMsj);
+  console.log(diff);
   if (diff > 0) {
     return {
       ...newMsj,
@@ -109,6 +110,7 @@ const ChatComponent: React.FC = () => {
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
   const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
+  const [fullScreenShow, setFullScreenShow] = useState<boolean>(false);
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
@@ -151,7 +153,6 @@ const ChatComponent: React.FC = () => {
         ...(chatData.chatGroupIDs.chat || []),
         ...(chatData.chatGroupIDs.directChat || []),
       ];
-
       setChatGroups(
         allGroups.map((groupID: any) => {
           const groupChatName = groupID.group_chat_name;
@@ -185,7 +186,6 @@ const ChatComponent: React.FC = () => {
             const otherMember = groupID.members.filter(
               (member: string) => member !== userDatas.unique_user_ID
             );
-            console.log(otherMember);
             return {
               individualChat: groupID._id,
               members: groupID.members,
@@ -202,7 +202,9 @@ const ChatComponent: React.FC = () => {
           };
         })
       );
+      setFullScreenShow(true);
     } else if (chatError) {
+      setFullScreenShow(true);
       console.log("Chat Error:", chatError);
       Sentry.captureException(chatError);
     }
@@ -538,105 +540,117 @@ const ChatComponent: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container]}>
-      {userLoading ? (
-        <View>
-          <ActivityIndicator color={Colors.primary} size={"small"} />
+    <>
+      {!fullScreenShow ? (
+        <View
+          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+        >
+          <ActivityIndicator size={"large"} color={Colors.primary} />
         </View>
       ) : (
-        <View
-          style={{
-            width: width,
-            height: height - bottom,
-          }}
-        >
-          <FlatList
-            data={chatGroups}
-            style={styles.groupItemContainer}
-            renderItem={({ item }) => (
-              <>
-                {item.group_chat_name !== "Direct Chat" && (
-                  <View style={styles.groupItem}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (item.individualChat) {
-                          router.push(`/(modals)/chat/${item.group_chat_name}`);
-                        } else {
-                          joinSpecificChat(item.group_ID ?? "");
-                        }
-                      }}
-                      style={{ flexDirection: "row", padding: 5, gap: 5 }}
-                    >
-                      <Avatar.Image
-                        size={40}
-                        source={require("@/assets/images/sportHall_Icon_full_primary.png")}
-                        theme={{
-                          colors: { primary: Colors.white },
-                        }}
-                      />
-                      <View
-                        style={{
-                          flex: 1,
-                          flexWrap: "wrap",
-                          flexDirection: "row",
-                          gap: 5,
-                        }}
-                      >
-                        {item.sportHallName &&
-                        item.date &&
-                        item.startTime &&
-                        item.endTime ? (
-                          <>
-                            <Text style={{ fontWeight: 600 }}>
-                              {item.sportHallName}
-                            </Text>
-                            <Text style={{ fontWeight: 800 }}>-</Text>
-                            <Text style={{ fontWeight: 300 }}>
-                              {item.date
-                                ? format(new Date(item.date), "MMMM dd")
-                                : ""}
-                            </Text>
-                            <Text>
-                              {item.startTime} - {item.endTime}
-                            </Text>
-                          </>
-                        ) : (
-                          <Text>{item.group_chat_name}</Text>
-                        )}
+        <View style={[styles.container]}>
+          {userLoading ? (
+            <View>
+              <ActivityIndicator color={Colors.primary} size={"small"} />
+            </View>
+          ) : (
+            <View
+              style={{
+                width: width,
+                height: height - bottom,
+              }}
+            >
+              <FlatList
+                data={chatGroups}
+                style={styles.groupItemContainer}
+                renderItem={({ item }) => (
+                  <>
+                    {item.group_chat_name !== "Direct Chat" && (
+                      <View style={styles.groupItem}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            if (item.individualChat) {
+                              router.push(
+                                `/(modals)/chat/${item.group_chat_name}`
+                              );
+                            } else {
+                              joinSpecificChat(item.group_ID ?? "");
+                            }
+                          }}
+                          style={{ flexDirection: "row", padding: 5, gap: 5 }}
+                        >
+                          <Avatar.Image
+                            size={40}
+                            source={require("@/assets/images/sportHall_Icon_full_primary.png")}
+                            theme={{
+                              colors: { primary: Colors.white },
+                            }}
+                          />
+                          <View
+                            style={{
+                              flex: 1,
+                              flexWrap: "wrap",
+                              flexDirection: "row",
+                              gap: 5,
+                            }}
+                          >
+                            {item.sportHallName &&
+                            item.date &&
+                            item.startTime &&
+                            item.endTime ? (
+                              <>
+                                <Text style={{ fontWeight: 600 }}>
+                                  {item.sportHallName}
+                                </Text>
+                                <Text style={{ fontWeight: 800 }}>-</Text>
+                                <Text style={{ fontWeight: 300 }}>
+                                  {item.date
+                                    ? format(new Date(item.date), "MMMM dd")
+                                    : ""}
+                                </Text>
+                                <Text>
+                                  {item.startTime} - {item.endTime}
+                                </Text>
+                              </>
+                            ) : (
+                              <Text>{item.group_chat_name}</Text>
+                            )}
+                          </View>
+                        </TouchableOpacity>
                       </View>
-                    </TouchableOpacity>
-                  </View>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-            keyExtractor={(item) =>
-              item.group_ID ||
-              (item.individualChat ?? JSON.stringify(Math.random()))
-            }
+                keyExtractor={(item) =>
+                  item.group_ID ||
+                  (item.individualChat ?? JSON.stringify(Math.random()))
+                }
+              />
+            </View>
+          )}
+
+          <MainChatModal
+            mainModalShow={mainModalShow}
+            setmainModalShow={setmainModalShow}
+            isitReady={isitReady}
+            setChildModalVisible={setChildModalVisible}
+            childModalVisible={childModalVisible}
+            message={messagesMap}
+            loadOlderMsj={loadOlderMsj}
+            loading={loading}
+            flatListRef={flatListRef}
+            newMessage={newMessage}
+            setNewMessage={setNewMessage}
+            sendMessage={sendMessage}
+            renderChatItem={renderChatItem}
+            memberData={chatGroups}
+            activeUserData={activeUserData}
+            socketRef={socketRef}
+            groupID={currentChatId.current}
           />
         </View>
       )}
-
-      <MainChatModal
-        mainModalShow={mainModalShow}
-        setmainModalShow={setmainModalShow}
-        isitReady={isitReady}
-        setChildModalVisible={setChildModalVisible}
-        childModalVisible={childModalVisible}
-        message={messagesMap}
-        loadOlderMsj={loadOlderMsj}
-        loading={loading}
-        flatListRef={flatListRef}
-        newMessage={newMessage}
-        setNewMessage={setNewMessage}
-        sendMessage={sendMessage}
-        renderChatItem={renderChatItem}
-        memberData={chatGroups}
-        activeUserData={activeUserData}
-        socketRef={socketRef}
-        groupID={currentChatId.current}
-      />
-    </View>
+    </>
   );
 };
 

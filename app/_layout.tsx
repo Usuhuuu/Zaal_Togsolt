@@ -198,7 +198,7 @@ function RootLayoutNav() {
         name="(modals)/chat/[item]"
         options={{
           headerTintColor: Colors.primary,
-
+          animation: "fade",
           headerShown: false,
           headerLeft: () => {
             return (
