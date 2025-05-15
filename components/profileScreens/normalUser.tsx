@@ -83,7 +83,7 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
           unique_user_ID={formData[0].unique_user_ID}
         />
         
-        <ProfileData />
+        
 
         {/* Button to open modal */}
         <View style={styles.saved}>
