@@ -13,7 +13,12 @@ import * as Sentry from "@sentry/react-native";
 import Constants from "expo-constants";
 import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { format, parseISO, differenceInDays } from "date-fns";
+import {
+  format,
+  parseISO,
+  differenceInDays,
+  differenceInMinutes,
+} from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr, regular_swr } from "../../hooks/useswr";
@@ -24,12 +29,16 @@ import { connectSocket, getSocket } from "@/hooks/socketConnection";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
-interface Message {
+export interface Message {
   sender_unique_name: string;
   groupId: string;
   message: string;
   timestamp: Date;
   showDateSeparator?: boolean;
+  showTimeGap?: boolean;
+  no_more_message?: boolean;
+  isLastMessage?: boolean;
+  showAvatar?: boolean;
 }
 export interface GroupChat {
   group_ID?: string | undefined;
@@ -46,9 +55,19 @@ type MessageHistory = {
   nextCursor: Date | null;
   messages: Message[];
   groupId: string;
+  no_more_message: boolean;
 };
-
-export const prepareMessages = (messages: Message[]) => {
+export interface ActiveUserType {
+  unique_user_ID: string;
+  status: string;
+}
+export const prepareMessages = (
+  messages: Message[],
+  cursorValue: Date | null,
+  no_more_message: boolean
+) => {
+  if (messages.length < 20 || cursorValue === null) {
+  }
   const result = [...messages];
   const dateGroups: Record<string, number[]> = {};
 
@@ -60,22 +79,72 @@ export const prepareMessages = (messages: Message[]) => {
   });
 
   const dates = Object.keys(dateGroups);
+  console.log("Odor", dates);
 
   // If there is only 1 date, don't mark anything
-  if (dates.length <= 1) {
-    return result.map((msg) => ({ ...msg, showDateSeparator: false }));
-  }
+  console.log(dates.length, cursorValue, messages.length, no_more_message);
 
   // Otherwise, mark the last message of each day
-  dates.forEach((dateKey) => {
+  dates.forEach((dateKey, i) => {
     const indexes = dateGroups[dateKey];
-    const lastIndex = indexes[indexes.length - 1];
-    result[lastIndex] = {
-      ...result[lastIndex],
-      showDateSeparator: true,
-    };
-  });
+    const isLastDate = i === dates.length - 1;
+    console.log("odor shalgah", isLastDate);
+    let currentMsjIndex: number = indexes[0];
+    let currentMsj: Message = result[currentMsjIndex];
 
+    indexes.forEach((currentIndex, i) => {
+      const tempMsj = result[currentIndex];
+      const nextMsg = result[currentIndex + 1];
+
+      if (!nextMsg) {
+        result[currentIndex] = {
+          ...currentMsj,
+          showTimeGap: false,
+          isLastMessage: true,
+        };
+        return;
+      }
+
+      const diff = differenceInMinutes(
+        parseISO(currentMsj.timestamp.toString()),
+        parseISO(nextMsg.timestamp.toString())
+      );
+
+      const isDifferentUser =
+        currentMsj.sender_unique_name !== nextMsg.sender_unique_name;
+
+      if (diff > 5 || isDifferentUser) {
+        result[currentIndex] = {
+          ...tempMsj,
+          showTimeGap: true,
+        };
+
+        // ✅ Add showAvatar to the previous message
+        result[currentMsjIndex] = {
+          ...result[currentMsjIndex],
+          showAvatar: true,
+        };
+
+        // ✅ Update currentMsj and its index
+        currentMsj = nextMsg;
+        currentMsjIndex = currentIndex + 1;
+      } else {
+        result[currentIndex] = {
+          ...tempMsj,
+          showTimeGap: false,
+        };
+      }
+    });
+    // Add date separator to last message of that day
+    const lastIndex = indexes[indexes.length - 1];
+    console.log("pisda", no_more_message);
+    if (!isLastDate || (isLastDate && no_more_message)) {
+      result[lastIndex] = {
+        ...result[lastIndex],
+        showDateSeparator: true,
+      };
+    }
+  });
   return result;
 };
 
@@ -95,10 +164,113 @@ export const newMsjPrepare = (previewMsj: any, newMsj: any) => {
   }
 };
 
-export interface ActiveUserType {
-  unique_user_ID: string;
-  status: string;
-}
+export const MemoizedChatItem = React.memo(
+  ({ item, userDatas }: { item: Message; userDatas: any }) => {
+    //본인
+    const userSelf: boolean =
+      item.sender_unique_name === userDatas.unique_user_ID;
+    return (
+      <View>
+        {item.showDateSeparator && (
+          <View style={styles.dateSeparator}>
+            <View style={styles.line} />
+            <Text style={styles.dateText}>
+              {format(new Date(item.timestamp), "EEEE MMMM dd")}
+            </Text>
+            <View style={styles.line} />
+          </View>
+        )}
+
+        <View
+          style={[
+            styles.msjContainer,
+            {
+              alignItems: userSelf ? "flex-end" : "flex-start",
+              paddingVertical: !userSelf && !item.showTimeGap ? 2 : 10,
+            },
+          ]}
+        >
+          <View style={{ flexDirection: "row" }}>
+            {/* Show avatar only if NOT userSelf and there's a time gap */}
+            <View style={{ width: 40, marginRight: 6 }}>
+              {!userSelf && item.showAvatar && (
+                <Avatar.Icon size={30} icon={"account"} />
+              )}
+            </View>
+
+            <View>
+              {/* Username – reserve vertical space with margin */}
+              <View
+                style={{
+                  minHeight: item.showTimeGap && !userSelf ? undefined : 0,
+                }}
+              >
+                {!userSelf && item.showTimeGap && (
+                  <Text style={[styles.userNameText, { marginBottom: 4 }]}>
+                    {item.sender_unique_name}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                style={[
+                  styles.msjInside,
+                  userSelf
+                    ? {
+                        borderBottomLeftRadius: 10,
+                        borderBottomRightRadius: 10,
+                        borderTopLeftRadius: 10,
+                        backgroundColor: Colors.primary,
+                        borderColor: Colors.primary,
+                        marginLeft: 50,
+                      }
+                    : {
+                        borderBottomLeftRadius: 10,
+                        borderBottomRightRadius: 10,
+                        borderTopRightRadius: 10,
+                        backgroundColor: Colors.white,
+                        borderColor: Colors.white,
+                        marginRight: 100,
+                      },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.messageText,
+                    {
+                      color: userSelf ? Colors.light : Colors.dark,
+                    },
+                  ]}
+                >
+                  {item.message}
+                </Text>
+              </View>
+
+              {/* Optional timestamp */}
+              {!userSelf && item.showAvatar && (
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: Colors.dark,
+                    fontWeight: "300",
+                    marginTop: 2,
+                    alignSelf: userSelf ? "flex-end" : "flex-start",
+                  }}
+                >
+                  {format(item.timestamp, "hh:mm a")}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  },
+  (prev, next) =>
+    prev.item.message === next.item.message &&
+    prev.item.timestamp === next.item.timestamp
+);
+
 const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -285,13 +457,18 @@ const ChatComponent: React.FC = () => {
       (message: MessageHistory) => {
         setIsitReady(true);
 
-        if (message.nextCursor === null) {
+        if (message.nextCursor === null && message.messages.length === 0) {
+          console.log(message.messages.length);
           setLoading(false);
           setIsitReady(false);
           return;
         }
 
-        const formattedMessages = prepareMessages(message.messages);
+        const formattedMessages = prepareMessages(
+          message.messages,
+          message.nextCursor,
+          message.no_more_message
+        );
 
         saveMessageToMap({
           chat_ID: currentChatId.current,
@@ -379,9 +556,12 @@ const ChatComponent: React.FC = () => {
       message: messageText,
       timestamp: new Date(),
     };
-
+    console.log(messages);
     const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-    if (!prevMsj) {
+    const diff = differenceInDays(newMessage.timestamp, prevMsj || new Date(0));
+    console.log(newMessage.timestamp, prevMsj);
+    console.log("sadasd", diff);
+    if (diff > 0) {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: true,
@@ -392,7 +572,11 @@ const ChatComponent: React.FC = () => {
         newSendedMsj: true,
       });
     } else {
-      const newMsjPrepared = newMsjPrepare(prevMsj, newMessage);
+      const newMsjPrepared = {
+        ...newMessage,
+        showDateSeparator: false,
+      };
+
       saveMessageToMap({
         chat_ID: currentChatId.current,
         messages: [newMsjPrepared],
@@ -410,99 +594,6 @@ const ChatComponent: React.FC = () => {
   const height = Dimensions.get("window").height;
   const width = Dimensions.get("window").width;
   const { bottom } = useSafeAreaInsets();
-
-  const MemoizedChatItem = React.memo(
-    ({ item, userDatas }: { item: Message; userDatas: any }) => {
-      //본인
-      const userSelf: boolean =
-        item.sender_unique_name === userDatas.unique_user_ID;
-      return (
-        <View>
-          {item.showDateSeparator && (
-            <View style={styles.dateSeparator}>
-              <View style={styles.line} />
-              <Text style={styles.dateText}>
-                {format(new Date(item.timestamp), "EEEE MMMM dd")}
-              </Text>
-              <View style={styles.line} />
-            </View>
-          )}
-
-          <View
-            style={[
-              styles.msjContainer,
-              { alignItems: userSelf ? "flex-end" : "flex-start" },
-            ]}
-          >
-            <View style={{ flexDirection: "row" }}>
-              {!userSelf && (
-                <View style={{ marginRight: 6 }}>
-                  <Avatar.Icon size={40} icon={"account"} />
-                </View>
-              )}
-
-              <View>
-                <View>
-                  {!userSelf && (
-                    <Text style={[styles.userNameText, { marginBottom: 4 }]}>
-                      {item.sender_unique_name}
-                    </Text>
-                  )}
-                </View>
-                <View
-                  style={[
-                    styles.msjInside,
-                    userSelf
-                      ? {
-                          borderBottomLeftRadius: 10,
-                          borderBottomRightRadius: 10,
-                          borderTopLeftRadius: 10,
-                          backgroundColor: Colors.primary,
-                          borderColor: Colors.primary,
-                          marginLeft: 50,
-                        }
-                      : {
-                          borderBottomLeftRadius: 10,
-                          borderBottomRightRadius: 10,
-                          borderTopRightRadius: 10,
-                          backgroundColor: Colors.white,
-                          borderColor: Colors.white,
-                          marginRight: 100,
-                        },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.messageText,
-                      {
-                        color: userSelf ? Colors.light : Colors.dark,
-                      },
-                    ]}
-                  >
-                    {item.message}
-                  </Text>
-                </View>
-                <Text
-                  style={{
-                    fontSize: 11,
-                    color: Colors.dark,
-                    fontWeight: "300",
-                    marginTop: 2,
-                    alignSelf: userSelf ? "flex-end" : "flex-start",
-                  }}
-                >
-                  {format(item.timestamp, "hh:mm a")}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      );
-    },
-    (prev, next) =>
-      prev.item.message === next.item.message &&
-      prev.item.timestamp === next.item.timestamp
-  );
 
   const renderChatItem = useCallback(
     ({ item }: { item: Message }) => {
@@ -525,7 +616,11 @@ const ChatComponent: React.FC = () => {
           setLoading(false);
           return;
         }
-        const formattedMessages = prepareMessages(message.messages);
+        const formattedMessages = prepareMessages(
+          message.messages,
+          message.nextCursor,
+          message.no_more_message
+        );
         const pisdaMsj = saveMessageToMap({
           chat_ID: currentChatId.current,
           messages: formattedMessages,
@@ -728,7 +823,6 @@ const styles = StyleSheet.create({
 
   msjContainer: {
     marginHorizontal: 10,
-    paddingVertical: 10,
   },
   msjInside: {
     borderWidth: 1,

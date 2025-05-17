@@ -99,7 +99,11 @@ const DirectChatScreen: React.FC = ({}) => {
         setLoading(false);
         return;
       }
-      const formattedMessages = prepareMessages(message.messages);
+      const formattedMessages = prepareMessages(
+        message.messages,
+        message.nextCursor,
+        message.no_more_message
+      );
       setMessages((prevMessages) => [...prevMessages, ...formattedMessages]);
 
       setCursor(message.nextCursor);
@@ -259,12 +263,23 @@ const DirectChatScreen: React.FC = ({}) => {
       },
       (message: any) => {
         setIsitReady(true);
-        if (message.nextCursor === null) {
+        if (message.nextCursor === null && message.messages.length === 0) {
+          console.log(message.messages.length);
+          console.log("pisda");
           setLoading(false);
           setIsitReady(false);
           return;
         }
-        const formatMessages = prepareMessages(message.messages);
+        console.log(
+          message.messages,
+          message.nextCursor,
+          message.no_more_message
+        );
+        const formatMessages = prepareMessages(
+          message.messages,
+          message.nextCursor,
+          message.no_more_message
+        );
         setMessages((prevMsj: Message[]) => {
           const merged = [...formatMessages, ...prevMsj];
           const seen = new Set();
