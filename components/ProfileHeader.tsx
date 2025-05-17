@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,13 +13,14 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { router } from "expo-router";
 import Colors from "@/constants/Colors";
 import { FlatList } from "react-native-gesture-handler";
-import Animated, { interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, Extrapolate } from "react-native-reanimated";
-import { it } from "node:test";
-
-
-
-
-
+import Animated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  Extrapolate,
+} from "react-native-reanimated";
+import ProfileData from "@/components/profileData";
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -29,51 +30,22 @@ interface ProfileHeaderProps {
 }
 
 const { width } = Dimensions.get("window");
-
-const _itemSize = width / 3.5;
-const _spacing = 12;
+const _itemSize = width / 3;
+const _spacing = 10;
 const _itemTotalSize = _itemSize + _spacing;
 
-
-// Dummy menu items
 const menu = [
-  { name: "Settings",
-  icon: require("@/assets/tab-icons/athlete.png") },
-
-  { name: "Achievements"
-  ,  icon: require("@/assets/tab-icons/athlete.png")
-   },
-  { name: "Rewards"
-  ,  icon: require("@/assets/tab-icons/athlete.png")
-   },
-   
+  { name: "Saved Halls", icon: require("@/assets/tab-icons/athlete.png") },
+  { name: "Achievements", icon: require("@/assets/tab-icons/athlete.png") },
+  { name: "Rewards", icon: require("@/assets/tab-icons/athlete.png") },
 ];
 
-function CarouselItem({ item, index, scrollX }: { item: any; index: number; scrollX: SharedValue<number> }) {
+function CarouselItem({ item, index, scrollX }: { item: any; index: number; scrollX: any }) {
   const animatedStyle = useAnimatedStyle(() => {
-
     const inputRange = [index - 1, index, index + 1];
-
-    const scale = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.8, 1, 0.8],
-      Extrapolate.CLAMP
-    );
-
-    const rotateY = interpolate(
-      scrollX.value,
-      inputRange,
-      [30, 0, -30], // degrees
-      Extrapolate.CLAMP
-    );
-
-    const translateY = interpolate(
-      scrollX.value,
-      inputRange,
-      [20, 0, 20],
-      Extrapolate.CLAMP
-    );
+    const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7], Extrapolate.CLAMP);
+    const rotateY = interpolate(scrollX.value, inputRange, [30, 0, -30], Extrapolate.CLAMP);
+    const translateY = interpolate(scrollX.value, inputRange, [20, 0, 20], Extrapolate.CLAMP);
 
     return {
       transform: [
@@ -84,8 +56,8 @@ function CarouselItem({ item, index, scrollX }: { item: any; index: number; scro
       ],
     };
   });
-  
- return (
+
+  return (
     <Animated.View style={[styles.menuItem, animatedStyle]}>
       <Image source={item.icon} style={{ width: 50, height: 50 }} />
       <Text style={styles.titleText}>{item.name}</Text>
@@ -99,18 +71,32 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   unique_user_ID,
   profileImageUri,
 }) => {
-
+  const flatListRef = useRef<FlatList>(null);
   const scrollX = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler(e => {
-    console.log(scrollX.value);
+  const [selectedItem, setSelectedItem] = useState(menu[1].name); // Default center
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      flatListRef.current?.scrollToOffset({
+        offset: _itemTotalSize * 1,
+        animated: false,
+      });
+      scrollX.value = 1;
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const onScroll = useAnimatedScrollHandler((e) => {
     scrollX.value = e.contentOffset.x / _itemTotalSize;
+  });
 
-
-  })
+  const handleMomentumScrollEnd = (event: any): void => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / _itemTotalSize);
+    setSelectedItem(menu[index]?.name);
+  };
 
   return (
     <ScrollView>
-      {/* Profile Header */}
       <View style={styles.profileContainer}>
         <View style={styles.profileImageContainer}>
           <Image
@@ -119,7 +105,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           />
         </View>
         <View style={styles.infoContainer}>
-          <Text style={styles.profileName}>ojhn silvia</Text>
+          <Text style={styles.profileName}>{firstName}</Text>
           <View style={styles.user}>
             <TouchableOpacity style={styles.friend}>
               <Text style={{ color: Colors.dark }}>Friend</Text>
@@ -141,38 +127,41 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </View>
       </View>
 
-      {/* Menu Section */}
+      {/* Menu Carousel */}
       <View style={styles.menuContainer}>
-
-        
         <Animated.FlatList
-        data = {menu}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <CarouselItem item={item} index={index} scrollX={scrollX} />
-        )}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-
-        onScroll ={onScroll}
-        scrollEventThrottle={1000/60}
-        snapToInterval={_itemSize + _spacing}
-        decelerationRate="fast"
-        contentContainerStyle={{
-          paddingHorizontal: width / 2 - _itemSize / 2,
-         
-         
-          height: 200,
-          gap: _spacing,
-        }}
-        style={{
-          flexGrow: 0,
-          paddingVertical: 20,
-          borderRadius: 20,
-        }}
-        
-          
+          ref={flatListRef}
+          data={menu}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <CarouselItem item={item} index={index} scrollX={scrollX} />
+          )}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          onScroll={onScroll}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          scrollEventThrottle={16}
+          snapToInterval={_itemTotalSize}
+          decelerationRate="fast"
+          contentContainerStyle={{
+            paddingHorizontal: width / 2 - _itemSize / 2,
+            height: 200,
+          }}
+          style={{ flexGrow: 0, paddingVertical: 10 }}
         />
+      </View>
+
+      {/* Dynamic Section */}
+      <View >
+        {selectedItem === "Saved Halls" && (
+          <Text style={styles.dynamicText}>⚙️ Settings content goes here.</Text>
+        )}
+        {selectedItem === "Achievements" && (
+         <ProfileData/>
+        )}
+        {selectedItem === "Rewards" && (
+          <Text style={styles.dynamicText}>🎁 Rewards or statistics shown here.</Text>
+        )}
       </View>
     </ScrollView>
   );
@@ -239,47 +228,41 @@ const styles = StyleSheet.create({
   menuContainer: {
     flexDirection: "row",
     alignItems: "center",
-   
+    backgroundColor: Colors.secondary,
+    borderTopStartRadius: 500,
+    borderBottomEndRadius: 500,
+    borderTopEndRadius: 200,
+    borderBottomStartRadius: 200,
+    borderWidth: 1,
+    borderColor: Colors.primary,
     marginTop: 40,
     height: 200,
   },
   menuItem: {
-   flex: 1,
-   flexDirection:"column",
+    flex: 1,
+    flexDirection: "column",
     padding: 10,
-    width: _itemSize+10,
-    height: _itemSize+10,
+    width: _itemSize + 10,
+    height: _itemSize + 10,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 50,
-    
     backgroundColor: Colors.light,
     borderWidth: 1,
-   
-   
-   
-  },  
-  categoriesBtn: {
-    backgroundColor: Colors.light,
-   
-    width: 100,
-    height: 100,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 50,
-    marginHorizontal: 5,
-    flexDirection: "row",
-  },
-  categoriesBtnActive: {
-    padding: 10,
-    backgroundColor: Colors.light,
-    borderRadius: 70,
-   
   },
   titleText: {
     color: Colors.dark,
     fontSize: 16,
     fontWeight: "600",
+    marginTop: 5,
+  },
+  dynamicText: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: Colors.dark,
+    backgroundColor: Colors.light,
+    padding: 15,
+    borderRadius: 10,
   },
 });
 

@@ -87,6 +87,25 @@ export const TabsLayout = () => {
         name="inbox"
         options={{
           tabBarLabel: t("together"),
+          headerTitle: t("together"),
+          headerTitleStyle: { color: Colors.primary, fontSize: 24 },
+          
+          headerRight: () => {
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/(modals)/createGroup");
+                }}
+                style={{ marginRight: 10 }}
+              >
+                <AntDesign
+                  name="pluscircleo"
+                  size={30}
+                  color={Colors.primary}
+                />
+              </TouchableOpacity>
+            );
+          },
           tabBarIcon: ({ focused }) => (
             <View
               style={{
@@ -315,18 +334,13 @@ const Layout = () => {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = auth_swr(
-    {
-      item: {
-        pathname: "main",
-        cacheKey: "RoleAndProfile_main",
-        loginStatus: LoginStatus,
-      },
+  } = auth_swr({
+    item: {
+      pathname: "main",
+      cacheKey: "RoleAndProfile_main",
+      loginStatus: LoginStatus,
     },
-    {
-      revalidateOnMount: true,
-    }
-  );
+  });
 
   useEffect(() => {
     if (userData) {
