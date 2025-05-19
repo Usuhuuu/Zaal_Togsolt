@@ -12,7 +12,12 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
-import { prepareMessages } from "@/app/(tabs)/chat";
+import {
+  Message,
+  prepareMessages,
+  MemoizedChatItem,
+  newMessagePrepareFunction,
+} from "@/app/(tabs)/chat";
 import { Socket } from "socket.io-client";
 import Colors from "@/constants/Colors";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -23,13 +28,6 @@ import { connectSocket, getSocket } from "@/hooks/socketConnection";
 import { auth_swr } from "@/hooks/useswr";
 import { useAuth } from "../context/authContext";
 
-interface Message {
-  sender_unique_name: string;
-  groupId?: string;
-  message: string;
-  timestamp: Date;
-  showDateSeparator?: boolean;
-}
 type ActiveUserType = {
   unique_user_ID: string;
   status: string;
@@ -45,9 +43,14 @@ const DirectChatScreen: React.FC = ({}) => {
   const [isitReady, setIsitReady] = useState<boolean>(false);
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
   const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
+  const [refreshFlag, setRefreshFlag] = useState<boolean>(false);
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
+  const currentChatId = useRef<string>("");
+  const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
+    new Map()
+  );
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
@@ -59,24 +62,32 @@ const DirectChatScreen: React.FC = ({}) => {
       timestamp: new Date(),
     };
 
-    const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-    const diff = differenceInDays(newMessage.timestamp, prevMsj || new Date(0));
-    console.log(diff);
-    if (diff > 0) {
+    const prevMsj = messagesMap.get(currentChatId.current)?.[0];
+
+    const diff = differenceInDays(
+      newMessage.timestamp,
+      prevMsj?.timestamp || new Date(0)
+    );
+    console.log("Time Difference", diff);
+    if (diff > 0 || diff < 0) {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: true,
       };
-      setMessages((prevMsj: any) => {
-        return [newMsjPrepared, ...prevMsj];
+      saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: [newMsjPrepared],
+        newSendedMsj: true,
       });
     } else {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: false,
       };
-      setMessages((prevMsj: any) => {
-        return [newMsjPrepared, ...prevMsj];
+      saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: [newMsjPrepared],
+        newSendedMsj: true,
       });
     }
     socketRef.current.emit("directChatSend", newMessage);
@@ -135,108 +146,67 @@ const DirectChatScreen: React.FC = ({}) => {
     }
   }, [userData, userError, userLoading]);
 
-  const MemoizedChatItem = React.memo(
-    ({ item, userDatas }: { item: Message; userDatas: any }) => {
-      //본인
-      const userSelf: boolean =
-        item.sender_unique_name === userDatas.unique_user_ID;
-      return (
-        <View style={{ marginHorizontal: 10 }}>
-          {item.showDateSeparator && (
-            <View style={styles.dateSeparator}>
-              <View style={styles.line} />
-              <Text style={styles.dateText}>
-                {format(new Date(item.timestamp), "EEEE MMMM dd")}
-              </Text>
-              <View style={styles.line} />
-            </View>
-          )}
-
-          <View
-            style={[
-              styles.msjContainer,
-              { alignItems: userSelf ? "flex-end" : "flex-start" },
-            ]}
-          >
-            <View style={{ flexDirection: "row" }}>
-              {!userSelf && (
-                <View style={{ marginRight: 6 }}>
-                  <Avatar.Image
-                    size={40}
-                    source={{ uri: userDataParsed.userImage }}
-                  />
-                </View>
-              )}
-
-              <View>
-                <View>
-                  {!userSelf && (
-                    <Text style={[styles.userNameText, { marginBottom: 4 }]}>
-                      {item.sender_unique_name}
-                    </Text>
-                  )}
-                </View>
-                <View
-                  style={[
-                    styles.msjInside,
-                    userSelf
-                      ? {
-                          borderBottomLeftRadius: 10,
-                          borderBottomRightRadius: 10,
-                          borderTopLeftRadius: 10,
-                          backgroundColor: Colors.primary,
-                          borderColor: Colors.primary,
-                          marginLeft: 50,
-                        }
-                      : {
-                          borderBottomLeftRadius: 10,
-                          borderBottomRightRadius: 10,
-                          borderTopRightRadius: 10,
-                          backgroundColor: Colors.white,
-                          borderColor: Colors.white,
-                          marginRight: 100,
-                        },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.messageText,
-                      {
-                        color: userSelf ? Colors.light : Colors.dark,
-                      },
-                    ]}
-                  >
-                    {item.message}
-                  </Text>
-                </View>
-                <Text
-                  style={{
-                    fontSize: 11,
-                    color: Colors.dark,
-                    fontWeight: "300",
-                    marginTop: 2,
-                    alignSelf: userSelf ? "flex-end" : "flex-start",
-                  }}
-                >
-                  {format(item.timestamp, "hh:mm a")}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      );
-    },
-    (prev, next) =>
-      prev.item.message === next.item.message &&
-      prev.item.timestamp === next.item.timestamp
-  );
-
   const renderChatItem = useCallback(
     ({ item }: { item: Message }) => {
       return <MemoizedChatItem item={item} userDatas={userDataParsed} />;
     },
     [userDataParsed]
   );
+
+  const saveMessageToMap = ({
+    chat_ID,
+    messages,
+    newSendedMsj,
+  }: {
+    chat_ID: string;
+    messages: Message[];
+    newSendedMsj: boolean;
+  }) => {
+    setMessagesMap((prevMsj) => {
+      const newMap = new Map(prevMsj);
+      const prev = newMap.get(chat_ID) || [];
+      let existingMessages = [...prev];
+
+      const previewMessage = existingMessages[0];
+
+      if (previewMessage && newSendedMsj) {
+        const newMsj = messages[0];
+        if (previewMessage.sender_unique_name === newMsj.sender_unique_name) {
+          const updatedFirstMessage = {
+            ...previewMessage,
+            showAvatar: !previewMessage.showAvatar,
+          };
+
+          // Create a new array to trigger re-render
+          existingMessages = [
+            updatedFirstMessage,
+            ...existingMessages.slice(1),
+          ];
+
+          messages = [{ ...newMsj, showAvatar: true }];
+          setRefreshFlag((prev) => !prev);
+        } else {
+          messages = [{ ...newMsj, showAvatar: true, showTimeGap: true }];
+          console.log("kakarr");
+        }
+      }
+
+      const combined = !newSendedMsj
+        ? [...existingMessages, ...messages]
+        : [...messages, ...existingMessages];
+
+      const seen = new Set();
+      const unique = combined.filter((msj) => {
+        const key = `${msj.sender_unique_name}-${msj.timestamp}-${msj.message}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      newMap.set(chat_ID, [...unique]);
+      return newMap;
+    });
+  };
 
   const width = Dimensions.get("window").width;
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -250,9 +220,15 @@ const DirectChatScreen: React.FC = ({}) => {
       }
     }
     setIsitReady(true);
-    socketRef.current?.emit("directChatJoin", {
-      initFriend: item,
-    });
+    socketRef.current?.emit(
+      "directChatJoin",
+      {
+        initFriend: item,
+      },
+      (callBackData: any) => {
+        currentChatId.current = callBackData.callBackData;
+      }
+    );
     setIsitReady(false);
     socketRef.current?.emit("direct-active-user");
     socketRef.current?.emit(
@@ -270,36 +246,46 @@ const DirectChatScreen: React.FC = ({}) => {
           setIsitReady(false);
           return;
         }
-        console.log(
-          message.messages,
-          message.nextCursor,
-          message.no_more_message
-        );
+
         const formatMessages = prepareMessages(
           message.messages,
           message.nextCursor,
           message.no_more_message
         );
-        setMessages((prevMsj: Message[]) => {
-          const merged = [...formatMessages, ...prevMsj];
-          const seen = new Set();
-          return merged.filter((item) => {
-            if (seen.has(item.timestamp)) return false;
-            seen.add(item.timestamp);
-            return true;
-          });
+
+        saveMessageToMap({
+          chat_ID: currentChatId.current,
+          messages: formatMessages,
+          newSendedMsj: false,
         });
+
         setCursor(message.nextCursor);
         setIsitReady(false);
       }
     );
     socketRef.current?.on("directMessageReceived", async (data) => {
-      console.log(data);
       if (!socketRef.current?.connected) {
         await connectSocket();
       }
-      setMessages((prevMsj) => {
-        return [data.messages, ...prevMsj];
+      const newMsj: Message = {
+        sender_unique_name: data.sender_unique_name,
+        message: data.message,
+        timestamp: new Date(data.timestamp),
+      };
+      const preparedNewMsj = newMessagePrepareFunction(
+        newMsj,
+        messagesMap,
+        currentChatId
+      );
+
+      saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: preparedNewMsj,
+        newSendedMsj: true,
+      });
+      flatListRef.current?.scrollToIndex({
+        index: 0,
+        animated: true,
       });
     });
   };
@@ -331,6 +317,7 @@ const DirectChatScreen: React.FC = ({}) => {
     };
   }, []);
 
+  const messagesMapData = messagesMap.get(currentChatId.current);
   return (
     <>
       {isitReady ? (
@@ -421,9 +408,11 @@ const DirectChatScreen: React.FC = ({}) => {
               </View>
               <FlatList
                 ref={flatListRef}
-                data={messages}
+                data={messagesMapData}
                 renderItem={renderChatItem}
-                keyExtractor={(item) => item.timestamp.toString()}
+                keyExtractor={(item, index) =>
+                  `${item.timestamp.toString()}-${index}`
+                }
                 inverted
                 style={[
                   {
@@ -438,6 +427,7 @@ const DirectChatScreen: React.FC = ({}) => {
                     loadOlderMsj();
                   }
                 }}
+                extraData={refreshFlag}
               />
               <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}

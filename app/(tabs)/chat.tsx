@@ -31,7 +31,7 @@ const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
 export interface Message {
   sender_unique_name: string;
-  groupId: string;
+  groupId?: string;
   message: string;
   timestamp: Date;
   showDateSeparator?: boolean;
@@ -107,7 +107,7 @@ export const prepareMessages = (
       const isDifferentUser =
         currentMsj.sender_unique_name !== nextMsg.sender_unique_name;
 
-      if (diff > 10 || isDifferentUser) {
+      if (diff > 30 || isDifferentUser) {
         result[currentIndex] = {
           ...tempMsj,
           showTimeGap: true,
@@ -235,6 +235,38 @@ export const MemoizedChatItem = React.memo(
     prev.item.message === next.item.message &&
     prev.item.timestamp === next.item.timestamp
 );
+
+export const newMessagePrepareFunction = (
+  messages: Message,
+  messagesMap: Map<string, Message[]>,
+  currentChatId: React.RefObject<string>
+) => {
+  const existingMessages = currentChatId.current
+    ? messagesMap.get(currentChatId.current)
+    : undefined;
+  const prevMsj = existingMessages?.[0];
+  console.log(existingMessages);
+  console.log("new-msj-prepare", prevMsj);
+  const diff = differenceInDays(
+    parseISO(messages.timestamp.toString()),
+    prevMsj ? parseISO(prevMsj.timestamp.toString()) : new Date()
+  );
+  console.log(diff);
+  if (diff > 0 || diff < 0) {
+    return [
+      {
+        ...messages,
+        showDateSeparator: true,
+      },
+    ];
+  }
+  return [
+    {
+      ...messages,
+      showDateSeparator: false,
+    },
+  ];
+};
 
 const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
@@ -423,30 +455,6 @@ const ChatComponent: React.FC = () => {
       return newMap;
     });
   };
-  const newMessagePrepareFunction = (messages: Message) => {
-    const existingMessages = messagesMap.get(currentChatId.current);
-    const prevMsj = existingMessages?.[0];
-    console.log("new-msj-prepare", prevMsj);
-    const diff = differenceInDays(
-      parseISO(messages.timestamp.toString()),
-      prevMsj ? parseISO(prevMsj.timestamp.toString()) : new Date()
-    );
-    console.log(diff);
-    if (diff > 0 || diff < 0) {
-      return [
-        {
-          ...messages,
-          showDateSeparator: true,
-        },
-      ];
-    }
-    return [
-      {
-        ...messages,
-        showDateSeparator: false,
-      },
-    ];
-  };
 
   const joinSpecificChat = async (groupId: string) => {
     socketRef.current = getSocket();
@@ -512,7 +520,11 @@ const ChatComponent: React.FC = () => {
         message: data.message,
         timestamp: new Date(data.timestamp),
       };
-      const preparedMsj = newMessagePrepareFunction(newMsj);
+      const preparedMsj = newMessagePrepareFunction(
+        newMsj,
+        messagesMap,
+        currentChatId
+      );
 
       saveMessageToMap({
         chat_ID: currentChatId.current,
@@ -578,7 +590,6 @@ const ChatComponent: React.FC = () => {
       newMessage.timestamp,
       prevMsj?.timestamp || new Date(0)
     );
-    console.log(newMessage.timestamp, prevMsj);
     if (diff > 0 || diff < 0) {
       const newMsjPrepared = {
         ...newMessage,
