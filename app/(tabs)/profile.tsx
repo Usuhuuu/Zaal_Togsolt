@@ -24,13 +24,18 @@ const Profile: React.FC = () => {
   const [userRole, setUserRole] = useState<string>("");
   const { LoginStatus } = useAuth();
 
-  const { data, error, isLoading } = auth_swr({
-    item: {
-      pathname: path,
-      cacheKey: `RoleAndProfile_${path}`,
-      loginStatus: LoginStatus,
+  const { data, error, isLoading } = auth_swr(
+    {
+      item: {
+        pathname: path,
+        cacheKey: `RoleAndProfile_${path}`,
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnMount: false,
+    }
+  );
 
   useEffect(() => {
     if (data) {

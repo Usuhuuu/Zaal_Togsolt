@@ -79,16 +79,10 @@ export const prepareMessages = (
   });
 
   const dates = Object.keys(dateGroups);
-  console.log("Odor", dates);
 
-  // If there is only 1 date, don't mark anything
-  console.log(dates.length, cursorValue, messages.length, no_more_message);
-
-  // Otherwise, mark the last message of each day
   dates.forEach((dateKey, i) => {
     const indexes = dateGroups[dateKey];
     const isLastDate = i === dates.length - 1;
-    console.log("odor shalgah", isLastDate);
     let currentMsjIndex: number = indexes[0];
     let currentMsj: Message = result[currentMsjIndex];
 
@@ -113,19 +107,17 @@ export const prepareMessages = (
       const isDifferentUser =
         currentMsj.sender_unique_name !== nextMsg.sender_unique_name;
 
-      if (diff > 5 || isDifferentUser) {
+      if (diff > 10 || isDifferentUser) {
         result[currentIndex] = {
           ...tempMsj,
           showTimeGap: true,
         };
 
-        // ✅ Add showAvatar to the previous message
         result[currentMsjIndex] = {
           ...result[currentMsjIndex],
           showAvatar: true,
         };
 
-        // ✅ Update currentMsj and its index
         currentMsj = nextMsg;
         currentMsjIndex = currentIndex + 1;
       } else {
@@ -135,9 +127,7 @@ export const prepareMessages = (
         };
       }
     });
-    // Add date separator to last message of that day
     const lastIndex = indexes[indexes.length - 1];
-    console.log("pisda", no_more_message);
     if (!isLastDate || (isLastDate && no_more_message)) {
       result[lastIndex] = {
         ...result[lastIndex],
@@ -146,22 +136,6 @@ export const prepareMessages = (
     }
   });
   return result;
-};
-
-export const newMsjPrepare = (previewMsj: any, newMsj: any) => {
-  const diff = differenceInDays(newMsj.timestamp, previewMsj);
-  console.log(diff);
-  if (diff > 0) {
-    return {
-      ...newMsj,
-      showDateSeparator: true,
-    };
-  } else {
-    return {
-      ...newMsj,
-      showDateSeparator: false,
-    };
-  }
 };
 
 export const MemoizedChatItem = React.memo(
@@ -192,25 +166,18 @@ export const MemoizedChatItem = React.memo(
         >
           <View style={{ flexDirection: "row" }}>
             {/* Show avatar only if NOT userSelf and there's a time gap */}
-            <View style={{ width: 40, marginRight: 6 }}>
+            <View style={{ width: 30, marginRight: 6 }}>
               {!userSelf && item.showAvatar && (
                 <Avatar.Icon size={30} icon={"account"} />
               )}
             </View>
 
             <View>
-              {/* Username – reserve vertical space with margin */}
-              <View
-                style={{
-                  minHeight: item.showTimeGap && !userSelf ? undefined : 0,
-                }}
-              >
-                {!userSelf && item.showTimeGap && (
-                  <Text style={[styles.userNameText, { marginBottom: 4 }]}>
-                    {item.sender_unique_name}
-                  </Text>
-                )}
-              </View>
+              {!userSelf && item.showTimeGap && (
+                <Text style={[styles.userNameText, { marginBottom: 4 }]}>
+                  {item.sender_unique_name}
+                </Text>
+              )}
 
               <View
                 style={[
@@ -245,8 +212,6 @@ export const MemoizedChatItem = React.memo(
                   {item.message}
                 </Text>
               </View>
-
-              {/* Optional timestamp */}
               {!userSelf && item.showAvatar && (
                 <Text
                   style={{
@@ -290,6 +255,8 @@ const ChatComponent: React.FC = () => {
   const [messagesMap, setMessagesMap] = useState<Map<string, Message[]>>(
     new Map()
   );
+  const [refreshFlag, setRefreshFlag] = useState(false);
+
   const { t } = useTranslation();
   const { LoginStatus } = useAuth();
 
@@ -297,13 +264,18 @@ const ChatComponent: React.FC = () => {
     data: userData,
     error: userError,
     isLoading: userLoading,
-  } = auth_swr({
-    item: {
-      pathname: "main",
-      cacheKey: "RoleAndProfile_main",
-      loginStatus: LoginStatus,
+  } = auth_swr(
+    {
+      item: {
+        pathname: "main",
+        cacheKey: "RoleAndProfile_main",
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnReconnect: true,
+    }
+  );
 
   const {
     data: chatData,
@@ -407,14 +379,38 @@ const ChatComponent: React.FC = () => {
     newSendedMsj: boolean;
   }) => {
     setMessagesMap((prevMsj) => {
-      const newMap = new Map(prevMsj); // clone existing map
-      const existingMessages = newMap.get(chat_ID) || [];
-      let combined;
-      if (!newSendedMsj) {
-        combined = [...existingMessages, ...messages];
-      } else {
-        combined = [...messages, ...existingMessages];
+      const newMap = new Map(prevMsj);
+      const prev = newMap.get(chat_ID) || [];
+      let existingMessages = [...prev];
+
+      const previewMessage = existingMessages[0];
+
+      if (previewMessage && newSendedMsj) {
+        const newMsj = messages[0];
+        if (previewMessage.sender_unique_name === newMsj.sender_unique_name) {
+          const updatedFirstMessage = {
+            ...previewMessage,
+            showAvatar: !previewMessage.showAvatar,
+          };
+
+          // Create a new array to trigger re-render
+          existingMessages = [
+            updatedFirstMessage,
+            ...existingMessages.slice(1),
+          ];
+
+          messages = [{ ...newMsj, showAvatar: true }];
+          setRefreshFlag((prev) => !prev);
+        } else {
+          messages = [{ ...newMsj, showAvatar: true, showTimeGap: true }];
+          console.log("kakarr");
+        }
       }
+
+      const combined = !newSendedMsj
+        ? [...existingMessages, ...messages]
+        : [...messages, ...existingMessages];
+
       const seen = new Set();
       const unique = combined.filter((msj) => {
         const key = `${msj.sender_unique_name}-${msj.timestamp}-${msj.message}`;
@@ -422,9 +418,34 @@ const ChatComponent: React.FC = () => {
         seen.add(key);
         return true;
       });
-      newMap.set(chat_ID, unique);
-      return newMap; // Return the updated map
+
+      newMap.set(chat_ID, [...unique]);
+      return newMap;
     });
+  };
+  const newMessagePrepareFunction = (messages: Message) => {
+    const existingMessages = messagesMap.get(currentChatId.current);
+    const prevMsj = existingMessages?.[0];
+    console.log("new-msj-prepare", prevMsj);
+    const diff = differenceInDays(
+      parseISO(messages.timestamp.toString()),
+      prevMsj ? parseISO(prevMsj.timestamp.toString()) : new Date()
+    );
+    console.log(diff);
+    if (diff > 0 || diff < 0) {
+      return [
+        {
+          ...messages,
+          showDateSeparator: true,
+        },
+      ];
+    }
+    return [
+      {
+        ...messages,
+        showDateSeparator: false,
+      },
+    ];
   };
 
   const joinSpecificChat = async (groupId: string) => {
@@ -491,13 +512,13 @@ const ChatComponent: React.FC = () => {
         message: data.message,
         timestamp: new Date(data.timestamp),
       };
+      const preparedMsj = newMessagePrepareFunction(newMsj);
 
-      const messageHash = saveMessageToMap({
+      saveMessageToMap({
         chat_ID: currentChatId.current,
-        messages: [newMsj],
+        messages: preparedMsj,
         newSendedMsj: true,
       });
-      console.log(messageHash);
 
       flatListRef.current?.scrollToIndex({
         index: 0,
@@ -505,7 +526,6 @@ const ChatComponent: React.FC = () => {
       });
     });
   };
-
   useFocusEffect(
     useCallback(() => {
       const initSocket = async () => {
@@ -516,16 +536,13 @@ const ChatComponent: React.FC = () => {
       initSocket();
     }, [])
   );
-  const handleSocket = useCallback(() => {
+
+  useEffect(() => {
     if (mainModalShow) {
       socketRef.current?.emit("chat-active");
     } else {
       socketRef.current?.emit("chat-inactive");
     }
-  }, [mainModalShow]);
-
-  useEffect(() => {
-    handleSocket();
   }, [mainModalShow]);
 
   useEffect(() => {
@@ -556,16 +573,19 @@ const ChatComponent: React.FC = () => {
       message: messageText,
       timestamp: new Date(),
     };
-    console.log(messages);
-    const prevMsj = messages.length > 0 ? messages[0].timestamp : null;
-    const diff = differenceInDays(newMessage.timestamp, prevMsj || new Date(0));
+    const prevMsj = messagesMap.get(currentChatId.current)?.[0];
+    const diff = differenceInDays(
+      newMessage.timestamp,
+      prevMsj?.timestamp || new Date(0)
+    );
     console.log(newMessage.timestamp, prevMsj);
-    console.log("sadasd", diff);
-    if (diff > 0) {
+    if (diff > 0 || diff < 0) {
       const newMsjPrepared = {
         ...newMessage,
         showDateSeparator: true,
       };
+      console.log(currentChatId);
+
       saveMessageToMap({
         chat_ID: currentChatId.current,
         messages: [newMsjPrepared],
@@ -742,6 +762,7 @@ const ChatComponent: React.FC = () => {
             activeUserData={activeUserData}
             socketRef={socketRef}
             groupID={currentChatId.current}
+            refreshFlag={refreshFlag}
           />
         </View>
       )}
@@ -794,7 +815,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   userNameText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.primary,
     textShadowColor: Colors.primary,
     textShadowRadius: 0.5,

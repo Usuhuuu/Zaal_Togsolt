@@ -12,7 +12,7 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
-import { newMsjPrepare, prepareMessages } from "@/app/(tabs)/chat";
+import { prepareMessages } from "@/app/(tabs)/chat";
 import { Socket } from "socket.io-client";
 import Colors from "@/constants/Colors";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";

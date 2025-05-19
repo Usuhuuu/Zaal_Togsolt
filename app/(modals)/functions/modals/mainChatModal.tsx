@@ -47,6 +47,7 @@ interface MainChatModalProps {
   activeUserData: ActiveUserType[];
   socketRef: React.RefObject<Socket | null>;
   groupID: string;
+  refreshFlag: boolean;
 }
 
 const MainChatModal: React.FC<MainChatModalProps> = ({
@@ -66,6 +67,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
   memberData,
   activeUserData,
   groupID,
+  refreshFlag,
 }) => {
   const { t } = useTranslation();
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -198,11 +200,12 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 style={[
                   {
                     backgroundColor: Colors.lightGrey,
-                    paddingBottom: 40,
                   },
                 ]}
                 renderItem={renderChatItem}
-                keyExtractor={(item) => item.timestamp.toString()}
+                keyExtractor={(item, index) =>
+                  `${item.timestamp.toString()}-${index}`
+                }
                 inverted={true}
                 onEndReached={loadOlderMsj}
                 onEndReachedThreshold={0.2}
@@ -212,6 +215,7 @@ const MainChatModal: React.FC<MainChatModalProps> = ({
                 maxToRenderPerBatch={20}
                 windowSize={10}
                 removeClippedSubviews={true}
+                extraData={refreshFlag}
               />
               <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}

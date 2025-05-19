@@ -39,13 +39,19 @@ const CustomDrawerContent = (props: any) => {
 
   const router = useRouter();
 
-  const { data, error } = auth_swr({
-    item: {
-      pathname: "main",
-      cacheKey: "RoleAndProfile_main",
-      loginStatus: LoginStatus,
+  const { data, error } = auth_swr(
+    {
+      item: {
+        pathname: "main",
+        cacheKey: "RoleAndProfile_main",
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
+    }
+  );
 
   const handleNotification = async () => {
     let token: string =
