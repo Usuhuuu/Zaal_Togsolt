@@ -166,7 +166,10 @@ function RootLayoutNav() {
         }}
       />
 
-      <Stack.Screen name="listing/[id]" options={{ headerTitle: " " }} />
+      <Stack.Screen
+        name="listing/[sportHallID]"
+        options={{ headerTitle: " " }}
+      />
       <Stack.Screen
         name="(modals)/sags"
         options={{

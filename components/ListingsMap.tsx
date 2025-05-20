@@ -8,27 +8,22 @@ import {
 import React, { memo, useEffect, useState, useCallback } from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { ListingGeo } from "@/interfaces/listingGeo";
+import { SportHallDataType } from "@/interfaces/listing";
 import { useRouter } from "expo-router";
 import MapViewClustering from "react-native-map-clustering";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as SecureStorage from "expo-secure-store";
-interface ListingsMapProps {
-  listings: {
-    features: ListingGeo[];
-  };
-}
 
 const INITIAL_REGION = {
-  latitude: 52.52, // Default latitude (Berlin)
-  longitude: 13.405, // Default longitude (Berlin)
-  latitudeDelta: 0.1, // Adjust for zoom level
+  latitude: 47.918873,
+  longitude: 106.917701,
+  latitudeDelta: 0.1,
   longitudeDelta: 0.1,
 };
 
-const ListingsMap = memo(({ listings }: ListingsMapProps) => {
+const ListingsMap = memo(({ listings }: { listings: SportHallDataType[] }) => {
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
@@ -37,8 +32,8 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
   const router = useRouter();
   const mapRef = React.useRef<MapView | null>(null);
 
-  const onMarkerSelected = (item: ListingGeo) => {
-    router.push(`/listing/${item.properties.id}`);
+  const onMarkerSelected = (item: SportHallDataType) => {
+    router.push(`/listing/${item.sportHallID}`);
   };
 
   const goToUserLocation = () => {
@@ -129,16 +124,16 @@ const ListingsMap = memo(({ listings }: ListingsMapProps) => {
         clusterColor=""
         renderCluster={renderCluster}
       >
-        {listings.features.map((item: ListingGeo) => (
+        {listings.map((item: SportHallDataType) => (
           <Marker
-            key={item.properties.id}
+            key={item.sportHallID}
             onPress={() => onMarkerSelected(item)}
             coordinate={{
-              latitude: parseFloat(item.properties.latitude),
-              longitude: parseFloat(item.properties.longitude),
+              latitude: parseFloat(item.location.latitude),
+              longitude: parseFloat(item.location.longitude),
             }}
-            title={item.properties.name}
-            description={item.properties.summary ?? undefined}
+            title={item.name}
+            //description={item.properties.summary ?? undefined}
           />
         ))}
       </MapViewClustering>

@@ -1,21 +1,15 @@
-import { View, StyleSheet, Dimensions, Platform } from "react-native";
+import { Dimensions } from "react-native";
 import React, { useMemo, useState } from "react";
 import { Stack } from "expo-router";
 import ExploreHeader from "@/components/ExploreHeader";
 import ListingsMap from "@/components/ListingsMap";
-import listingsDataGeo from "@/assets/Data/airbnb-listings.geo (1).json"; // Ensure the filename is correct
-import { ListingGeo } from "@/interfaces/listingGeo";
+import SportHallData from "@/assets/Data/sportHall.json";
 import ListingBottomSheet from "@/components/ListingBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import the root view component
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface FeatureCollection {
-  type: "FeatureCollection";
-  features: ListingGeo[];
-}
-
 const Page = () => {
-  const listingsData = require("@/assets/Data/airbnb-listings.json");
+  const listingsData = require("@/assets/Data/sportHall.json");
   const [category, setCategory] = useState<string>("Sags");
   const items = useMemo(() => listingsData as any[], []);
   const height = Dimensions.get("window").height;
@@ -41,7 +35,15 @@ const Page = () => {
         }}
       />
       {/*<Listing listings={items} category={category} />*/}
-      <ListingsMap listings={listingsDataGeo as FeatureCollection} />
+      <ListingsMap
+        listings={SportHallData.map((item: any) => ({
+          ...item,
+          availableTimeSlots: item.availableTimeSlots.map((slot: any) => ({
+            start_time: slot.start,
+            end_time: slot.end,
+          })),
+        }))}
+      />
       <ListingBottomSheet listing={items} category={category} />
     </GestureHandlerRootView>
   );

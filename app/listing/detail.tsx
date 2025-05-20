@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
+import SportHallData from "@/assets/Data/sportHall.json";
 
 type TimeSlotProps = {
   timeString: string;
@@ -42,33 +43,31 @@ const TimeSlot: React.FC<TimeSlotProps> = React.memo(
   }
 );
 
-type FormData = {
-  zaalId: string;
+export type FormData = {
+  sportHallID: string;
   date: string;
   startTime: string;
   endTime: string;
+};
+type baseTimeSlotType = {
+  start_time: string;
+  end_time: string;
 };
 
 interface OrderScreenProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
+  baseTimeSlot: baseTimeSlotType[];
 }
 
-const OrderScreen: React.FC<OrderScreenProps> = ({ formData, setFormData }) => {
+const OrderScreen: React.FC<OrderScreenProps> = ({
+  formData,
+  setFormData,
+  baseTimeSlot,
+}) => {
   const [today, setToday] = useState<string>(new Date().toISOString());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const baseTimeSlots = [
-    { start_time: "06:00", end_time: "08:00" },
-    { start_time: "08:00", end_time: "10:00" },
-    { start_time: "10:00", end_time: "12:00" },
-    { start_time: "12:00", end_time: "14:00" },
-    { start_time: "14:00", end_time: "16:00" },
-    { start_time: "16:00", end_time: "18:00" },
-    { start_time: "18:00", end_time: "20:00" },
-    { start_time: "20:00", end_time: "22:00" },
-    { start_time: "22:00", end_time: "24:00" },
-  ];
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
   const [zahialgaBtn, setZahialgaBtn] = useState<boolean>(false);
 
@@ -78,7 +77,7 @@ const OrderScreen: React.FC<OrderScreenProps> = ({ formData, setFormData }) => {
       const odor: string = date.toISOString().split("T")[0];
 
       setToday(odor);
-      console.log(formData.zaalId);
+      console.log(formData.sportHallID);
       const tempZaal = "674c9367f5b8455cd83d70c2";
       console.log(tempZaal);
 
@@ -91,7 +90,6 @@ const OrderScreen: React.FC<OrderScreenProps> = ({ formData, setFormData }) => {
       setIsLoading(false);
     }
   };
-
   const handlePressTimeSlot = (timeSlot: any) => {
     console.log(`Time slot pressed: ${timeSlot}`);
     setZahialgaBtn(true);
@@ -129,7 +127,7 @@ const OrderScreen: React.FC<OrderScreenProps> = ({ formData, setFormData }) => {
           />
           <View style={styles.LLR_style}>
             {/* Render available and unavailable time slots */}
-            {baseTimeSlots?.map((timeSlot, index) => {
+            {baseTimeSlot?.map((timeSlot, index) => {
               const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
               const isDisabled = unavailableTimes.some(
                 (time: any) =>

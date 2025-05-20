@@ -312,13 +312,19 @@ const ChatComponent: React.FC = () => {
     data: chatData,
     error: chatError,
     isLoading: chatLoading,
-  } = regular_swr({
-    item: {
-      pathname: "/auth/chatcheck",
-      cacheKey: "group_chat",
-      loginStatus: LoginStatus,
+  } = regular_swr(
+    {
+      item: {
+        pathname: "/auth/chatcheck",
+        cacheKey: "group_chat",
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
+    }
+  );
 
   useEffect(() => {
     if (chatLoading) {
@@ -358,9 +364,10 @@ const ChatComponent: React.FC = () => {
           }
           // Handle direct (individual) chat
           if (groupID.individualChat && Array.isArray(groupID.members)) {
-            const otherMember = groupID.members.filter(
+            const otherMember = groupID.members.find(
               (member: string) => member !== userDatas.unique_user_ID
             );
+            console.log("otherMember", otherMember);
             return {
               individualChat: groupID._id,
               members: groupID.members,

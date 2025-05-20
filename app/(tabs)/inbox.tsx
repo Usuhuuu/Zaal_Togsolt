@@ -7,212 +7,105 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   runOnJS,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Colors from "@/constants/Colors";
+import { SportHallDataType } from "@/interfaces/listing";
+import SportHall from "@/assets/Data/sportHall.json";
 
-
-
-interface SportHallFeature {
-  changingRoom: boolean;
-  shower: boolean;
-  lighting: boolean;
-  spectatorSeats: boolean;
-  parking: boolean;
-  freeWifi: boolean;
-  scoreboard: boolean;
-  speaker: boolean;
-  microphone: boolean;
-  tennis: boolean;
-  billiards: boolean;
-  darts: boolean;
-}
-
-interface SportHallData {
-  sportHallID: string;
-  name: string;
-  address: string;
-  imageUrls: string[];
-  phoneNumber: string;
-  workTime: string;
-  availableTimeSlots: {
-    start: string;
-    end: string;
-  }[];
-  feature: SportHallFeature;
-}
-
-const { width } = Dimensions.get('window');
-const SWIPE_WIDTH = width -90; // 16 padding on each side
+const { width } = Dimensions.get("window");
+const SWIPE_WIDTH = width - 90; // 16 padding on each side
 const BUTTON_WIDTH = 60;
 
-
 const Page = () => {
-  const [sportHalls, setSportHalls] = useState<SportHallData[] | null>(null);
-   const translateX = useSharedValue(0);
-   const isSwiping = useSharedValue(false);
+  const [sportHalls, setSportHalls] = useState<SportHallDataType[] | null>(
+    null
+  );
+  const translateX = useSharedValue(0);
+  const isSwiping = useSharedValue(false);
 
   const handleCompleteSwipe = () => {
-    alert('✅ Booking confirmed!');
+    alert("✅ Booking confirmed!");
   };
 
   const panGesture = Gesture.Pan()
-  .onStart(() => {
-    isSwiping.value = true;
-  })
-  .onUpdate((e) => {
-    if (e.translationX >= 0 && e.translationX <= SWIPE_WIDTH - BUTTON_WIDTH) {
-      translateX.value = e.translationX;
-    }
-  })
-  .onEnd(() => {
-    isSwiping.value = false; 
-    if (translateX.value > SWIPE_WIDTH - BUTTON_WIDTH - 20) {
-      runOnJS(handleCompleteSwipe)();
-    }
-    translateX.value = withSpring(0);
+    .onStart(() => {
+      isSwiping.value = true;
+    })
+    .onUpdate((e) => {
+      if (e.translationX >= 0 && e.translationX <= SWIPE_WIDTH - BUTTON_WIDTH) {
+        translateX.value = e.translationX;
+      }
+    })
+    .onEnd(() => {
+      isSwiping.value = false;
+      if (translateX.value > SWIPE_WIDTH - BUTTON_WIDTH - 20) {
+        runOnJS(handleCompleteSwipe)();
+      }
+      translateX.value = withSpring(0);
+    });
+  const bounceStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withSpring(isSwiping.value ? 1 : 1.2, {
+            damping: 5,
+            stiffness: 100,
+          }),
+        },
+        {
+          translateY: withSpring(isSwiping.value ? 0 : -5, {
+            damping: 5,
+            stiffness: 100,
+          }),
+        },
+      ],
+      color: isSwiping.value ? Colors.primary : Colors.darkGrey,
+    };
   });
- const bounceStyle = useAnimatedStyle(() => {
-
-
-  return {
-    transform: [
-      {
-        scale: withSpring(isSwiping.value ? 1 : 1.2, {
-          damping: 5,
-          stiffness: 100,
-        }),
-      },
-      {
-        translateY: withSpring(isSwiping.value ? 0 : -5, {
-          damping: 5,
-          stiffness: 100,
-        }),
-      },
-    ],
-    color: isSwiping.value ? Colors.primary : Colors.darkGrey,
-  };
-});
-
 
   const railAnimatedStyle = useAnimatedStyle(() => {
-  const progress = translateX.value / (SWIPE_WIDTH - BUTTON_WIDTH); // 0 to 1
-  const startColor = [224, 224, 224]; // #e0e0e0
-  const endColor = [33, 150, 243];   // Colors.primary (blue)
+    const progress = translateX.value / (SWIPE_WIDTH - BUTTON_WIDTH); // 0 to 1
+    const startColor = [224, 224, 224]; // #e0e0e0
+    const endColor = [33, 150, 243]; // Colors.primary (blue)
 
-  const r = startColor[0] + (endColor[0] - startColor[0]) * progress;
-  const g = startColor[1] + (endColor[1] - startColor[1]) * progress;
-  const b = startColor[2] + (endColor[2] - startColor[2]) * progress;
+    const r = startColor[0] + (endColor[0] - startColor[0]) * progress;
+    const g = startColor[1] + (endColor[1] - startColor[1]) * progress;
+    const b = startColor[2] + (endColor[2] - startColor[2]) * progress;
 
-  return {
-   borderColor: `rgb(${r}, ${g}, ${b})`,
-  };
-});
+    return {
+      borderColor: `rgb(${r}, ${g}, ${b})`,
+    };
+  });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
-    backgroundColor: translateX.value > SWIPE_WIDTH - BUTTON_WIDTH - 20 ? Colors.primary : Colors.secondary,
-   
+    backgroundColor:
+      translateX.value > SWIPE_WIDTH - BUTTON_WIDTH - 20
+        ? Colors.primary
+        : Colors.secondary,
+
     borderRadius: 30,
     width: BUTTON_WIDTH,
     height: 60,
-    justifyContent: 'center',
+    justifyContent: "center",
   }));
-
+  //daraa duudan
   useEffect(() => {
-    setSportHalls([
-      {
-        sportHallID: "hall-001",
-        name: "Цагаан Хуаран спорт комплек",
-        address: "Улаанбаатар, БЗД, 26-р хороо",
-        imageUrls: ["https://example.com/tsagaan1.jpg"],
-        phoneNumber: "9999-1111",
-        workTime: "06:00 - 22:00",
-        availableTimeSlots: [
-          { start: "10:00", end: "12:00" },
-          { start: "12:00", end: "14:00" },
-        ],
-        feature: {
-          changingRoom: true,
-          shower: true,
-          lighting: true,
-          spectatorSeats: true,
-          parking: true,
-          freeWifi: true,
-          scoreboard: true,
-          speaker: true,
-          microphone: true,
-          tennis: false,
-          billiards: true,
-          darts: true,
-        },
-      },
-      {
-        sportHallID: "hall-002",
-        name: "MCU Спорт Төв",
-        address: "Улаанбаатар, СБД, 5-р хороо",
-        imageUrls: ["https://example.com/mcu1.jpg"],
-        phoneNumber: "8888-2222",
-        workTime: "07:00 - 23:00",
-        availableTimeSlots: [
-          { start: "09:00", end: "11:00" },
-          { start: "11:00", end: "13:00" },
-        ],
-        feature: {
-          changingRoom: true,
-          shower: false,
-          lighting: true,
-          spectatorSeats: false,
-          parking: true,
-          freeWifi: true,
-          scoreboard: false,
-          speaker: true,
-          microphone: false,
-          tennis: true,
-          billiards: false,
-          darts: false,
-        },
-      },
-      {
-        sportHallID: "hall-003",
-        name: "UG Спорт Заал",
-        address: "Улаанбаатар, ХУД, 15-р хороо",
-        imageUrls: ["https://example.com/ug1.jpg"],
-        phoneNumber: "7777-3333",
-        workTime: "08:00 - 20:00",
-        availableTimeSlots: [
-          { start: "08:00", end: "10:00" },
-          { start: "10:00", end: "12:00" },
-        ],
-        feature: {
-          changingRoom: false,
-          shower: false,
-          lighting: true,
-          spectatorSeats: false,
-          parking: true,
-          freeWifi: false,
-          scoreboard: false,
-          speaker: false,
-          microphone: false,
-          tennis: false,
-          billiards: false,
-          darts: true,
-        },
-      },
-    ]);
+    setSportHalls(SportHall);
   }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-     <Animated.Text style={[styles.swipet, bounceStyle]}>
-  Swipe to find partner
-</Animated.Text>
+      <Animated.Text style={[styles.swipet, bounceStyle]}>
+        Swipe to find partner
+      </Animated.Text>
       <Text style={styles.text}>
         Swipe right to confirm your booking for the selected sport hall.
       </Text>
-     
-    <Animated.View style={[styles.rail, railAnimatedStyle]}>
+
+      <Animated.View style={[styles.rail, railAnimatedStyle]}>
         <GestureDetector gesture={panGesture}>
           <Animated.View style={[styles.swipeButton, animatedStyle]}>
             <Text style={styles.swipeText}>→</Text>
@@ -234,7 +127,7 @@ const Page = () => {
           <Text style={styles.subTitle}>🗓️ Available Time Slots:</Text>
           {item.availableTimeSlots.map((slot, idx) => (
             <Text key={idx} style={styles.text}>
-              {slot.start} - {slot.end}
+              {slot.start_time} - {slot.end_time}
             </Text>
           ))}
 
@@ -243,7 +136,10 @@ const Page = () => {
             {Object.entries(item.feature).map(([key, value]) => (
               <Text
                 key={key}
-                style={[styles.featureItem, { color: value ? "#2e7d32" : "#ccc" }]}
+                style={[
+                  styles.featureItem,
+                  { color: value ? "#2e7d32" : "#ccc" },
+                ]}
               >
                 {value ? `✔️ ${key}` : `❌ ${key}`}
               </Text>
@@ -271,44 +167,42 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
-   rail: {
+  rail: {
     width: SWIPE_WIDTH,
     height: 40,
     marginHorizontal: 30,
     borderRadius: 30,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginTop: 20,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
-
-
+    borderColor: "#e0e0e0",
   },
-  swipet:{
+  swipet: {
     marginTop: 20,
     marginBottom: 20,
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
-   
+
     textAlign: "center",
   },
-   swipeButton: {
+  swipeButton: {
     width: BUTTON_WIDTH,
     height: 40,
     backgroundColor: Colors.primary,
     borderRadius: 30,
     borderWidth: 2,
     borderColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
     zIndex: 1,
   },
   swipeText: {
     fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   image: {
     width: "100%",

@@ -11,7 +11,6 @@ import {
   StyleProp,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { Listing } from "@/interfaces/listing";
 import { MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import {
@@ -19,19 +18,13 @@ import {
   BottomSheetFlatListMethods,
 } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
-import { ViewStyle } from "react-native";
-
-
+import { SportHallDataType } from "@/interfaces/listing";
 
 interface Props {
-  listings: Listing[];
+  listings: SportHallDataType[];
   category: string;
   refresh: number;
 }
-
-
-
-
 
 const ListingComponent = ({ listings: items, category }: Props) => {
   const [loading, setLoading] = useState(false);
@@ -42,9 +35,6 @@ const ListingComponent = ({ listings: items, category }: Props) => {
   const handleCategoryPress = (label: string): void => {
     setSelected(label); // Set selected label
   };
-
-  
-
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
@@ -53,16 +43,22 @@ const ListingComponent = ({ listings: items, category }: Props) => {
   }, [category, items]);
 
   const handlePress = useCallback(
-    (id: string) => {
-      router.push(`/listing/${id}`);
+    (sportHallID: string) => {
+      router.push(`/listing/${sportHallID}`);
     },
     [router]
   );
   const ListingItem = React.memo(
-    ({ item, onPress }: { item: Listing; onPress: (id: string) => void }) => {
+    ({
+      item,
+      onPress,
+    }: {
+      item: SportHallDataType;
+      onPress: (id: string) => void;
+    }) => {
       return (
         <TouchableOpacity
-          onPress={() => onPress(item.id)}
+          onPress={() => onPress(item.sportHallID)}
           style={styles.itemContainer}
         >
           <ImageBackground
@@ -74,9 +70,9 @@ const ListingComponent = ({ listings: items, category }: Props) => {
 
               <View style={styles.ratingContainer}>
                 <MaterialIcons name="sports-score" size={24} color="red" />
-                <Text style={styles.text}>
+                {/* <Text style={styles.text}>
                   {item.review_scores_rating / 20}
-                </Text>
+                </Text> */}
               </View>
 
               <View style={styles.locationContainer}>
@@ -84,8 +80,8 @@ const ListingComponent = ({ listings: items, category }: Props) => {
                   source={require("../assets/images/placeholder.png")}
                   style={styles.placeholderImage}
                 />
-                <Text style={styles.text}>{item.city}</Text>
-                <Text style={styles.text}>{item.neighbourhood}</Text>
+                {/* <Text style={styles.text}>{item.city}</Text>
+                <Text style={styles.text}>{item.neighbourhood}</Text> */}
               </View>
 
               <Text style={styles.text}>${item.price} tugrug</Text>
@@ -104,17 +100,29 @@ const ListingComponent = ({ listings: items, category }: Props) => {
     (prevProps, nextProps) => prevProps.item === nextProps.item
   );
 
-  const renderRow: ListRenderItem<Listing> = useCallback(
+  const renderRow: ListRenderItem<SportHallDataType> = useCallback(
     ({ item }) => <ListingItem item={item} onPress={handlePress} />,
     [handlePress]
   );
 
-  const CategoryButton = ({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) => (
+  const CategoryButton = ({
+    label,
+    selected,
+    onPress,
+  }: {
+    label: string;
+    selected: boolean;
+    onPress: () => void;
+  }) => (
     <TouchableOpacity
       onPress={onPress}
       style={[
         styles.categoryButton,
-        selected && { backgroundColor: Colors.primary, borderRadius: 10, elevation: 5 }, // Selected button styling
+        selected && {
+          backgroundColor: Colors.primary,
+          borderRadius: 10,
+          elevation: 5,
+        }, // Selected button styling
       ]}
     >
       <Text
@@ -127,7 +135,6 @@ const ListingComponent = ({ listings: items, category }: Props) => {
       </Text>
     </TouchableOpacity>
   );
-  
 
   return (
     <LinearGradient
@@ -136,9 +143,6 @@ const ListingComponent = ({ listings: items, category }: Props) => {
       end={[0, 1]}
       style={styles.container}
     >
-     
-
-    
       <View style={styles.categoryContainer}>
         {["ойрхон ", "шилдэг", "зөвлөx"].map((label) => (
           <CategoryButton
@@ -157,7 +161,7 @@ const ListingComponent = ({ listings: items, category }: Props) => {
           ref={listRef}
           data={items}
           renderItem={renderRow}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.sportHallID}
           contentContainerStyle={styles.flatListContent}
           onEndReached={() => console.log("end reached")}
           onEndReachedThreshold={0.1}
@@ -255,6 +259,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
 
 export default ListingComponent;

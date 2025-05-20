@@ -1,0 +1,349 @@
+[
+  {
+    "sportHallID": "1",
+    "name": "Цагаан Хуаран спорт комплекс",
+    "address": "Улаанбаатар, Баянзүрх дүүрэг, 13-р хороолол",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "77112233",
+    "workTime": "08:00-22:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9182",
+      "longitude": "106.9170",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": true,
+      "parking": true,
+      "freeWifi": true,
+      "scoreboard": true,
+      "speaker": true,
+      "microphone": false,
+      "tennis": false,
+      "billiards": false,
+      "darts": true
+    }
+  },
+  {
+    "sportHallID": "2",
+    "name": "MCU спорт комплекс",
+    "address": "Улаанбаатар, Сүхбаатар дүүрэг",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "77223344",
+    "workTime": "09:00-23:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "16:00", "end_time": "18:00" }
+    ],
+    "location": {
+      "latitude": "47.9165",
+      "longitude": "106.9251",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": false,
+      "lighting": true,
+      "spectatorSeats": false,
+      "parking": true,
+      "freeWifi": false,
+      "scoreboard": false,
+      "speaker": true,
+      "microphone": true,
+      "tennis": false,
+      "billiards": true,
+      "darts": false
+    }
+  },
+  {
+    "sportHallID": "3",
+    "name": "UG спорт заал",
+    "address": "Улаанбаатар, Хан-Уул дүүрэг",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "88009900",
+    "workTime": "10:00-20:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.8865",
+      "longitude": "106.8911",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": false,
+      "parking": true,
+      "freeWifi": true,
+      "scoreboard": true,
+      "speaker": false,
+      "microphone": false,
+      "tennis": true,
+      "billiards": false,
+      "darts": false
+    }
+  },
+  {
+    "sportHallID": "4",
+    "name": "Таван Богд Фитнесс",
+    "address": "Улаанбаатар, Сансар",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "99112233",
+    "workTime": "06:00-22:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9311",
+      "longitude": "106.9502",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": true,
+      "parking": true,
+      "freeWifi": false,
+      "scoreboard": false,
+      "speaker": true,
+      "microphone": true,
+      "tennis": false,
+      "billiards": false,
+      "darts": true
+    }
+  },
+  {
+    "sportHallID": "5",
+    "name": "Galaxy спорт төв",
+    "address": "Улаанбаатар, 3,4-р хороолол",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "77445566",
+    "workTime": "07:00-21:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9066",
+      "longitude": "106.8889",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": false,
+      "lighting": true,
+      "spectatorSeats": false,
+      "parking": true,
+      "freeWifi": false,
+      "scoreboard": true,
+      "speaker": true,
+      "microphone": false,
+      "tennis": false,
+      "billiards": true,
+      "darts": true
+    }
+  },
+  {
+    "sportHallID": "6",
+    "name": "Next Step Gym",
+    "address": "Улаанбаатар, Нархан хотхон",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "88990077",
+    "workTime": "08:00-20:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9302",
+      "longitude": "106.9380",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": false,
+      "parking": false,
+      "freeWifi": true,
+      "scoreboard": false,
+      "speaker": false,
+      "microphone": false,
+      "tennis": false,
+      "billiards": false,
+      "darts": false
+    }
+  },
+  {
+    "sportHallID": "7",
+    "name": "Спортын төв ордон",
+    "address": "Улаанбаатар, Чингэлтэй дүүрэг",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "88008800",
+    "workTime": "09:00-21:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9220",
+      "longitude": "106.9155",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": true,
+      "parking": true,
+      "freeWifi": true,
+      "scoreboard": true,
+      "speaker": true,
+      "microphone": true,
+      "tennis": true,
+      "billiards": true,
+      "darts": false
+    }
+  },
+  {
+    "sportHallID": "8",
+    "name": "Аврагч спорт хороо",
+    "address": "Улаанбаатар, Сонгинохайрхан",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "99001122",
+    "workTime": "06:00-22:00",
+    "price":"100",
+   "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9077",
+      "longitude": "106.8503",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": false,
+      "lighting": true,
+      "spectatorSeats": false,
+      "parking": true,
+      "freeWifi": false,
+      "scoreboard": false,
+      "speaker": true,
+      "microphone": false,
+      "tennis": false,
+      "billiards": false,
+      "darts": true
+    }
+  },
+  {
+    "sportHallID": "9",
+    "name": "FitPro Arena",
+    "address": "Улаанбаатар, Зайсан",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "88887766",
+    "workTime": "08:00-22:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.8860",
+      "longitude": "106.9330",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": false,
+      "parking": true,
+      "freeWifi": true,
+      "scoreboard": true,
+      "speaker": true,
+      "microphone": true,
+      "tennis": false,
+      "billiards": true,
+      "darts": false
+    }
+  },
+  {
+    "sportHallID": "10",
+    "name": "Olympic спорт ордон",
+    "address": "Улаанбаатар, Баянгол дүүрэг",
+    "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
+    "phoneNumber": "77220011",
+    "workTime": "07:00-21:00",
+    "price":"100",
+    "availableTimeSlots": [
+      { "start_time": "08:00", "end_time": "10:00" },
+      { "start_time": "10:00", "end_time": "12:00" },
+      { "start_time": "14:00", "end_time": "16:00" },
+      { "start_time": "16:00", "end_time": "18:00" },
+      { "start_time": "18:00", "end_time": "20:00" }
+    ],
+    "location": {
+      "latitude": "47.9135",
+      "longitude": "106.8920",
+      "smart_location": "Ulaanbaatar, Mongolia"
+    },
+    "feature": {
+      "changingRoom": true,
+      "shower": true,
+      "lighting": true,
+      "spectatorSeats": true,
+      "parking": true,
+      "freeWifi": true,
+      "scoreboard": true,
+      "speaker": true,
+      "microphone": true,
+      "tennis": false,
+      "billiards": false,
+      "darts": true
+    }
+  }
+]

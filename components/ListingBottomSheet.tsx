@@ -1,20 +1,13 @@
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Dimensions,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import React, { useMemo, useRef, useState } from "react";
 import Listings from "@/components/Listing";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { Listing } from "@/interfaces/listing";
+import { SportHallDataType } from "@/interfaces/listing";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 
 interface ListingBottomSheetProps {
-  listing: Listing[];
+  listing: SportHallDataType[];
   category: string;
 }
 const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {

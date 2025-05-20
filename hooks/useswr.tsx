@@ -21,8 +21,9 @@ export const regular_swr = (
     isLoading: userLoading,
   } = useSWR(loginStatus ? [cacheKey, loginStatus] : null, {
     fetcher: () => normalFetch(`${pathname}`),
-    revalidateOnFocus: true, //config?.revalidateOnFocus ?? false,
+    revalidateOnFocus: config?.revalidateOnFocus ?? false,
     shouldRetryOnError: true,
+    revalidateOnMount: config?.revalidateOnMount ?? false,
     errorRetryCount: 3,
     ...config,
   });
@@ -47,7 +48,7 @@ export const auth_swr = (
     fetcher: () => fetchRoleAndProfile(`${pathname}`, loginStatus ?? false),
     revalidateOnFocus: config?.revalidateOnFocus ?? false,
     refreshInterval: config?.refreshInterval ?? 60 * 1000,
-    revalidateOnMount: config?.revalidateOnMount ?? false,
+    revalidateOnMount: true, //config?.revalidateOnMount ?? false,
     shouldRetryOnError: false,
     errorRetryInterval: 4000,
     errorRetryCount: 3,

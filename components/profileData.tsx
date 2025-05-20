@@ -48,12 +48,14 @@ const categories = [
 ];
 
 const ProfileData = () => {
- const menuScrollRef = useRef<ScrollView>(null);
-const categoryScrollRef = useRef<ScrollView>(null);
-const menuItemsRef = useRef<(TouchableOpacity | null)[]>([]);
-const categoryItemsRef = useRef<(TouchableOpacity | null)[]>([]);
-const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
-const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
+  const menuScrollRef = useRef<ScrollView>(null);
+  const categoryScrollRef = useRef<ScrollView>(null);
+  const menuItemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
+  const categoryItemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(
+    null
+  );
   const [selectedDetails, setSelectedDetails] = useState<null | {
     timesPlayed: number;
     goal: number;
@@ -62,31 +64,31 @@ const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(nu
   const animatedHeight = useRef(new Animated.Value(0)).current;
 
   const selectMenu = (index: number) => {
-  const selected = menuItemsRef.current[index];
-  setActiveMenuIndex(index);
-  if (selected) {
-    (selected as unknown as View).measure(
-      (_fx, fy, width, height, px, py) => {
-        menuScrollRef.current?.scrollTo({ x: px - 16, animated: true });
-      }
-    );
-  }
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-};
+    const selected = menuItemsRef.current[index];
+    setActiveMenuIndex(index);
+    if (selected) {
+      (selected as unknown as View).measure(
+        (_fx, fy, width, height, px, py) => {
+          menuScrollRef.current?.scrollTo({ x: px - 16, animated: true });
+        }
+      );
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
 
- const selectCategory = (index: number) => {
-  const selected = categoryItemsRef.current[index];
-  setActiveCategoryIndex(index);
-  setSelectedDetails(categories[index].details);
-  if (selected) {
-    (selected as unknown as View).measure(
-      (_fx, fy, width, height, px, py) => {
-        categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
-      }
-    );
-  }
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-};
+  const selectCategory = (index: number) => {
+    const selected = categoryItemsRef.current[index];
+    setActiveCategoryIndex(index);
+    setSelectedDetails(categories[index].details);
+    if (selected) {
+      (selected as unknown as View).measure(
+        (_fx, fy, width, height, px, py) => {
+          categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
+        }
+      );
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
 
   const toggleDetails = () => {
     setShowDetails((prev) => !prev);
@@ -126,8 +128,6 @@ const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(nu
 
       {/* MENU */}
 
-     
-
       <View style={styles.header}>
         <Text style={styles.activityTitle}>minii amjilt</Text>
         <TouchableOpacity style={styles.goalContainer} onPress={toggleDetails}>
@@ -141,28 +141,28 @@ const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(nu
 
       {/* CATEGORIES */}
       <ScrollView
-  ref={categoryScrollRef}
-  horizontal
-  showsHorizontalScrollIndicator={false}
->
-  {categories.map((item, index) => (
-    <TouchableOpacity
-      key={index}
-      ref={(el) => (categoryItemsRef.current[index] = el)}
-      style={
-        activeCategoryIndex === index
-          ? styles.categoriesBtnActive
-          : styles.categoriesBtn
-      }
-      onPress={() => selectCategory(index)}
-    >
-      <View style={styles.iconContainer}>
-        <Image source={item.source} style={iconStyles} />
-      </View>
-      <Text style={styles.titleText}>{item.name}</Text>
-    </TouchableOpacity>
-  ))}
-</ScrollView>
+        ref={categoryScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        {categories.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            ref={(el) => (categoryItemsRef.current[index] = el)}
+            style={
+              activeCategoryIndex === index
+                ? styles.categoriesBtnActive
+                : styles.categoriesBtn
+            }
+            onPress={() => selectCategory(index)}
+          >
+            <View style={styles.iconContainer}>
+              <Image source={item.source} style={iconStyles} />
+            </View>
+            <Text style={styles.titleText}>{item.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       <Animated.View
         style={[styles.detailsContainer, { height: animatedHeight }]}
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  
+
   activityTitle: {
     fontSize: 18,
     fontWeight: "bold",

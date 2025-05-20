@@ -12,8 +12,15 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
-import listingsData from "@/assets/Data/airbnb-listings.json";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import SportHallData from "@/assets/Data/sportHall.json";
+import {
+  AntDesign,
+  FontAwesome,
+  FontAwesome5,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import Animated, {
   SlideInDown,
@@ -26,24 +33,68 @@ import { defaultStyles } from "@/constants/Styles";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSavedHalls } from "../(modals)/context/savedHall";
 import { useRouter } from "expo-router";
-import OrderScreen from "./detail";
+import OrderScreen, { FormData } from "./detail";
+import { SportHallDataType } from "@/interfaces/listing";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
 const bottompadding = width * 0.1;
+
+const featureIcons = {
+  changingRoom: {
+    icon: (
+      <MaterialCommunityIcons name="ceiling-light" size={24} color="black" />
+    ),
+    label: "Хувцас солих өрөө",
+  },
+  shower: {
+    icon: <FontAwesome name="shower" size={24} color="black" />,
+    label: "Душ",
+  },
+  lighting: {
+    icon: (
+      <MaterialCommunityIcons name="ceiling-light" size={24} color="black" />
+    ),
+    label: "Гэрэлтүүлэг",
+  },
+  spectatorSeats: {
+    icon: (
+      <MaterialCommunityIcons name="ceiling-light" size={24} color="black" />
+    ),
+    label: "Үзэгчдийн суудал",
+  },
+  parking: {
+    icon: <FontAwesome5 name="parking" size={24} color="black" />,
+    label: "Зогсоол",
+  },
+  freeWifi: {
+    icon: <AntDesign name="wifi" size={24} color="black" />,
+    label: "Free WiFi",
+  },
+  scoreboard: {
+    icon: (
+      <MaterialCommunityIcons name="ceiling-light" size={24} color="black" />
+    ),
+    label: "Онооны самбар",
+  },
+  speaker: {
+    icon: <FontAwesome name="volume-up" size={24} color="black" />,
+    label: "Чанга яригч",
+  },
+  microphone: {
+    icon: <FontAwesome name="microphone" size={24} color="black" />,
+    label: "Микрофон",
+  },
+  // tennis: { icon: "tennis-ball", label: "Теннис" },
+  // billiards: { icon: "circle", label: "Билльярд" },
+  // darts: { icon: "target", label: "Дартс" },
+};
 
 const ScheduleScreen = () => (
   <View style={styles.modalContent}>
     <Text>This is the schedule screen!</Text>
   </View>
 );
-
-type FormData = {
-  zaalId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-};
 
 const DetailsPage = () => {
   const [isScheduleVisible, setIsScheduleVisible] = useState<boolean>(false);
@@ -53,27 +104,29 @@ const DetailsPage = () => {
   const [iconsOverflow, setIconsOverflow] = useState<boolean>(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const [formData, setFormData] = useState<FormData>({
-    zaalId: "",
+    sportHallID: "",
     date: "",
     startTime: "",
     endTime: "",
   });
+
   const router = useRouter();
   const { addHall } = useSavedHalls();
 
   const handleSave = () => {
-    if (!listing) {
-      alert("Listing data is unavailable");
-      return;
+    if (listing?.sportHallID && listing?.name) {
+      const hall = { id: listing.sportHallID, name: listing.name };
+      addHall(hall);
+      Alert.alert("Hall saved!");
+    } else {
+      Alert.alert("Unable to save hall: missing information.");
     }
-
-    const hall = { id: listing.id, name: listing.name };
-    addHall(hall);
-    Alert.alert("Hall saved!");
   };
 
-  const { id } = useLocalSearchParams();
-  const listing = (listingsData as any[]).find((item) => item.id == id);
+  const { sportHallID } = useLocalSearchParams();
+  const listing = (SportHallData as SportHallDataType[]).find(
+    (item) => item.sportHallID == sportHallID
+  );
   const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
@@ -87,8 +140,11 @@ const DetailsPage = () => {
   const shareListing = async () => {
     try {
       await Share.share({
-        title: listing.name,
-        url: listing.listing_url,
+        title: listing?.name,
+        url: listing?.listing_url,
+        message: `${listing?.name ?? "Check out this listing!"} ${
+          listing?.listing_url ?? ""
+        }`,
       });
     } catch (err) {
       console.log(err);
@@ -96,9 +152,9 @@ const DetailsPage = () => {
   };
 
   const handleViewReviews = () => {
-    router.push(
-      `/listing/ZaalReview?reviews=${listing.number_of_reviews}&rating=${listing.review_scores_rating}`
-    );
+    // router.push(
+    //   `/listing/ZaalReview?reviews=${listing.number_of_reviews}&rating=${listing.review_scores_rating}`
+    // );
   };
 
   useLayoutEffect(() => {
@@ -178,8 +234,8 @@ const DetailsPage = () => {
   };
 
   useEffect(() => {
-    handleZaalId(id);
-  }, [id]);
+    handleZaalId(sportHallID);
+  }, [sportHallID]);
 
   return (
     <View style={styles.container}>
@@ -190,11 +246,15 @@ const DetailsPage = () => {
         onScroll={handleScroll}
       >
         <Animated.Image
-          source={{ uri: listing.xl_picture_url }}
+          source={{
+            uri: Array.isArray(listing?.imageUrls)
+              ? listing.imageUrls[0]
+              : listing?.imageUrls,
+          }}
           style={[styles.image, imageAnimatedStyle]}
           resizeMode="cover"
         />
-        <Text>{listing.id}</Text>
+        <Text>{listing?.sportHallID}</Text>
         <View
           onLayout={(event) => {
             const { height } = event.nativeEvent.layout;
@@ -227,7 +287,7 @@ const DetailsPage = () => {
               alignItems: "center",
             }}
           >
-            <Text style={styles.name}>{listing.name}</Text>
+            <Text style={styles.name}>{listing?.name}</Text>
             <TouchableOpacity style={styles.hostView}>
               <ImageBackground
                 source={require("@/assets/images/listingicons/map.png")}
@@ -267,7 +327,9 @@ const DetailsPage = () => {
                 source={require("@/assets/images/placeholder.png")}
                 style={styles.placeholderImage}
               />
-              <Text style={{ fontSize: 12 }}>{listing.smart_location}</Text>
+              <Text style={{ fontSize: 12 }}>
+                {listing?.location.smart_location}
+              </Text>
             </View>
 
             {/* Rating container */}
@@ -292,11 +354,13 @@ const DetailsPage = () => {
               >
                 <MaterialIcons name="sports-score" size={18} color="red" />
                 <Text style={{ fontSize: 12 }}>
-                  {listing.review_scores_rating / 20}
+                  {/* {listing.review_scores_rating / 20} */}
+                  review oruulan sda
                 </Text>
                 <TouchableOpacity onPress={handleViewReviews}>
                   <Text style={styles.ratings}>
-                    {listing.number_of_reviews} reviews
+                    {/* {listing.number_of_reviews} reviews */}
+                    total review sda
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -323,24 +387,18 @@ const DetailsPage = () => {
                 }}
               >
                 {/* Icons */}
-                <MaterialIcons name="sports-soccer" size={18} color="black" />
-                <MaterialIcons name="sports-tennis" size={18} color="black" />
-                <MaterialIcons
-                  name="sports-volleyball"
-                  size={18}
-                  color="black"
-                />
-                <MaterialIcons
-                  name="sports-basketball"
-                  size={18}
-                  color="black"
-                />
-                <MaterialIcons name="sports-golf" size={18} color="black" />
+                {Object.entries(featureIcons).map(([key, { icon, label }]) => (
+                  <View key={key}>{icon}</View>
+                ))}
               </View>
             </View>
           </View>
-
-          <Text style={styles.description}>{listing.description}</Text>
+          {/* Description data like address hereggui ymnud lalar */}
+          <View>
+            <Text style={styles.description}>{listing?.address}</Text>
+            <Text>{listing?.phoneNumber}</Text>
+            <Text>{listing?.workTime}</Text>
+          </View>
         </View>
       </Animated.ScrollView>
 
@@ -357,7 +415,7 @@ const DetailsPage = () => {
           }}
         >
           <TouchableOpacity style={styles.footerText}>
-            <Text style={styles.footerPrice}>€{listing.price}</Text>
+            <Text style={styles.footerPrice}>€{listing?.price}</Text>
             <Text>/1 tsag</Text>
           </TouchableOpacity>
 
@@ -407,7 +465,24 @@ const DetailsPage = () => {
             <TouchableOpacity onPress={() => setIsOrderScreenVisible(false)}>
               <Ionicons name="close" size={24} color={Colors.grey} />
             </TouchableOpacity>
-            <OrderScreen formData={formData} setFormData={setFormData} />
+            <OrderScreen
+              formData={formData}
+              setFormData={setFormData}
+              baseTimeSlot={
+                Array.isArray(listing?.availableTimeSlots)
+                  ? listing.availableTimeSlots
+                      .filter(
+                        (slot) =>
+                          typeof slot.start_time === "string" &&
+                          typeof slot.end_time === "string"
+                      )
+                      .map((slot) => ({
+                        start_time: slot.start_time as string,
+                        end_time: slot.end_time as string,
+                      }))
+                  : []
+              }
+            />
           </View>
         </View>
       </Modal>
