@@ -468,6 +468,7 @@ const DetailsPage = () => {
             <OrderScreen
               formData={formData}
               setFormData={setFormData}
+              sportHallID={listing?.sportHallID ?? ""}
               baseTimeSlot={
                 Array.isArray(listing?.availableTimeSlots)
                   ? listing.availableTimeSlots

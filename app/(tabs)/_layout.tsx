@@ -29,6 +29,7 @@ import ProfileSettings from "../settings/profileSettings";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
 import FriendReqModal from "../(modals)/friendReqModal";
+import RegisterZaal from "@/components/profileScreens/contractorScreen/register_zaal";
 // Create a Drawer Navigator
 export const TabsLayout = () => {
   const { t } = useTranslation();
@@ -326,6 +327,11 @@ const Layout = () => {
         name: contractorDrawerLng.settings,
         component: ProfileSettings,
         icon: "settings",
+      },
+      {
+        name: "Register Sport Hall",
+        component: RegisterZaal,
+        icon: "add",
       },
     ],
   };

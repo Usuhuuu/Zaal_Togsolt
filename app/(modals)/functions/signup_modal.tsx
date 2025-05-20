@@ -19,7 +19,6 @@ import {
 import { useAuth } from "../context/authContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { ScrollView } from "react-native-gesture-handler";
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as SecureStore from "expo-secure-store";
 import { Avatar, Badge, TextInput } from "react-native-paper";

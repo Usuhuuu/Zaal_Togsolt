@@ -12,10 +12,6 @@ interface SportHallFeature {
   billiards: boolean;
   darts: boolean;
 }
-interface SportHallLocation {
-  latitude: string;
-  longitude: string;
-}
 
 export interface SportHallDataType {
   sportHallID: string;

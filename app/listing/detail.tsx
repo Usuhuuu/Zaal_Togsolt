@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
-import SportHallData from "@/assets/Data/sportHall.json";
 
 type TimeSlotProps = {
   timeString: string;
@@ -58,12 +57,14 @@ interface OrderScreenProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
   baseTimeSlot: baseTimeSlotType[];
+  sportHallID: string;
 }
 
 const OrderScreen: React.FC<OrderScreenProps> = ({
   formData,
   setFormData,
   baseTimeSlot,
+  sportHallID,
 }) => {
   const [today, setToday] = useState<string>(new Date().toISOString());
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -90,6 +91,7 @@ const OrderScreen: React.FC<OrderScreenProps> = ({
       setIsLoading(false);
     }
   };
+  console.log(sportHallID);
   const handlePressTimeSlot = (timeSlot: any) => {
     console.log(`Time slot pressed: ${timeSlot}`);
     setZahialgaBtn(true);
