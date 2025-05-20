@@ -48,7 +48,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",

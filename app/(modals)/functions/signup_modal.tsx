@@ -22,10 +22,9 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { ScrollView } from "react-native-gesture-handler";
 import { axiosInstanceRegular } from "./axiosInstance";
 import * as SecureStore from "expo-secure-store";
-import { Avatar, TextInput } from "react-native-paper";
+import { Avatar, Badge, TextInput } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 import StepIndicator from "react-native-step-indicator";
-
 type LoginInput = {
   userName: string;
   firstName: string;
@@ -273,7 +272,10 @@ const SignupModal = ({
                   },
                   {
                     text: "Yes",
-                    onPress: () => setModalVisible(false),
+                    onPress: () => {
+                      setModalVisible(false);
+                      setSteps(0);
+                    },
                   },
                 ]);
               }}
@@ -287,14 +289,13 @@ const SignupModal = ({
 
         <View
           style={{
-            flex: 1,
-            alignItems: "center",
+            height: "20%",
           }}
         >
           <View style={styles.IndicatorContainer}>
             <StepIndicator
               customStyles={customStyles}
-              currentPosition={currentPosition} // convert 1-based to 0-based
+              currentPosition={steps} // convert 1-based to 0-based
               labels={labels}
             />
           </View>
@@ -318,6 +319,9 @@ const SignupModal = ({
               theme={{
                 colors: {
                   primary: Colors.primary,
+                  outline: Colors.darkGrey,
+                  placeholder: Colors.darkGrey,
+                  background: Colors.white,
                 },
               }}
             />
@@ -337,6 +341,9 @@ const SignupModal = ({
               theme={{
                 colors: {
                   primary: Colors.primary,
+                  outline: Colors.darkGrey,
+                  placeholder: Colors.darkGrey,
+                  background: Colors.white,
                 },
               }}
             />
@@ -346,7 +353,6 @@ const SignupModal = ({
                 onPress={() => {
                   setSteps(steps + 1);
                   fadeInStep();
-                  nextStep();
                 }}
               >
                 <Text style={styles.modalButtonText}>Next</Text>
@@ -373,6 +379,9 @@ const SignupModal = ({
               theme={{
                 colors: {
                   primary: Colors.primary,
+                  outline: Colors.darkGrey,
+                  placeholder: Colors.darkGrey,
+                  background: Colors.white,
                 },
               }}
             />
@@ -382,7 +391,6 @@ const SignupModal = ({
                 onPress={() => {
                   setSteps(steps - 1);
                   fadeInStep();
-                  previousStep();
                 }}
               >
                 <Text style={styles.modalButtonText}>Preview</Text>
@@ -391,7 +399,6 @@ const SignupModal = ({
                 style={styles.modalNextButton}
                 onPress={() => {
                   fadeInStep();
-
                   setSteps(steps + 1);
                 }}
               >
@@ -419,6 +426,9 @@ const SignupModal = ({
               theme={{
                 colors: {
                   primary: Colors.primary,
+                  outline: Colors.darkGrey,
+                  placeholder: Colors.darkGrey,
+                  background: Colors.white,
                 },
               }}
             />
@@ -476,29 +486,32 @@ const SignupModal = ({
             style={[styles.modalInputContainer, { opacity: fadeAnim }]}
           >
             <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <TouchableOpacity
-                onPress={() => {
-                  launchImageLibrary(
-                    { mediaType: "photo", includeBase64: true },
-                    (response) => {
-                      if (response.assets && response.assets[0].uri) {
-                        setImageUrl(response.assets[0].uri);
-                      } else {
-                        console.warn("No image selected or invalid response");
+              <View style={{}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    launchImageLibrary(
+                      { mediaType: "photo", includeBase64: true },
+                      (response) => {
+                        if (response.assets && response.assets[0].uri) {
+                          setImageUrl(response.assets[0].uri);
+                        } else {
+                          console.warn("No image selected or invalid response");
+                        }
                       }
+                    );
+                  }}
+                  style={{}}
+                >
+                  <Avatar.Image
+                    source={
+                      imageUrl
+                        ? { uri: imageUrl }
+                        : require("@/assets/images/profileIcons/profile.png")
                     }
-                  );
-                }}
-              >
-                <Avatar.Image
-                  source={
-                    imageUrl
-                      ? { uri: imageUrl }
-                      : require("@/assets/images/profileIcons/profile.png")
-                  }
-                  size={100}
-                />
-              </TouchableOpacity>
+                    size={100}
+                  />
+                </TouchableOpacity>
+              </View>
               <View style={styles.modalButtonContainer}>
                 <TouchableOpacity
                   style={styles.modalNextButton}
@@ -530,23 +543,24 @@ const SignupModal = ({
           <Animated.View
             style={[styles.modalInputContainer, { opacity: fadeAnim, flex: 1 }]}
           >
-            <ScrollView>
-              {Object.entries(formData).map(([fields, value]) => (
-                <View key={fields} style={styles.modalInputContainer}>
-                  <Text>{fields}</Text>
-                  <TextInput
-                    value={value}
-                    mode="outlined"
-                    style={styles.modalInput}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary,
-                      },
-                    }}
-                  />
-                </View>
-              ))}
-            </ScrollView>
+            {Object.entries(formData).map(([fields, value]) => (
+              <View key={fields} style={styles.modalInputContainer}>
+                <Text>{fields}</Text>
+                <TextInput
+                  value={value}
+                  mode="outlined"
+                  style={styles.modalInput}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary,
+                      outline: Colors.darkGrey,
+                      placeholder: Colors.darkGrey,
+                      background: Colors.white,
+                    },
+                  }}
+                />
+              </View>
+            ))}
             <TouchableOpacity
               onPress={() => {
                 handleSubmit();

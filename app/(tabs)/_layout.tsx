@@ -89,12 +89,12 @@ export const TabsLayout = () => {
           tabBarLabel: t("together"),
           headerTitle: t("together"),
           headerTitleStyle: { color: Colors.primary, fontSize: 24 },
-          
+
           headerRight: () => {
             return (
               <TouchableOpacity
                 onPress={() => {
-                  router.push("/(modals)/createGroup");
+                  //router.push("/(modals)/createGroup");
                 }}
                 style={{ marginRight: 10 }}
               >

@@ -160,7 +160,7 @@ export const MemoizedChatItem = React.memo(
             styles.msjContainer,
             {
               alignItems: userSelf ? "flex-end" : "flex-start",
-              paddingVertical: !userSelf && !item.showTimeGap ? 2 : 10,
+              paddingVertical: 3,
             },
           ]}
         >
@@ -270,7 +270,6 @@ export const newMessagePrepareFunction = (
 
 const ChatComponent: React.FC = () => {
   const [chatGroups, setChatGroups] = useState<GroupChat[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [mainModalShow, setmainModalShow] = useState<boolean>(false);
   const [userDatas, setUserDatas] = useState<any>([]);
@@ -468,13 +467,8 @@ const ChatComponent: React.FC = () => {
       return;
     }
 
-    setMessages([]);
-
-    if ((socketRef as any).currentGroupId) {
-      socketRef.current?.emit(
-        "leave_group",
-        ((socketRef.current as any).currentGroupId = groupId)
-      );
+    if (currentChatId.current) {
+      socketRef.current?.emit("leave_group", currentChatId.current);
     }
 
     socketRef.current?.emit("joinGroup", { item: groupId });
@@ -538,6 +532,7 @@ const ChatComponent: React.FC = () => {
       });
     });
   };
+
   useFocusEffect(
     useCallback(() => {
       const initSocket = async () => {
@@ -546,6 +541,11 @@ const ChatComponent: React.FC = () => {
         socketRef.current = socket;
       };
       initSocket();
+
+      return () => {
+        socketRef.current?.off("receiveMessage");
+        socketRef.current?.emit("leave_group", currentChatId.current);
+      };
     }, [])
   );
 
@@ -614,7 +614,7 @@ const ChatComponent: React.FC = () => {
         newSendedMsj: true,
       });
     }
-    console.log(newMessage);
+    setNewMessage("");
     socketRef.current.emit("sendMessage", newMessage);
     flatListRef.current?.scrollToIndex({
       index: 0,
@@ -652,12 +652,11 @@ const ChatComponent: React.FC = () => {
           message.nextCursor,
           message.no_more_message
         );
-        const pisdaMsj = saveMessageToMap({
+        saveMessageToMap({
           chat_ID: currentChatId.current,
           messages: formattedMessages,
           newSendedMsj: false,
         });
-        console.log(pisdaMsj);
 
         setCursor(message.nextCursor);
         setLoading(false);
@@ -822,7 +821,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   messageContainer: {
-    marginVertical: 3,
     width: "100%",
   },
   userNameText: {
@@ -834,7 +832,6 @@ const styles = StyleSheet.create({
   messageText: {
     padding: 5,
     fontSize: 18,
-    marginRight: 0,
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",

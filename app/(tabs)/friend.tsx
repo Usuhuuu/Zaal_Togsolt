@@ -125,7 +125,6 @@ const FriendRequest = () => {
       },
     },
     {
-      revalidateOnFocus: true,
       revalidateOnMount: true,
       refreshInterval: 60 * 1000,
     }

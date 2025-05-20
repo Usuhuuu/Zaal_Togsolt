@@ -35,7 +35,6 @@ type ActiveUserType = {
 
 const DirectChatScreen: React.FC = ({}) => {
   const { item } = useLocalSearchParams();
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [userDataParsed, setuserDataParsed] = useState<any>([]);
   const [cursor, setCursor] = useState(null);
@@ -91,6 +90,7 @@ const DirectChatScreen: React.FC = ({}) => {
       });
     }
     socketRef.current.emit("directChatSend", newMessage);
+    setNewMessage("");
     flatListRef.current?.scrollToIndex({
       index: 0,
       animated: true,
@@ -115,8 +115,11 @@ const DirectChatScreen: React.FC = ({}) => {
         message.nextCursor,
         message.no_more_message
       );
-      setMessages((prevMessages) => [...prevMessages, ...formattedMessages]);
-
+      saveMessageToMap({
+        chat_ID: currentChatId.current,
+        messages: formattedMessages,
+        newSendedMsj: false,
+      });
       setCursor(message.nextCursor);
       setLoading(false);
     });
