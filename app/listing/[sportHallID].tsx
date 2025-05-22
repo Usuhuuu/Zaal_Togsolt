@@ -35,6 +35,7 @@ import { useSavedHalls } from "../(modals)/context/savedHall";
 import { useRouter } from "expo-router";
 import OrderScreen, { FormData } from "./detail";
 import { SportHallDataType } from "@/interfaces/listing";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -90,6 +91,8 @@ const featureIcons = {
   // darts: { icon: "target", label: "Дартс" },
 };
 
+
+
 const ScheduleScreen = () => (
   <View style={styles.modalContent}>
     <Text>This is the schedule screen!</Text>
@@ -113,15 +116,7 @@ const DetailsPage = () => {
   const router = useRouter();
   const { addHall } = useSavedHalls();
 
-  const handleSave = () => {
-    if (listing?.sportHallID && listing?.name) {
-      const hall = { id: listing.sportHallID, name: listing.name };
-      addHall(hall);
-      Alert.alert("Hall saved!");
-    } else {
-      Alert.alert("Unable to save hall: missing information.");
-    }
-  };
+  
 
   const { sportHallID } = useLocalSearchParams();
   const listing = (SportHallData as SportHallDataType[]).find(
@@ -157,6 +152,50 @@ const DetailsPage = () => {
     // );
   };
 
+  const handleSaveCourt = async () => {
+  try {
+    const existing = await AsyncStorage.getItem('savedCourts');
+
+    // Define the structure of a saved court
+    interface SavedCourt {
+      id: string;
+      name: string;
+      image?: string;     // optional
+      location?: string;  // optional
+    }
+
+    const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
+
+    const alreadySaved = saved.some(
+      (court) => court.id === listing?.sportHallID
+    );
+
+    if (alreadySaved) {
+      alert("Court already saved!");
+      return;
+    }
+
+    const newCourt: SavedCourt = {
+      id: listing?.sportHallID ?? "",
+      name: listing?.name ?? "Unknown",
+      image: Array.isArray(listing?.imageUrls)
+        ? listing?.imageUrls[0] ?? ""
+        : listing?.imageUrls ?? "",         // Add image if available
+      location: typeof listing?.location === "string"
+        ? listing.location
+        : listing?.location?.smart_location ?? "",   // Add location if available
+    };
+
+    const updated = [...saved, newCourt];
+
+    await AsyncStorage.setItem('savedCourts', JSON.stringify(updated));
+    alert("Court saved!");
+  } catch (error) {
+    console.error("Failed to save court:", error);
+  }
+};
+
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: "",
@@ -175,7 +214,7 @@ const DetailsPage = () => {
               style={styles.headerButton}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave} style={styles.roundButton}>
+          <TouchableOpacity onPress={handleSaveCourt} style={styles.roundButton}>
             <Image
               source={require("@/assets/images/saved.png")}
               style={styles.headerButton}

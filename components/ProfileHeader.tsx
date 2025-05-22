@@ -1,7 +1,7 @@
 import { View , Text , StyleSheet ,  Dimensions, Share ,TouchableOpacity, Image } from  'react-native';
-import React, { useRef, useState, useEffect ,useLayoutEffect } from "react";
+import React, { useRef, useState,useCallback, useEffect ,useLayoutEffect } from "react";
 
-import { useLocalSearchParams, useNavigation
+import { router, useNavigation
  } from 'expo-router';
 import Animated, {
   SlideInDown,
@@ -9,20 +9,23 @@ import Animated, {
   useAnimatedRef,
   useAnimatedStyle,
   useScrollViewOffset,
-  Extrapolate,
   useSharedValue,
   useAnimatedScrollHandler,
 } from "react-native-reanimated";
 import ProfileData from './profileData';
-import { Ionicons } from '@expo/vector-icons';
+
 import Colors from '../constants/Colors';
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { auth_swr } from "@/hooks/useswr";
 import { useAuth } from "@/app/(modals)/context/authContext";
-import { NavigationProp } from '@react-navigation/native';
+
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { Swipeable } from 'react-native-gesture-handler';
+
 
 
 const IMG_HEIGHT = 200;
@@ -41,28 +44,7 @@ interface SavedCourt {
   location: string;
 }
 
-const saveCourt = async (court: SavedCourt): Promise<void> => {
-  try {
-    const existing = await AsyncStorage.getItem('savedCourts');
-    const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
-    const updated: SavedCourt[] = [...saved, court];
-    await AsyncStorage.setItem('savedCourts', JSON.stringify(updated));
-    console.log('Court saved!');
-  } catch (error) {
-    console.error('Error saving court:', error);
-  }
-};
-useEffect(() => {
-  const loadSavedCourts = async () => {
-    try {
-      const data = await AsyncStorage.getItem('savedCourts');
-      if (data) setSavedCourts(JSON.parse(data));
-    } catch (error) {
-      console.error('Error loading courts:', error);
-    }
-  };
-  loadSavedCourts();
-}, []);
+
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -81,9 +63,9 @@ const menu = [
 function CarouselItem({ item, index, scrollX }: { item: any; index: number; scrollX: any }) {
   const animatedStyle = useAnimatedStyle(() => {
     const inputRange = [index - 1, index, index + 1];
-    const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7], Extrapolate.CLAMP);
-    const rotateY = interpolate(scrollX.value, inputRange, [30, 0, -30], Extrapolate.CLAMP);
-    const translateY = interpolate(scrollX.value, inputRange, [20, 0, 20], Extrapolate.CLAMP);
+    const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7], );
+    const rotateY = interpolate(scrollX.value, inputRange, [30, 0, -30], );
+    const translateY = interpolate(scrollX.value, inputRange, [20, 0, 20]);
 
     return {
       transform: [
@@ -109,31 +91,6 @@ const _itemSize = width / 3;
 const _spacing = 10;
 const _itemTotalSize = _itemSize + _spacing;
 
-  interface Court {
-    id: string;
-    name: string;
-    image: any; // You can use ImageSourcePropType from 'react-native' for stricter typing
-    location: string;
-  }
-  const [savedCourts, setSavedCourts] = useState<Court[]>([
-    {
-      id: "1",
-      name: "Court A",
-      image: require("@/assets/images/profileIcons/profile/jpg"),
-      location: "Location A",
-    },
-    {
-      id: "2",
-      name: "Court B",
-      image: require("@/assets/images/profileIcons/profile.jpg"),
-      location: "Location B",
-    },
-  ]);
-
-  const handleCourtPress = (court: Court): void => {
-    console.log("Tapped court:", court.name);
-    // You can navigate or show details here
-  };
 
 
 
@@ -169,6 +126,60 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       }
     );
 
+    const [savedCourts, setSavedCourts] = useState<SavedCourt[]>([]);
+
+useFocusEffect(
+  useCallback(() => {
+    const loadSavedCourts = async () => {
+      try {
+        const json = await AsyncStorage.getItem('savedCourts');
+        if (json) {
+          const courts = JSON.parse(json);
+          setSavedCourts(courts);
+        } else {
+          setSavedCourts([]);
+        }
+      } catch (e) {
+        console.error('Failed to load courts', e);
+      }
+    };
+
+    loadSavedCourts();
+  }, [])
+);
+
+  const handleCourtPress = (court: SavedCourt) => {
+    // Navigate to the court details screen or perform any action
+    console.log(`Court pressed: ${court.name}`);
+    router.push({
+      pathname: "/listing/[sportHallID]",
+      params: { sportHallID: court.id },
+    });
+  };
+  // Perform any other action you want when a court is pre
+
+  const handleRemove = async (id: string) => {
+  const filtered = savedCourts.filter(court => court.id !== id);
+  setSavedCourts(filtered);
+  await AsyncStorage.setItem('savedCourts', JSON.stringify(filtered));
+};
+
+const renderRightActions = (courtId: string) => (
+  <TouchableOpacity
+    onPress={() => handleRemove(courtId)}
+    style={{
+      backgroundColor: 'red',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 80,
+      height: "90%",
+      borderRadius: 10,
+    }}
+  >
+    <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
+  </TouchableOpacity>
+);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       flatListRef.current?.scrollToOffset({
@@ -188,19 +199,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     const index = Math.round(event.nativeEvent.contentOffset.x / _itemTotalSize);
     setSelectedItem(menu[index]?.name);
   };
-  useEffect(() => {
-    const loadSavedCourts = async () => {
-      try {
-        const data = await AsyncStorage.getItem('savedCourts');
-        if (data) setSavedCourts(JSON.parse(data));
-      }
-      catch (error) {
-        console.error('Error loading courts:', error);
-      } 
-    }
-    loadSavedCourts();
-  }
-  , []);
    useEffect(() => {
       if (data) {
         const parsedData =
@@ -210,13 +208,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
         logIn();
       } else if (error) {
-        //logOut();
         console.log("Error fetching user data: Pisda", error);
       }
     }, [data, error]);
   
     useEffect(() => {
-      //console.log("LoginStatus changed:", LoginStatus);
     }, [LoginStatus]);
   
     useEffect(() => {
@@ -390,33 +386,44 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
     {/* Dynamic Section */}
     <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
-      {selectedItem === "Saved Halls" && (
-  <ScrollView style={styles.savedListContainer} contentContainerStyle={styles.scrollContent}>
+    {selectedItem === "Saved Halls" && (
+      <ScrollView
+  style={styles.savedListContainer}
+  contentContainerStyle={[styles.scrollContent, { flexGrow: 1 }]}
+>
   {savedCourts.length > 0 ? (
     savedCourts.map((court) => (
-      <TouchableOpacity
+      <Swipeable
         key={court.id}
-        style={styles.card}
-        onPress={() => handleCourtPress(court)} // You define this
-        activeOpacity={0.8}
+        renderRightActions={() => renderRightActions(court.id)}
       >
-        <Image source={court.image} style={styles.cardImage} />
-        <View style={styles.cardTextContainer}>
-          <Text style={styles.cardTitle}>{court.name}</Text>
-          <Text style={styles.cardSubtitle}>{court.location}</Text>
-        </View>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => handleCourtPress(court)}
+          activeOpacity={0.8}
+        >
+          <Image source={{ uri: court.image }} style={styles.cardImage} />
+          <View style={styles.cardTextContainer}>
+            <Text style={styles.cardTitle}>{court.name}</Text>
+            <Text style={styles.cardSubtitle}>{court.location}</Text>
+          </View>
+        </TouchableOpacity>
+      </Swipeable>
     ))
   ) : (
     <Text style={styles.dynamicText}>No saved courts yet.</Text>
   )}
 </ScrollView>
-)}
-      {selectedItem === "Achievements" && <ProfileData />}
-      {selectedItem === "Rewards" && (
-        <Text style={styles.dynamicText}>🎁 Rewards or statistics shown here.</Text>
-      )}
-    </Animated.View>
+    )}
+
+    {selectedItem === "Achievements" && <ProfileData />}
+    
+    {selectedItem === "Rewards" && (
+      <Text style={styles.dynamicText}>
+        🎁 Rewards or statistics shown here.
+      </Text>
+    )}
+  </Animated.View>
 
   </Animated.ScrollView>
 </View>
