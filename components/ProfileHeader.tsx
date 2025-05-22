@@ -112,10 +112,7 @@ interface Court {
   location: string;
 }
 
-const handleCourtPress = (court: Court): void => {
-  console.log("Tapped court:", court.name);
-  // You can navigate or show details here
-};
+
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   copyToClipboard,

@@ -8,8 +8,10 @@ import {
   Modal,
   Pressable,
   Touchable,
+  Platform,
+  Linking,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useRef} from "react";
 import { ScrollView } from "react-native";
 
 import Animated, {
@@ -21,7 +23,8 @@ import Animated, {
   withTiming,
   Easing,
   FadeIn,
-  FadeOut,
+ withDelay,
+  useAnimatedProps,
 } from "react-native-reanimated";
 import CalendarStrip from "react-native-calendar-strip";
 
@@ -30,9 +33,14 @@ import Colors from "@/constants/Colors";
 import { SportHallDataType } from "@/interfaces/listing";
 import SportHall from "@/assets/Data/sportHall.json";
 
+
+
+
 const { width } = Dimensions.get("window");
 const SWIPE_WIDTH = width - 170;
 const BUTTON_WIDTH = 40;
+
+
 
 const Page = () => {
   const [sportHalls, setSportHalls] = useState<SportHallDataType[] | null>(
@@ -43,8 +51,96 @@ const Page = () => {
   const [selectedSort, setSelectedSort] = useState<string | null>(null);
   const [today,setToday] = useState<string>(new Date().toISOString());
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
-  
+
+ 
+interface CallWaveButtonProps {
+  partnersLookingFor: number | string;
+  playersNeeded: number | string;
+  onPress: () => void;
+}
+
+const Wave = ({ delay = 0 }: { delay?: number }) => {
+  const scale = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(1.5, {
+          duration: 1200,
+          easing: Easing.out(Easing.ease),
+        }),
+        -1,
+        true
+      )
+    );
+  }, [delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: 1.5 - scale.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: "absolute",
+          width: 100,
+          height: 100,
+          borderRadius: 50,
+          backgroundColor: "rgba(33, 150, 243, 0.2)",
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+};
+
+const CallWaveButton = ({
+  partnersLookingFor,
+  playersNeeded,
+  onPress,
+}: CallWaveButtonProps) => {
+  return (
+    <View style={{ alignItems: "center" }}>
+      {/* Title above the button */}
+      <Text style={{ marginBottom: 8, fontWeight: "600", fontSize: 16, color: Colors.primary }}>
+        {partnersLookingFor} partners looking for
+      </Text>
+
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={{ width: 100, height: 100, justifyContent: "center", alignItems: "center" }}>
+        {/* Waves container */}
+        <View style={{ position: "absolute", width: 100, height: 100, justifyContent: "center", alignItems: "center" }}>
+          <Wave delay={0} />
+         
+         
+          <Wave delay={1000} />
+        </View>
+
+        {/* Number inside the circle */}
+        <View
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            backgroundColor: Colors.primary,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10,
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "bold", fontSize: 24 }}>
+            {playersNeeded}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+
+
 
   const sortOptions = [
     { label: "Distance", children: ["Nearest First", "Farthest First"] },
@@ -69,7 +165,15 @@ const Page = () => {
         )
     );
 
-    setSportHalls(filtered);
+    setSportHalls(
+      filtered.map((hall) => ({
+        ...hall,
+        price:
+          typeof hall.price === "object"
+            ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
+            : hall.price,
+      }))
+    );
   } catch (err) {
     console.error(err);
   } finally {
@@ -79,9 +183,19 @@ const Page = () => {
   const translateX = useSharedValue(0);
   const isSwiping = useSharedValue(false);
   const scale = useSharedValue(0);
+   
+
+  
 
   useEffect(() => {
-    setSportHalls(SportHall);
+    setSportHalls(
+      SportHall.map((hall) => ({
+        ...hall,
+        price: typeof hall.price === "object"
+          ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
+          : hall.price,
+      }))
+    );
   }, []);
 
   useEffect(() => {
@@ -95,15 +209,12 @@ const Page = () => {
     );
   }, []);
 
-  const animatedSort = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-      opacity: 1.5 - scale.value,
-    };
-  });
+ 
+
+
+
 
   const handleCompleteSwipe = () => {
-
 
 
 
@@ -112,7 +223,15 @@ const Page = () => {
 
   setTimeout(() => {
     // Reset to full unfiltered list
-    setSportHalls(SportHall);
+    setSportHalls(
+      SportHall.map((hall) => ({
+        ...hall,
+        price:
+          typeof hall.price === "object"
+            ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
+            : hall.price,
+      }))
+    );
     setToday(new Date().toISOString());
     setIsLoading(false);
   }, 500); // simulate network delay or update
@@ -223,6 +342,19 @@ const Page = () => {
 };
 
 
+
+  function openGoogleMaps(arg0: number, arg1: number, address: string): void {
+    const scheme = Platform.select({
+      ios: 'maps://0,0?q=',
+      android: 'geo:0,0?q='
+    });
+
+    const latLng = `${arg0},${arg1}`;
+    const query = address ? `${address}@${latLng}` : latLng;
+    const url = `${scheme}${encodeURIComponent(query)}`;
+
+    Linking.openURL(url).catch(err => console.error('An error occurred', err));
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -346,16 +478,39 @@ const Page = () => {
             resizeMode="cover"
           />
           <Text style={styles.title}>{item.name}</Text>
+
+           
+        
           <Text style={styles.subTitle}>📞 {item.phoneNumber}</Text>
 
-          <TouchableOpacity
-            onPress={() => {
-              Linking.openURL(item.listing_url);
-            }}>
+          <CallWaveButton
+  partnersLookingFor={item.partnersLookingFor ?? 0}
+  playersNeeded={item.playersNeeded ?? 0}
+  onPress={() => {
+    // handle press here if needed
+    console.log(`Pressed button for ${item.name}`);
+  }}
+/>
 
-         
-    <Text style={styles.text}>📍 {item.address}</Text>
-    </TouchableOpacity>
+         <TouchableOpacity
+  onPress={() =>openGoogleMaps (
+    parseFloat(item.location.latitude),
+    parseFloat(item.location.longitude),
+    item.address
+  )}
+  style={{ marginBottom: 10 , 
+    marginTop: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.light,
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  <Text style={styles.text}>📍{item.address}</Text>
+</TouchableOpacity>
 
           <Text style={styles.subTitle}>🎯 Features:</Text>
           <View style={styles.featuresContainer}>
@@ -390,6 +545,14 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
+
+   wave: {
+  position: 'absolute',
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  backgroundColor: 'rgba(33, 150, 243, 0.3)', // blueish wave
+},
   rail: {
     width: SWIPE_WIDTH,
     height: 40,
@@ -480,6 +643,13 @@ featureText: {
     padding: 16,
     backgroundColor: "#f8f9fa",
   },
+   wave: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(33, 150, 243, 0.3)', // blueish wave
+  },
   sortButton: {
     backgroundColor: "#eee",
     padding: 10,
@@ -531,3 +701,5 @@ featureText: {
 });
 
 export default Page;
+
+

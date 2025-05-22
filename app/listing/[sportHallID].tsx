@@ -10,6 +10,7 @@ import {
   Share,
   Modal,
   ImageBackground,
+  
 } from "react-native";
 import SportHallData from "@/assets/Data/sportHall.json";
 import {
@@ -30,9 +31,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { defaultStyles } from "@/constants/Styles";
 import { LinearGradient } from "expo-linear-gradient";
+
 import OrderScreen, { FormData } from "./detail";
 import { SportHallDataType } from "@/interfaces/listing";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 500;
@@ -88,7 +90,16 @@ const featureIcons = {
   // darts: { icon: "target", label: "Дартс" },
 };
 
+
+
+const ScheduleScreen = () => (
+  <View style={styles.modalContent}>
+    <Text>This is the schedule screen!</Text>
+  </View>
+);
+
 const DetailsPage = () => {
+  const [isScheduleVisible, setIsScheduleVisible] = useState<boolean>(false);
   const [isOrderScreenVisible, setIsOrderScreenVisible] =
     useState<boolean>(false);
   const [infoHeight, setInfoHeight] = useState(0);
@@ -96,13 +107,17 @@ const DetailsPage = () => {
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const [formData, setFormData] = useState<FormData>({
     sportHallID: "",
-    name: "",
     date: "",
+    name: "",
     price: {
       oneHour: "",
       wholeDay: "",
     },
   });
+
+ 
+
+  
 
   const { sportHallID } = useLocalSearchParams();
   const listing = (SportHallData as unknown as SportHallDataType[]).find(
@@ -139,48 +154,48 @@ const DetailsPage = () => {
   };
 
   const handleSaveCourt = async () => {
-    try {
-      const existing = await AsyncStorage.getItem("savedCourts");
+  try {
+    const existing = await AsyncStorage.getItem('savedCourts');
 
-      // Define the structure of a saved court
-      interface SavedCourt {
-        id: string;
-        name: string;
-        image?: string; // optional
-        location?: string; // optional
-      }
-
-      const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
-
-      const alreadySaved = saved.some(
-        (court) => court.id === listing?.sportHallID
-      );
-
-      if (alreadySaved) {
-        alert("Court already saved!");
-        return;
-      }
-
-      const newCourt: SavedCourt = {
-        id: listing?.sportHallID ?? "",
-        name: listing?.name ?? "Unknown",
-        image: Array.isArray(listing?.imageUrls)
-          ? listing?.imageUrls[0] ?? ""
-          : listing?.imageUrls ?? "", // Add image if available
-        location:
-          typeof listing?.location === "string"
-            ? listing.location
-            : listing?.location?.smart_location ?? "", // Add location if available
-      };
-
-      const updated = [...saved, newCourt];
-
-      await AsyncStorage.setItem("savedCourts", JSON.stringify(updated));
-      alert("Court saved!");
-    } catch (error) {
-      console.error("Failed to save court:", error);
+    // Define the structure of a saved court
+    interface SavedCourt {
+      id: string;
+      name: string;
+      image?: string;     // optional
+      location?: string;  // optional
     }
-  };
+
+    const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
+
+    const alreadySaved = saved.some(
+      (court) => court.id === listing?.sportHallID
+    );
+
+    if (alreadySaved) {
+      alert("Court already saved!");
+      return;
+    }
+
+    const newCourt: SavedCourt = {
+      id: listing?.sportHallID ?? "",
+      name: listing?.name ?? "Unknown",
+      image: Array.isArray(listing?.imageUrls)
+        ? listing?.imageUrls[0] ?? ""
+        : listing?.imageUrls ?? "",         // Add image if available
+      location: typeof listing?.location === "string"
+        ? listing.location
+        : listing?.location?.smart_location ?? "",   // Add location if available
+    };
+
+    const updated = [...saved, newCourt];
+
+    await AsyncStorage.setItem('savedCourts', JSON.stringify(updated));
+    alert("Court saved!");
+  } catch (error) {
+    console.error("Failed to save court:", error);
+  }
+};
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -200,10 +215,7 @@ const DetailsPage = () => {
               style={styles.headerButton}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleSaveCourt}
-            style={styles.roundButton}
-          >
+          <TouchableOpacity onPress={handleSaveCourt} style={styles.roundButton}>
             <Image
               source={require("@/assets/images/saved.png")}
               style={styles.headerButton}
@@ -254,17 +266,15 @@ const DetailsPage = () => {
     };
   }, []);
 
-  const handleZaalId = (zaal_id: any, sport_hall_name: any, price: any) => {
+  const handleZaalId = (input: any) => {
     setFormData((prev) => ({
       ...prev,
-      sportHallID: zaal_id,
-      name: sport_hall_name,
-      price: price,
+      zaalId: input,
     }));
   };
 
   useEffect(() => {
-    handleZaalId(sportHallID, listing?.name, listing?.price);
+    handleZaalId(sportHallID);
   }, [sportHallID]);
 
   return (
@@ -384,7 +394,7 @@ const DetailsPage = () => {
               >
                 <MaterialIcons name="sports-score" size={18} color="red" />
                 <Text style={{ fontSize: 12 }}>
-                  {/* {listing.review_scores_rating / 20} */}
+                  {}
                   review oruulan sda
                 </Text>
                 <TouchableOpacity onPress={handleViewReviews}>
@@ -445,8 +455,17 @@ const DetailsPage = () => {
           }}
         >
           <TouchableOpacity style={styles.footerText}>
-            <Text style={styles.footerPrice}>₮{listing?.price.oneHour}</Text>
+            <Text style={styles.footerPrice}>€{listing?.price}</Text>
             <Text>/1 tsag</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsScheduleVisible(true);
+            }}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
+          >
+            <Text style={defaultStyles.btnText}>tsagiin huvaari</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -459,6 +478,21 @@ const DetailsPage = () => {
       </Animated.View>
 
       {/* Modal for Schedule Screen */}
+      <Modal
+        animationType="slide"
+        visible={isScheduleVisible}
+        transparent={true}
+        onRequestClose={() => setIsScheduleVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => setIsScheduleVisible(false)}>
+              <Ionicons name="close" size={24} color={Colors.grey} />
+            </TouchableOpacity>
+            <ScheduleScreen />
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         animationType="slide"

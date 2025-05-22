@@ -88,7 +88,6 @@
     "react-native-screens": "~4.4.0",
     "react-native-ssl-pinning": "^1.5.8",
     "react-native-step-indicator": "^1.0.3",
-    "react-native-svg": "^15.11.2",
     "react-native-tab-view": "^4.0.4",
     "react-native-tracking-transparency": "^0.1.2",
     "react-native-web": "~0.19.10",

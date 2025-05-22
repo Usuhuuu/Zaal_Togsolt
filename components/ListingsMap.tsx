@@ -15,6 +15,7 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as SecureStorage from "expo-secure-store";
+import { useRoute } from "@react-navigation/native";
 
 const INITIAL_REGION = {
   latitude: 47.918873,
@@ -102,6 +103,7 @@ const ListingsMap = memo(({ listings }: { listings: SportHallDataType[] }) => {
     },
     [] // Dependencies are empty since renderCluster doesn't depend on props/state
   );
+  
 
   return (
     <View style={styles.container}>
