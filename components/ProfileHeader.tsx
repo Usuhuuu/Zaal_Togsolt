@@ -116,7 +116,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 }) => {
   const flatListRef = useRef<FlatList>(null);
 
-  const scrollref = useAnimatedRef<Animated.ScrollView>(null);
+  const scrollref = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollref);
   const navigation = useNavigation();
 
@@ -342,12 +342,26 @@ const renderRightActions = (courtId: string) => (
 
   return (
     <View style={styles.container}>
+      <Animated.ScrollView
+        ref={scrollref}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: IMG_HEIGHT }}
+        style={{ flex: 1 }}>
+
+      <Animated.Image
+        source={{ uri: profileImageUri }}
+        style={[styles.image, imageAnimatedStyle]}
+        resizeMode="cover"
+      />
+
       <LinearGradient
         colors={["#e5f0ff", "#ffffff"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-      />
-
+        style={styles.gradientBackground}
+        >
     {/* Dynamic Section */}
     <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
     {selectedItem === "Saved Halls" && (
@@ -480,6 +494,8 @@ const renderRightActions = (courtId: string) => (
             </Text>
           )}
         </Animated.View>
+        </LinearGradient>
+          </Animated.ScrollView>
     </View>
   );
 };
