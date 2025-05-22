@@ -423,29 +423,33 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {/* Dynamic Section */}
         <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
           {selectedItem === "Saved Halls" && (
-            <ScrollView
-              style={styles.savedListContainer}
-              contentContainerStyle={styles.scrollContent}
-            >
-              {savedCourts.length > 0 ? (
-                savedCourts.map((court) => (
-                  <TouchableOpacity
-                    key={court.id}
-                    style={styles.card}
-                    onPress={() => handleCourtPress(court)} // You define this
-                    activeOpacity={0.8}
-                  >
-                    <Image source={court.image} style={styles.cardImage} />
-                    <View style={styles.cardTextContainer}>
-                      <Text style={styles.cardTitle}>{court.name}</Text>
-                      <Text style={styles.cardSubtitle}>{court.location}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={styles.dynamicText}>No saved courts yet.</Text>
-              )}
-            </ScrollView>
+           <ScrollView
+  style={styles.savedListContainer}
+  contentContainerStyle={[styles.scrollContent, { flexGrow: 1 }]}
+>
+  {savedCourts.length > 0 ? (
+    savedCourts.map((court) => (
+      <Swipeable
+        key={court.id}
+        renderRightActions={() => renderRightActions(court.id)}
+      >
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => handleCourtPress(court)}
+          activeOpacity={0.8}
+        >
+          <Image source={{ uri: court.image }} style={styles.cardImage} />
+          <View style={styles.cardTextContainer}>
+            <Text style={styles.cardTitle}>{court.name}</Text>
+            <Text style={styles.cardSubtitle}>{court.location}</Text>
+          </View>
+        </TouchableOpacity>
+      </Swipeable>
+    ))
+  ) : (
+    <Text style={styles.dynamicText}>No saved courts yet.</Text>
+  )}
+</ScrollView>
           )}
           {selectedItem === "Achievements" && <ProfileData />}
           {selectedItem === "Rewards" && (

@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Share,
   Modal,
   ImageBackground,
-  Alert,
+  
 } from "react-native";
 import SportHallData from "@/assets/Data/sportHall.json";
 import {
@@ -31,8 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { defaultStyles } from "@/constants/Styles";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSavedHalls } from "../(modals)/context/savedHall";
-import { useRouter } from "expo-router";
+// import { useRouter } from "expo-router";
 import OrderScreen, { FormData } from "./detail";
 import { SportHallDataType } from "@/interfaces/listing";
 import AsyncStorage from '@react-native-async-storage/async-storage';
