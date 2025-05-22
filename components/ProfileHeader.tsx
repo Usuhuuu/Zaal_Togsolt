@@ -1,8 +1,21 @@
-import { View , Text , StyleSheet ,  Dimensions, Share ,TouchableOpacity, Image } from  'react-native';
-import React, { useRef, useState,useCallback, useEffect ,useLayoutEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Share,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 
-import { router, useNavigation
- } from 'expo-router';
+import { router, useNavigation } from "expo-router";
 import Animated, {
   SlideInDown,
   interpolate,
@@ -12,21 +25,18 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from "react-native-reanimated";
-import ProfileData from './profileData';
+import ProfileData from "./profileData";
 
-import Colors from '../constants/Colors';
+import Colors from "../constants/Colors";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { auth_swr } from "@/hooks/useswr";
 import { useAuth } from "@/app/(modals)/context/authContext";
 
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import { Swipeable } from 'react-native-gesture-handler';
-
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import { Swipeable } from "react-native-gesture-handler";
 
 const IMG_HEIGHT = 200;
 const { width } = Dimensions.get("window");
@@ -43,7 +53,6 @@ interface SavedCourt {
   image: any; // You can use ImageSourcePropType for stricter typing
   location: string;
 }
-
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -70,8 +79,8 @@ function CarouselItem({
 }) {
   const animatedStyle = useAnimatedStyle(() => {
     const inputRange = [index - 1, index, index + 1];
-    const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7], );
-    const rotateY = interpolate(scrollX.value, inputRange, [30, 0, -30], );
+    const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7]);
+    const rotateY = interpolate(scrollX.value, inputRange, [30, 0, -30]);
     const translateY = interpolate(scrollX.value, inputRange, [20, 0, 20]);
 
     return {
@@ -149,27 +158,27 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     loadSavedCourts();
   }, []);
 
-    const [savedCourts, setSavedCourts] = useState<SavedCourt[]>([]);
+  const [savedCourts, setSavedCourts] = useState<SavedCourt[]>([]);
 
-useFocusEffect(
-  useCallback(() => {
-    const loadSavedCourts = async () => {
-      try {
-        const json = await AsyncStorage.getItem('savedCourts');
-        if (json) {
-          const courts = JSON.parse(json);
-          setSavedCourts(courts);
-        } else {
-          setSavedCourts([]);
+  useFocusEffect(
+    useCallback(() => {
+      const loadSavedCourts = async () => {
+        try {
+          const json = await AsyncStorage.getItem("savedCourts");
+          if (json) {
+            const courts = JSON.parse(json);
+            setSavedCourts(courts);
+          } else {
+            setSavedCourts([]);
+          }
+        } catch (e) {
+          console.error("Failed to load courts", e);
         }
-      } catch (e) {
-        console.error('Failed to load courts', e);
-      }
-    };
+      };
 
-    loadSavedCourts();
-  }, [])
-);
+      loadSavedCourts();
+    }, [])
+  );
 
   const handleCourtPress = (court: SavedCourt) => {
     // Navigate to the court details screen or perform any action
@@ -182,26 +191,26 @@ useFocusEffect(
   // Perform any other action you want when a court is pre
 
   const handleRemove = async (id: string) => {
-  const filtered = savedCourts.filter(court => court.id !== id);
-  setSavedCourts(filtered);
-  await AsyncStorage.setItem('savedCourts', JSON.stringify(filtered));
-};
+    const filtered = savedCourts.filter((court) => court.id !== id);
+    setSavedCourts(filtered);
+    await AsyncStorage.setItem("savedCourts", JSON.stringify(filtered));
+  };
 
-const renderRightActions = (courtId: string) => (
-  <TouchableOpacity
-    onPress={() => handleRemove(courtId)}
-    style={{
-      backgroundColor: 'red',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: 80,
-      height: "90%",
-      borderRadius: 10,
-    }}
-  >
-    <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
-  </TouchableOpacity>
-);
+  const renderRightActions = (courtId: string) => (
+    <TouchableOpacity
+      onPress={() => handleRemove(courtId)}
+      style={{
+        backgroundColor: "red",
+        justifyContent: "center",
+        alignItems: "center",
+        width: 80,
+        height: "90%",
+        borderRadius: 10,
+      }}
+    >
+      <Text style={{ color: "white", fontWeight: "bold" }}>Remove</Text>
+    </TouchableOpacity>
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -224,23 +233,22 @@ const renderRightActions = (courtId: string) => (
     );
     setSelectedItem(menu[index]?.name);
   };
-   useEffect(() => {
-      if (data) {
-        const parsedData =
-          typeof data.profileData == "string"
-            ? JSON.parse(data.profileData)
-            : data.profileData;
-        setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
-        logIn();
-      } else if (error) {
-        console.log("Error fetching user data: Pisda", error);
-      }
-    }, [data, error]);
-  
-    useEffect(() => {
-    }, [LoginStatus]);
-  
-    useEffect(() => {
+  useEffect(() => {
+    if (data) {
+      const parsedData =
+        typeof data.profileData == "string"
+          ? JSON.parse(data.profileData)
+          : data.profileData;
+      setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
+      logIn();
+    } else if (error) {
+      console.log("Error fetching user data: Pisda", error);
+    }
+  }, [data, error]);
+
+  useEffect(() => {}, [LoginStatus]);
+
+  useEffect(() => {
     if (data) {
       const parsedData =
         typeof data.profileData == "string"
@@ -342,66 +350,18 @@ const renderRightActions = (courtId: string) => (
 
   return (
     <View style={styles.container}>
-      <Animated.ScrollView
-        ref={scrollref}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: IMG_HEIGHT }}
-        style={{ flex: 1 }}>
-
-      <Animated.Image
-        source={{ uri: profileImageUri }}
-        style={[styles.image, imageAnimatedStyle]}
-        resizeMode="cover"
-      />
-
       <LinearGradient
         colors={["#e5f0ff", "#ffffff"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.gradientBackground}
-        >
-    {/* Dynamic Section */}
-    <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
-    {selectedItem === "Saved Halls" && (
-      <ScrollView
-  style={styles.savedListContainer}
-  contentContainerStyle={[styles.scrollContent, { flexGrow: 1 }]}
->
-  {savedCourts.length > 0 ? (
-    savedCourts.map((court) => (
-      <Swipeable
-        key={court.id}
-        renderRightActions={() => renderRightActions(court.id)}
-      >
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => handleCourtPress(court)}
-          activeOpacity={0.8}
-        >
-          <Image source={{ uri: court.image }} style={styles.cardImage} />
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>{court.name}</Text>
-            <Text style={styles.cardSubtitle}>{court.location}</Text>
-          </View>
-        </TouchableOpacity>
-      </Swipeable>
-    ))
-  ) : (
-    <Text style={styles.dynamicText}>No saved courts yet.</Text>
-  )}
-</ScrollView>
-    )}
+      />
 
-    {selectedItem === "Achievements" && <ProfileData />}
-    
-    {selectedItem === "Rewards" && (
-      <Text style={styles.dynamicText}>
-        🎁 Rewards or statistics shown here.
-      </Text>
-    )}
-  </Animated.View>
+      <Animated.ScrollView ref={scrollref} scrollEventThrottle={16}>
+        <Animated.Image
+          source={require("../assets/images/profileIcons/profile.jpg")}
+          style={[styles.image, imageAnimatedStyle]}
+          resizeMode="cover"
+        />
 
         {/* Use a marginTop instead of position: 'absolute' */}
 
@@ -494,8 +454,7 @@ const renderRightActions = (courtId: string) => (
             </Text>
           )}
         </Animated.View>
-        </LinearGradient>
-          </Animated.ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
