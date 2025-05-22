@@ -219,6 +219,12 @@ function RootLayoutNav() {
           },
         }}
       />
+      <Stack.Screen
+        name="listing/book/[zaal_id]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

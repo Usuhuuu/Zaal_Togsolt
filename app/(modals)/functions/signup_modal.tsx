@@ -106,7 +106,6 @@ const SignupModal = ({
   const [timeLeft, setTimeLeft] = useState(600);
 
   const labels = ["Name", "Email", "Username", "Image", "Final"];
-  const [currentPosition, setCurrentPosition] = useState(0);
 
   const customStyles = {
     stepIndicatorSize: 30,
@@ -211,7 +210,6 @@ const SignupModal = ({
   const nextStep = () => {
     if (steps < initSteps.length - 1) {
       setSteps((prev) => prev + 1);
-      setCurrentPosition((prev) => prev + 1);
       fadeInStep();
     }
   };
@@ -219,7 +217,6 @@ const SignupModal = ({
   const previousStep = () => {
     if (steps > 0) {
       setSteps((prev) => prev - 1);
-      setCurrentPosition((prev) => prev - 1);
       fadeInStep();
     }
   };

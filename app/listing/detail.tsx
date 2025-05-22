@@ -11,14 +11,19 @@ import {
 import CalendarStrip from "react-native-calendar-strip";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useBookingStore } from "../(modals)/context/store";
 
 export type FormData = {
   sportHallID: string;
+  name: string;
   date: string;
-  startTime: string;
-  endTime: string;
+  price: {
+    oneHour: string;
+    wholeDay: string;
+  };
 };
-type baseTimeSlotType = {
+export type baseTimeSlotType = {
   start_time: string;
   end_time: string;
 };
@@ -100,7 +105,6 @@ const OrderScreen: React.FC<OrderScreenProps> = ({
 
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
-
   const dateSlotGiver = async (date: Date) => {
     setIsLoading(true);
     setSelectedTimeSlots([]);
@@ -118,8 +122,15 @@ const OrderScreen: React.FC<OrderScreenProps> = ({
     }
   };
   const handleOrder = () => {
-    console.log(selectedTimeSlots);
-    console.log("order process");
+    const zaal_id = sportHallID;
+    setIsOrderScreenVisible(false);
+
+    useBookingStore.getState().setBookingDetails({
+      ...formData,
+      selectedTimeSlots: selectedTimeSlots,
+      date: today,
+    });
+    router.push(`/listing/book/${zaal_id}`);
   };
 
   return (
