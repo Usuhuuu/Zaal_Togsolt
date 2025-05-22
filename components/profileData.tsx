@@ -12,7 +12,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { PieChart } from "react-native-chart-kit";
 import Colors from "@/constants/Colors";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const categories = [
   {
@@ -76,38 +75,37 @@ const ProfileData = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
- const handleCategoryPress = (index: number) => {
-  const selected = categoryItemsRef.current[index];
+  const handleCategoryPress = (index: number) => {
+    const selected = categoryItemsRef.current[index];
 
-  if (activeCategoryIndex === index) {
-    // Do nothing if same item is pressed again
-    return;
-  }
+    if (activeCategoryIndex === index) {
+      // Do nothing if same item is pressed again
+      return;
+    }
 
-  setActiveCategoryIndex(index);
-  setSelectedDetails(categories[index].details);
-  setShowDetails(true);
+    setActiveCategoryIndex(index);
+    setSelectedDetails(categories[index].details);
+    setShowDetails(true);
 
-  if (selected) {
-    (selected as unknown as View).measure((_fx, _fy, _width, _height, px, _py) => {
-      categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
-    });
-  }
+    if (selected) {
+      (selected as unknown as View).measure(
+        (_fx, _fy, _width, _height, px, _py) => {
+          categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
+        }
+      );
+    }
 
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-  // Animate after short delay to ensure state is applied
-  setTimeout(() => {
-    Animated.timing(animatedHeight, {
-      toValue: 200,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, 50); // slight delay ensures state is updated
-};
-
-
-
+    // Animate after short delay to ensure state is applied
+    setTimeout(() => {
+      Animated.timing(animatedHeight, {
+        toValue: 200,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }, 50); // slight delay ensures state is updated
+  };
 
   const doughnutData = [
     {
@@ -140,7 +138,6 @@ const ProfileData = () => {
 
       <View style={styles.header}>
         <Text style={styles.activityTitle}>minii amjilt</Text>
-        
       </View>
 
       {/* CATEGORIES */}

@@ -68,7 +68,7 @@ const TimeSlotItem: React.FC<TimeSlotItemProps> = React.memo(
               opacity: isDisabled || isPending ? 0.5 : 1,
               borderColor: selectedTimeSlots.includes(timeString)
                 ? Colors.dark
-                : Colors.darkGrey,
+                : Colors.littleDarkGrey,
             },
           ]}
         >

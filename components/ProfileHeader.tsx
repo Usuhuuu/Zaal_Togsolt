@@ -1,8 +1,15 @@
-import { View , Text , StyleSheet ,  Dimensions, Share ,TouchableOpacity, Image } from  'react-native';
-import React, { useRef, useState, useEffect ,useLayoutEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Share,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import React, { useRef, useState, useEffect, useLayoutEffect } from "react";
 
-import { useLocalSearchParams, useNavigation
- } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import Animated, {
   SlideInDown,
   interpolate,
@@ -13,20 +20,19 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from "react-native-reanimated";
-import ProfileData from './profileData';
-import { Ionicons } from '@expo/vector-icons';
-import Colors from '../constants/Colors';
+import ProfileData from "./profileData";
+import { Ionicons } from "@expo/vector-icons";
+import Colors from "../constants/Colors";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
 import { auth_swr } from "@/hooks/useswr";
 import { useAuth } from "@/app/(modals)/context/authContext";
-import { NavigationProp } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { NavigationProp } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const IMG_HEIGHT = 200;
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 interface UserData {
   unique_user_ID: string;
   firstName?: string;
@@ -43,26 +49,15 @@ interface SavedCourt {
 
 const saveCourt = async (court: SavedCourt): Promise<void> => {
   try {
-    const existing = await AsyncStorage.getItem('savedCourts');
+    const existing = await AsyncStorage.getItem("savedCourts");
     const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
     const updated: SavedCourt[] = [...saved, court];
-    await AsyncStorage.setItem('savedCourts', JSON.stringify(updated));
-    console.log('Court saved!');
+    await AsyncStorage.setItem("savedCourts", JSON.stringify(updated));
+    console.log("Court saved!");
   } catch (error) {
-    console.error('Error saving court:', error);
+    console.error("Error saving court:", error);
   }
 };
-useEffect(() => {
-  const loadSavedCourts = async () => {
-    try {
-      const data = await AsyncStorage.getItem('savedCourts');
-      if (data) setSavedCourts(JSON.parse(data));
-    } catch (error) {
-      console.error('Error loading courts:', error);
-    }
-  };
-  loadSavedCourts();
-}, []);
 
 interface ProfileHeaderProps {
   copyToClipboard: () => void;
@@ -78,12 +73,35 @@ const menu = [
   { name: "Rewards", icon: require("@/assets/tab-icons/athlete.png") },
 ];
 
-function CarouselItem({ item, index, scrollX }: { item: any; index: number; scrollX: any }) {
+function CarouselItem({
+  item,
+  index,
+  scrollX,
+}: {
+  item: any;
+  index: number;
+  scrollX: any;
+}) {
   const animatedStyle = useAnimatedStyle(() => {
     const inputRange = [index - 1, index, index + 1];
-    const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7], Extrapolate.CLAMP);
-    const rotateY = interpolate(scrollX.value, inputRange, [30, 0, -30], Extrapolate.CLAMP);
-    const translateY = interpolate(scrollX.value, inputRange, [20, 0, 20], Extrapolate.CLAMP);
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.7, 1, 0.7],
+      Extrapolate.CLAMP
+    );
+    const rotateY = interpolate(
+      scrollX.value,
+      inputRange,
+      [30, 0, -30],
+      Extrapolate.CLAMP
+    );
+    const translateY = interpolate(
+      scrollX.value,
+      inputRange,
+      [20, 0, 20],
+      Extrapolate.CLAMP
+    );
 
     return {
       transform: [
@@ -103,39 +121,21 @@ function CarouselItem({ item, index, scrollX }: { item: any; index: number; scro
   );
 }
 
-
-
 const _itemSize = width / 3;
 const _spacing = 10;
 const _itemTotalSize = _itemSize + _spacing;
 
-  interface Court {
-    id: string;
-    name: string;
-    image: any; // You can use ImageSourcePropType from 'react-native' for stricter typing
-    location: string;
-  }
-  const [savedCourts, setSavedCourts] = useState<Court[]>([
-    {
-      id: "1",
-      name: "Court A",
-      image: require("@/assets/images/profileIcons/profile/jpg"),
-      location: "Location A",
-    },
-    {
-      id: "2",
-      name: "Court B",
-      image: require("@/assets/images/profileIcons/profile.jpg"),
-      location: "Location B",
-    },
-  ]);
+interface Court {
+  id: string;
+  name: string;
+  image: any; // You can use ImageSourcePropType from 'react-native' for stricter typing
+  location: string;
+}
 
-  const handleCourtPress = (court: Court): void => {
-    console.log("Tapped court:", court.name);
-    // You can navigate or show details here
-  };
-
-
+const handleCourtPress = (court: Court): void => {
+  console.log("Tapped court:", court.name);
+  // You can navigate or show details here
+};
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   copyToClipboard,
@@ -145,29 +145,51 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 }) => {
   const flatListRef = useRef<FlatList>(null);
 
-
   const scrollref = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollref);
   const navigation = useNavigation();
 
-
   const [userData, setUserData] = useState<UserData | null>(null);
   const scrollX = useSharedValue(0);
-   const { LoginStatus, logIn } = useAuth();
+  const { LoginStatus, logIn } = useAuth();
   const [selectedItem, setSelectedItem] = useState(menu[1].name); // Default center
-   const { data, error } = auth_swr(
-      {
-        item: {
-          pathname: "main",
-          cacheKey: "RoleAndProfile_main",
-          loginStatus: LoginStatus,
-        },
+  const [savedCourts, setSavedCourts] = useState<Court[]>([
+    {
+      id: "1",
+      name: "Court A",
+      image: require("@/assets/images/profileIcons/profile.jpg"),
+      location: "Location A",
+    },
+    {
+      id: "2",
+      name: "Court B",
+      image: require("@/assets/images/profileIcons/profile.jpg"),
+      location: "Location B",
+    },
+  ]);
+  const { data, error } = auth_swr(
+    {
+      item: {
+        pathname: "main",
+        cacheKey: "RoleAndProfile_main",
+        loginStatus: LoginStatus,
       },
-      {
-        revalidateOnFocus: true,
-        revalidateOnMount: true,
+    },
+    {
+      revalidateOnFocus: true,
+    }
+  );
+  useEffect(() => {
+    const loadSavedCourts = async () => {
+      try {
+        const data = await AsyncStorage.getItem("savedCourts");
+        if (data) setSavedCourts(JSON.parse(data));
+      } catch (error) {
+        console.error("Error loading courts:", error);
       }
-    );
+    };
+    loadSavedCourts();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -185,47 +207,47 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   });
 
   const handleMomentumScrollEnd = (event: any): void => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / _itemTotalSize);
+    const index = Math.round(
+      event.nativeEvent.contentOffset.x / _itemTotalSize
+    );
     setSelectedItem(menu[index]?.name);
   };
   useEffect(() => {
     const loadSavedCourts = async () => {
       try {
-        const data = await AsyncStorage.getItem('savedCourts');
+        const data = await AsyncStorage.getItem("savedCourts");
         if (data) setSavedCourts(JSON.parse(data));
+      } catch (error) {
+        console.error("Error loading courts:", error);
       }
-      catch (error) {
-        console.error('Error loading courts:', error);
-      } 
-    }
+    };
     loadSavedCourts();
-  }
-  , []);
-   useEffect(() => {
-      if (data) {
-        const parsedData =
-          typeof data.profileData == "string"
-            ? JSON.parse(data.profileData)
-            : data.profileData;
-        setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
-        logIn();
-      } else if (error) {
-        //logOut();
-        console.log("Error fetching user data: Pisda", error);
-      }
-    }, [data, error]);
-  
-    useEffect(() => {
-      //console.log("LoginStatus changed:", LoginStatus);
-    }, [LoginStatus]);
-  
-    useEffect(() => {
+  }, []);
+  useEffect(() => {
     if (data) {
       const parsedData =
         typeof data.profileData == "string"
           ? JSON.parse(data.profileData)
           : data.profileData;
-  
+      setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
+      logIn();
+    } else if (error) {
+      //logOut();
+      console.log("Error fetching user data: Pisda", error);
+    }
+  }, [data, error]);
+
+  useEffect(() => {
+    //console.log("LoginStatus changed:", LoginStatus);
+  }, [LoginStatus]);
+
+  useEffect(() => {
+    if (data) {
+      const parsedData =
+        typeof data.profileData == "string"
+          ? JSON.parse(data.profileData)
+          : data.profileData;
+
       setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
       logIn();
     } else if (error) {
@@ -233,61 +255,48 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     }
   }, [data, error]);
 
-  
-
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      headerTitle: '',
+      headerTitle: "",
       headerTransparent: true,
-      headerTintColor: 'transparent',
-      
+      headerTintColor: "transparent",
+
       headerStyle: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         elevation: 0,
         shadowOpacity: 0,
-        
-       
-
       },
-
     });
     navigation.setOptions({
-      headerBackground: () => (
-        <Animated.View
-        style = {[styles.header]}
-        />
-      ),
+      headerBackground: () => <Animated.View style={[styles.header]} />,
       headerRight: () => (
         <View style={styles.bar}>
-          <TouchableOpacity onPress={() => Share.share({
-            message: 'Check out this profile!',
-          })}>
-           <Image
-              source={require('@/assets/images/listingicons/share.png')}
+          <TouchableOpacity
+            onPress={() =>
+              Share.share({
+                message: "Check out this profile!",
+              })
+            }
+          >
+            <Image
+              source={require("@/assets/images/listingicons/share.png")}
               style={{ width: 30, height: 30 }}
             />
           </TouchableOpacity>
         </View>
       ),
       headerLeft: () => (
-        <View style={{marginLeft: 10
-
-
-        }}>
-          
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-         <Image
-            source={require('@/assets/images/listingicons/arrow.png')}
-            style={{ width: 30, height: 30 }}
-          />
-        </TouchableOpacity>
+        <View style={{ marginLeft: 10 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require("@/assets/images/listingicons/arrow.png")}
+              style={{ width: 30, height: 30 }}
+            />
+          </TouchableOpacity>
         </View>
       ),
-    
     });
-
   }, [navigation]);
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
@@ -297,9 +306,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {
           translateY: interpolate(
             scrollOffset.value,
-          [-IMG_HEIGHT, 0, IMG_HEIGHT],
-          [-IMG_HEIGHT/2, 0, IMG_HEIGHT * 0.75],
-            'clamp'
+            [-IMG_HEIGHT, 0, IMG_HEIGHT],
+            [-IMG_HEIGHT / 2, 0, IMG_HEIGHT * 0.75],
+            "clamp"
           ),
         },
         {
@@ -307,140 +316,139 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             scrollOffset.value,
             [-IMG_HEIGHT, 0, IMG_HEIGHT],
             [1.5, 1, 0.75],
-            'clamp'
+            "clamp"
           ),
         },
       ],
     };
   });
 
-  
-
   return (
     <View style={styles.container}>
-       <LinearGradient
-              colors={["#e5f0ff", "#ffffff"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-             
-            />
-              
-  <Animated.ScrollView
-    ref={scrollref}
-    scrollEventThrottle={16}
-  >
-    <Animated.Image 
-      source={require('../assets/images/profileIcons/profile.jpg')}
-      style={[styles.image, imageAnimatedStyle]}
-      resizeMode="cover"
-    />
-
-    {/* Use a marginTop instead of position: 'absolute' */}
-    
-    <Animated.View
-
-      entering={SlideInDown}
-      style={{
-        marginTop: -20, // slight overlap if desired
-        marginHorizontal: 20,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        padding: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        borderWidth: 2,
-        borderColor: Colors.primary,
-      }}
-    >
-      <Text style={styles.headerTitle}>Profile</Text>
-      <Text style={styles.titleText}>Username :</Text>
-      <Text style={styles.subHeader}>{userData?.unique_user_ID}</Text>
-      <Text style={styles.titleText}>Name :</Text>
-      <Text style={styles.subHeader}>{userData?.firstName} {userData?.lastName}</Text>
-      <Text style={styles.titleText}>Email :</Text>
-      <Text style={styles.subHeader}>{userData?.email}</Text>
-    </Animated.View>
-
-    {/* Carousel Section */}
-    <Animated.View entering={SlideInDown} style={[styles.menuContainer, { marginTop: 30 }]}>
-      <Animated.FlatList
-        ref={flatListRef}
-        data={menu}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <CarouselItem item={item} index={index} scrollX={scrollX} />
-        )}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
-        scrollEventThrottle={16}
-        snapToInterval={_itemTotalSize}
-        decelerationRate="fast"
-        contentContainerStyle={{
-          paddingHorizontal: width / 2 - _itemSize / 2,
-          height: 200,
-        }}
-        style={{ flexGrow: 0, paddingVertical: 10 }}
+      <LinearGradient
+        colors={["#e5f0ff", "#ffffff"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       />
-    </Animated.View>
 
-    {/* Dynamic Section */}
-    <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
-      {selectedItem === "Saved Halls" && (
-  <ScrollView style={styles.savedListContainer} contentContainerStyle={styles.scrollContent}>
-  {savedCourts.length > 0 ? (
-    savedCourts.map((court) => (
-      <TouchableOpacity
-        key={court.id}
-        style={styles.card}
-        onPress={() => handleCourtPress(court)} // You define this
-        activeOpacity={0.8}
-      >
-        <Image source={court.image} style={styles.cardImage} />
-        <View style={styles.cardTextContainer}>
-          <Text style={styles.cardTitle}>{court.name}</Text>
-          <Text style={styles.cardSubtitle}>{court.location}</Text>
-        </View>
-      </TouchableOpacity>
-    ))
-  ) : (
-    <Text style={styles.dynamicText}>No saved courts yet.</Text>
-  )}
-</ScrollView>
-)}
-      {selectedItem === "Achievements" && <ProfileData />}
-      {selectedItem === "Rewards" && (
-        <Text style={styles.dynamicText}>🎁 Rewards or statistics shown here.</Text>
-      )}
-    </Animated.View>
+      <Animated.ScrollView ref={scrollref} scrollEventThrottle={16}>
+        <Animated.Image
+          source={require("../assets/images/profileIcons/profile.jpg")}
+          style={[styles.image, imageAnimatedStyle]}
+          resizeMode="cover"
+        />
 
-  </Animated.ScrollView>
-</View>
+        {/* Use a marginTop instead of position: 'absolute' */}
+
+        <Animated.View
+          entering={SlideInDown}
+          style={{
+            marginTop: -20, // slight overlap if desired
+            marginHorizontal: 20,
+            backgroundColor: "#fff",
+            borderRadius: 10,
+            padding: 20,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            borderWidth: 2,
+            borderColor: Colors.primary,
+          }}
+        >
+          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={styles.titleText}>Username :</Text>
+          <Text style={styles.subHeader}>{userData?.unique_user_ID}</Text>
+          <Text style={styles.titleText}>Name :</Text>
+          <Text style={styles.subHeader}>
+            {userData?.firstName} {userData?.lastName}
+          </Text>
+          <Text style={styles.titleText}>Email :</Text>
+          <Text style={styles.subHeader}>{userData?.email}</Text>
+        </Animated.View>
+
+        {/* Carousel Section */}
+        <Animated.View
+          entering={SlideInDown}
+          style={[styles.menuContainer, { marginTop: 30 }]}
+        >
+          <Animated.FlatList
+            ref={flatListRef}
+            data={menu}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <CarouselItem item={item} index={index} scrollX={scrollX} />
+            )}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            onScroll={onScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
+            scrollEventThrottle={16}
+            snapToInterval={_itemTotalSize}
+            decelerationRate="fast"
+            contentContainerStyle={{
+              paddingHorizontal: width / 2 - _itemSize / 2,
+              height: 200,
+            }}
+            style={{ flexGrow: 0, paddingVertical: 10 }}
+          />
+        </Animated.View>
+
+        {/* Dynamic Section */}
+        <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
+          {selectedItem === "Saved Halls" && (
+            <ScrollView
+              style={styles.savedListContainer}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {savedCourts.length > 0 ? (
+                savedCourts.map((court) => (
+                  <TouchableOpacity
+                    key={court.id}
+                    style={styles.card}
+                    onPress={() => handleCourtPress(court)} // You define this
+                    activeOpacity={0.8}
+                  >
+                    <Image source={court.image} style={styles.cardImage} />
+                    <View style={styles.cardTextContainer}>
+                      <Text style={styles.cardTitle}>{court.name}</Text>
+                      <Text style={styles.cardSubtitle}>{court.location}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.dynamicText}>No saved courts yet.</Text>
+              )}
+            </ScrollView>
+          )}
+          {selectedItem === "Achievements" && <ProfileData />}
+          {selectedItem === "Rewards" && (
+            <Text style={styles.dynamicText}>
+              🎁 Rewards or statistics shown here.
+            </Text>
+          )}
+        </Animated.View>
+      </Animated.ScrollView>
+    </View>
   );
-}
-
-
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-   
+
     marginTop: 25,
-    
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
     color: Colors.primary,
   },
   subHeader: {
     fontSize: 24,
-    color: '#666',
+    color: "#666",
   },
   titleText: {
     color: Colors.dark,
@@ -456,7 +464,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 20,
   },
-   menuItem: {
+  menuItem: {
     flex: 1,
     flexDirection: "column",
     padding: 10,
@@ -469,12 +477,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   savedListContainer: {
-  maxHeight: 300, // You can adjust based on your layout
-  paddingHorizontal: 10,
-},
-scrollContent: {
-  paddingBottom: 10,
-},
+    maxHeight: 300, // You can adjust based on your layout
+    paddingHorizontal: 10,
+  },
+  scrollContent: {
+    paddingBottom: 10,
+  },
 
   menuContainer: {
     flexDirection: "row",
@@ -488,7 +496,6 @@ scrollContent: {
     borderColor: Colors.primary,
     marginTop: 100,
     height: 200,
-    
   },
   dynamicText: {
     fontSize: 18,
@@ -499,61 +506,55 @@ scrollContent: {
     borderRadius: 10,
   },
 
-  image:{
+  image: {
     height: IMG_HEIGHT,
     width: width,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-
   },
   bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
     marginRight: 20,
-
-    
   },
-  header :{
-    backgroundColor: 'transparent',
+  header: {
+    backgroundColor: "transparent",
     height: 80,
-    
   },
-  
-card: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#fff",
-  padding: 10,
-  marginBottom: 10,
-  borderRadius: 10,
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 3,
-},
-cardImage: {
-  width: 60,
-  height: 60,
-  borderRadius: 8,
-  marginRight: 10,
-},
-cardTextContainer: {
-  flex: 1,
-},
-cardTitle: {
-  fontSize: 16,
-  fontWeight: "bold",
-},
-cardSubtitle: {
-  fontSize: 14,
-  color: "gray",
-},
+
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  cardImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  cardTextContainer: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "gray",
+  },
 });
 
 export default ProfileHeader;
-
-
