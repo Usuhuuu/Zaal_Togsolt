@@ -226,6 +226,7 @@ export const TabsLayout = () => {
       <Tabs.Screen
         name="profile"
         options={{
+         
           tabBarLabel: `${t("profile")}`, // Profile Tab
           tabBarIcon: ({ focused }) => (
             <View
@@ -243,7 +244,7 @@ export const TabsLayout = () => {
               />
             </View>
           ),
-          headerShown: !LoginStatus ? true : false,
+          headerShown: !LoginStatus,
           headerTitle: !LoginStatus ? t("aboutUs.login") : t("profile"),
           headerStyle: {},
           headerTitleStyle: {

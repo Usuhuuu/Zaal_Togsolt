@@ -56,53 +56,9 @@ const NormalUser: React.FC<ProfileNormalUserProps> = ({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.titleBar}>
-          <TouchableOpacity onPress={handleBackPress} style={{ backgroundColor: Colors.primary , borderRadius: 20, padding: 5}}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleSharePress} style={{ backgroundColor: Colors.primary , borderRadius: 20, padding: 5}}>
-            <Ionicons name="share-social" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              router.push(
-                "/settings/profileSettings" as Href<"/settings/profileSettings">
-              )
-            }
-            style={{ backgroundColor: Colors.primary , borderRadius: 20, padding: 5}}
-          >
-            <Ionicons name="settings" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        <ProfileHeader
-          copyToClipboard={copyToClipboard}
-          profileImageUri="https://example.com/profile.jpg"
-          firstName={formData[0]?.firstName}
-          unique_user_ID={formData[0].unique_user_ID}
-        />
+      <ProfileHeader>
         
-        
-
-        {/* Button to open modal */}
-        <View style={styles.saved}>
-          <TouchableOpacity style={styles.savedBackground} onPress={openModal}>
-            <ImageBackground
-              source={require("@/assets/images/zurag1.jpg")} // Replace with your image path
-              resizeMode="cover"
-              borderRadius={20} // Rounded corners
-              style={styles.savedBackground}
-            >
-              <Text style={styles.savedText}>Saved Records</Text>
-              <ImageBackground
-                source={require("@/assets/images/saved.png")} // Replace with your image path
-                style={styles.savedicon}
-              />
-            </ImageBackground>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      </ProfileHeader>
 
       {/* Modal */}
       <Modal
@@ -143,7 +99,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 50, // Adjust for safe area / image space
+    marginTop: 40, // Adjust for safe area / image space
     marginHorizontal: 15,
     backgroundColor: "transparent", // ✅ make background transparent
     position: "absolute", // ✅ position it on top of the content

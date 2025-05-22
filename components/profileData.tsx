@@ -50,8 +50,8 @@ const categories = [
 const ProfileData = () => {
   const menuScrollRef = useRef<ScrollView>(null);
   const categoryScrollRef = useRef<ScrollView>(null);
-  const menuItemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
-  const categoryItemsRef = useRef<(typeof TouchableOpacity | null)[]>([]);
+  const menuItemsRef = useRef<(View | null)[]>([]);
+  const categoryItemsRef = useRef<(View | null)[]>([]);
   const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(
     null
@@ -76,28 +76,38 @@ const ProfileData = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const selectCategory = (index: number) => {
-    const selected = categoryItemsRef.current[index];
-    setActiveCategoryIndex(index);
-    setSelectedDetails(categories[index].details);
-    if (selected) {
-      (selected as unknown as View).measure(
-        (_fx, fy, width, height, px, py) => {
-          categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
-        }
-      );
-    }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
+ const handleCategoryPress = (index: number) => {
+  const selected = categoryItemsRef.current[index];
 
-  const toggleDetails = () => {
-    setShowDetails((prev) => !prev);
+  if (activeCategoryIndex === index) {
+    // Do nothing if same item is pressed again
+    return;
+  }
+
+  setActiveCategoryIndex(index);
+  setSelectedDetails(categories[index].details);
+  setShowDetails(true);
+
+  if (selected) {
+    (selected as unknown as View).measure((_fx, _fy, _width, _height, px, _py) => {
+      categoryScrollRef.current?.scrollTo({ x: px - 16, animated: true });
+    });
+  }
+
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+  // Animate after short delay to ensure state is applied
+  setTimeout(() => {
     Animated.timing(animatedHeight, {
-      toValue: showDetails ? 0 : 200,
+      toValue: 200,
       duration: 300,
       useNativeDriver: false,
     }).start();
-  };
+  }, 50); // slight delay ensures state is updated
+};
+
+
+
 
   const doughnutData = [
     {
@@ -130,13 +140,7 @@ const ProfileData = () => {
 
       <View style={styles.header}>
         <Text style={styles.activityTitle}>minii amjilt</Text>
-        <TouchableOpacity style={styles.goalContainer} onPress={toggleDetails}>
-          <MaterialIcons
-            name={showDetails ? "expand-less" : "expand-more"}
-            size={24}
-            color="black"
-          />
-        </TouchableOpacity>
+        
       </View>
 
       {/* CATEGORIES */}
@@ -154,7 +158,9 @@ const ProfileData = () => {
                 ? styles.categoriesBtnActive
                 : styles.categoriesBtn
             }
-            onPress={() => selectCategory(index)}
+            onPress={() => {
+              handleCategoryPress(index);
+            }}
           >
             <View style={styles.iconContainer}>
               <Image source={item.source} style={iconStyles} />
