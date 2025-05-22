@@ -8,4 +8,6 @@ export default {
   secondary: `#b0d9fc`,
   darkGrey: `#767676`,
   blue: `#007AFF`,
+  littleDark:"#464646",
+  littleDarkGrey:"#BDBDBD",
 };
