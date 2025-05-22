@@ -40,13 +40,20 @@ const MemberModal: React.FC<MemberModalProps> = ({
 
   const snapPoints = useMemo(() => ["10%"], ["40%"]);
 
-  const { data } = regular_swr({
-    item: {
-      pathname: `/auth/profile/${memberData[0].group_ID}?page=${1}&limit=${10}`,
-      cacheKey: `${memberData[0].group_ID}_group_members`,
-      loginStatus: LoginStatus,
+  const { data } = regular_swr(
+    {
+      item: {
+        pathname: `/auth/profile/${
+          memberData[0].group_ID
+        }?page=${1}&limit=${10}`,
+        cacheKey: `${memberData[0].group_ID}_group_members`,
+        loginStatus: LoginStatus,
+      },
     },
-  });
+    {
+      revalidateOnMount: true,
+    }
+  );
 
   const fetched_member: Members[] = data?.userData?.members || [];
   const displayedMembers = showAll

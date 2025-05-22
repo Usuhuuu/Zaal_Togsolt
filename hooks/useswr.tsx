@@ -47,8 +47,7 @@ export const auth_swr = (
   } = useSWR(loginStatus ? [cacheKey, loginStatus] : null, {
     fetcher: () => fetchRoleAndProfile(`${pathname}`, loginStatus ?? false),
     revalidateOnFocus: config?.revalidateOnFocus ?? false,
-    refreshInterval: config?.refreshInterval ?? 60 * 1000,
-    revalidateOnMount: true, //config?.revalidateOnMount ?? false,
+    revalidateOnMount: config?.revalidateOnMount ?? false,
     shouldRetryOnError: false,
     errorRetryInterval: 4000,
     errorRetryCount: 3,

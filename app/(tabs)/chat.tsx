@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  Image,
 } from "react-native";
 import { Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
@@ -279,6 +280,7 @@ const ChatComponent: React.FC = () => {
   const [childModalVisible, setChildModalVisible] = useState<boolean>(false);
   const [activeUserData, setActiveUserData] = useState<ActiveUserType[]>([]);
   const [fullScreenShow, setFullScreenShow] = useState<boolean>(false);
+  const [noChatExist, setNoChatExist] = useState<boolean>(false);
 
   const socketRef = useRef<Socket | null>(null);
   const flatListRef = useRef<FlatList | null>(null);
@@ -305,6 +307,7 @@ const ChatComponent: React.FC = () => {
     },
     {
       revalidateOnReconnect: true,
+      revalidateOnMount: true,
     }
   );
 
@@ -327,6 +330,7 @@ const ChatComponent: React.FC = () => {
   );
 
   useEffect(() => {
+    console.log(chatData, chatError, chatLoading);
     if (chatLoading) {
       setLoading(true);
     } else if (chatData && chatData.success) {
@@ -384,6 +388,10 @@ const ChatComponent: React.FC = () => {
           };
         })
       );
+      setFullScreenShow(true);
+    } else if (chatData && !chatData.success) {
+      console.log("no chat ");
+      setNoChatExist(true);
       setFullScreenShow(true);
     } else if (chatError) {
       setFullScreenShow(true);
@@ -673,115 +681,150 @@ const ChatComponent: React.FC = () => {
 
   return (
     <>
-      {!fullScreenShow ? (
+      {noChatExist ? (
         <View
-          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+          style={{
+            width: "100%",
+            height: "100%",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <ActivityIndicator size={"large"} color={Colors.primary} />
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Image
+              source={require("@/assets/images/profileIcons/no_chat_img.png")}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+            />
+          </View>
         </View>
       ) : (
-        <View style={[styles.container]}>
-          {userLoading ? (
-            <View>
-              <ActivityIndicator color={Colors.primary} size={"small"} />
-            </View>
-          ) : (
+        <>
+          {!fullScreenShow ? (
             <View
               style={{
-                width: width,
-                height: height - bottom,
+                justifyContent: "center",
+                alignItems: "center",
+                flex: 1,
               }}
             >
-              <FlatList
-                data={chatGroups}
-                style={styles.groupItemContainer}
-                renderItem={({ item }) => (
-                  <>
-                    {item.group_chat_name !== "Direct Chat" && (
-                      <View style={styles.groupItem}>
-                        <TouchableOpacity
-                          onPress={() => {
-                            if (item.individualChat) {
-                              router.push(
-                                `/(modals)/chat/${item.group_chat_name}`
-                              );
-                            } else {
-                              joinSpecificChat(item.group_ID ?? "");
-                            }
-                          }}
-                          style={{ flexDirection: "row", padding: 5, gap: 5 }}
-                        >
-                          <Avatar.Image
-                            size={40}
-                            source={require("@/assets/images/sportHall_Icon_full_primary.png")}
-                            theme={{
-                              colors: { primary: Colors.white },
-                            }}
-                          />
-                          <View
-                            style={{
-                              flex: 1,
-                              flexWrap: "wrap",
-                              flexDirection: "row",
-                              gap: 5,
-                            }}
-                          >
-                            {item.sportHallName &&
-                            item.date &&
-                            item.startTime &&
-                            item.endTime ? (
-                              <>
-                                <Text style={{ fontWeight: 600 }}>
-                                  {item.sportHallName}
-                                </Text>
-                                <Text style={{ fontWeight: 800 }}>-</Text>
-                                <Text style={{ fontWeight: 300 }}>
-                                  {item.date
-                                    ? format(new Date(item.date), "MMMM dd")
-                                    : ""}
-                                </Text>
-                                <Text>
-                                  {item.startTime} - {item.endTime}
-                                </Text>
-                              </>
-                            ) : (
-                              <Text>{item.group_chat_name}</Text>
-                            )}
+              <ActivityIndicator size={"large"} color={Colors.primary} />
+            </View>
+          ) : (
+            <View style={[styles.container]}>
+              {userLoading ? (
+                <View>
+                  <ActivityIndicator color={Colors.primary} size={"small"} />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    width: width,
+                    height: height - bottom,
+                  }}
+                >
+                  <FlatList
+                    data={chatGroups}
+                    style={styles.groupItemContainer}
+                    renderItem={({ item }) => (
+                      <>
+                        {item.group_chat_name !== "Direct Chat" && (
+                          <View style={styles.groupItem}>
+                            <TouchableOpacity
+                              onPress={() => {
+                                if (item.individualChat) {
+                                  router.push(
+                                    `/(modals)/chat/${item.group_chat_name}`
+                                  );
+                                } else {
+                                  joinSpecificChat(item.group_ID ?? "");
+                                }
+                              }}
+                              style={{
+                                flexDirection: "row",
+                                padding: 5,
+                                gap: 5,
+                              }}
+                            >
+                              <Avatar.Image
+                                size={40}
+                                source={require("@/assets/images/sportHall_Icon_full_primary.png")}
+                                theme={{
+                                  colors: { primary: Colors.white },
+                                }}
+                              />
+                              <View
+                                style={{
+                                  flex: 1,
+                                  flexWrap: "wrap",
+                                  flexDirection: "row",
+                                  gap: 5,
+                                }}
+                              >
+                                {item.sportHallName &&
+                                item.date &&
+                                item.startTime &&
+                                item.endTime ? (
+                                  <>
+                                    <Text style={{ fontWeight: 600 }}>
+                                      {item.sportHallName}
+                                    </Text>
+                                    <Text style={{ fontWeight: 800 }}>-</Text>
+                                    <Text style={{ fontWeight: 300 }}>
+                                      {item.date
+                                        ? format(new Date(item.date), "MMMM dd")
+                                        : ""}
+                                    </Text>
+                                    <Text>
+                                      {item.startTime} - {item.endTime}
+                                    </Text>
+                                  </>
+                                ) : (
+                                  <Text>{item.group_chat_name}</Text>
+                                )}
+                              </View>
+                            </TouchableOpacity>
                           </View>
-                        </TouchableOpacity>
-                      </View>
+                        )}
+                      </>
                     )}
-                  </>
-                )}
-                keyExtractor={(item) =>
-                  item.group_ID ||
-                  (item.individualChat ?? JSON.stringify(Math.random()))
-                }
+                    keyExtractor={(item) =>
+                      item.group_ID ||
+                      (item.individualChat ?? JSON.stringify(Math.random()))
+                    }
+                  />
+                </View>
+              )}
+
+              <MainChatModal
+                mainModalShow={mainModalShow}
+                setmainModalShow={setmainModalShow}
+                isitReady={isitReady}
+                setChildModalVisible={setChildModalVisible}
+                childModalVisible={childModalVisible}
+                message={messagesMap}
+                loadOlderMsj={loadOlderMsj}
+                loading={loading}
+                flatListRef={flatListRef}
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                sendMessage={sendMessage}
+                renderChatItem={renderChatItem}
+                memberData={chatGroups}
+                activeUserData={activeUserData}
+                socketRef={socketRef}
+                groupID={currentChatId.current}
+                refreshFlag={refreshFlag}
               />
             </View>
           )}
-
-          <MainChatModal
-            mainModalShow={mainModalShow}
-            setmainModalShow={setmainModalShow}
-            isitReady={isitReady}
-            setChildModalVisible={setChildModalVisible}
-            childModalVisible={childModalVisible}
-            message={messagesMap}
-            loadOlderMsj={loadOlderMsj}
-            loading={loading}
-            flatListRef={flatListRef}
-            newMessage={newMessage}
-            setNewMessage={setNewMessage}
-            sendMessage={sendMessage}
-            renderChatItem={renderChatItem}
-            memberData={chatGroups}
-            activeUserData={activeUserData}
-            socketRef={socketRef}
-            groupID={currentChatId.current}
-            refreshFlag={refreshFlag}
-          />
-        </View>
+        </>
       )}
     </>
   );

@@ -6,41 +6,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   Text,
+  SafeAreaView,
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
-
-type TimeSlotProps = {
-  timeString: string;
-  isDisabled: boolean;
-  isPending: boolean;
-  handlePressTimeSlot: (timeSlot: string) => void;
-};
-const TimeSlot: React.FC<TimeSlotProps> = React.memo(
-  ({ timeString, isDisabled, isPending, handlePressTimeSlot }) => {
-    return (
-      <View style={styles.timeSlotView}>
-        <TouchableOpacity
-          onPress={() => handlePressTimeSlot(timeString)}
-          disabled={isDisabled}
-          style={[
-            styles.lalarinSdaBtn,
-            {
-              backgroundColor: isDisabled
-                ? "red"
-                : isPending
-                ? "yellow"
-                : "white",
-              opacity: isDisabled || isPending ? 0.5 : 1,
-            },
-          ]}
-        >
-          <Text>{timeString}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-);
+import { Ionicons } from "@expo/vector-icons";
 
 export type FormData = {
   sportHallID: string;
@@ -53,49 +23,105 @@ type baseTimeSlotType = {
   end_time: string;
 };
 
+type TimeSlotItemProps = {
+  timeSlot: {
+    start_time: string;
+    end_time: string;
+  };
+  unavailableTimes: any[];
+  selectedTimeSlots: string[];
+  onSelect: (timeString: string[]) => void;
+};
+
+const TimeSlotItem: React.FC<TimeSlotItemProps> = React.memo(
+  ({ timeSlot, unavailableTimes, selectedTimeSlots, onSelect }) => {
+    const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
+    const isDisabled = unavailableTimes.some(
+      (time) => time.time === timeString && time.status.includes("Completed")
+    );
+    const isPending = unavailableTimes.some(
+      (time) => time.time === timeString && time.status.includes("Pending")
+    );
+
+    return (
+      <View style={styles.timeSlotView}>
+        <TouchableOpacity
+          onPress={() => {
+            const newSelected = selectedTimeSlots.filter(
+              (t) => t !== "WHOLE_DAY"
+            );
+            if (selectedTimeSlots.includes(timeString)) {
+              onSelect(newSelected.filter((t) => t !== timeString));
+            } else {
+              onSelect([...newSelected, timeString]);
+            }
+          }}
+          disabled={isDisabled}
+          style={[
+            styles.lalarinSdaBtn,
+            {
+              backgroundColor: isDisabled
+                ? "red"
+                : isPending
+                ? "yellow"
+                : "white",
+              opacity: isDisabled || isPending ? 0.5 : 1,
+              borderColor: selectedTimeSlots.includes(timeString)
+                ? Colors.dark
+                : Colors.littleDarkGrey,
+            },
+          ]}
+        >
+          <Text style={{ color: Colors.darkGrey }}>{timeString}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.selectedTimeSlots === nextProps.selectedTimeSlots &&
+    prevProps.unavailableTimes === nextProps.unavailableTimes
+);
 interface OrderScreenProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
   baseTimeSlot: baseTimeSlotType[];
   sportHallID: string;
+  setIsOrderScreenVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
 const OrderScreen: React.FC<OrderScreenProps> = ({
   formData,
   setFormData,
   baseTimeSlot,
   sportHallID,
+  setIsOrderScreenVisible,
 }) => {
   const [today, setToday] = useState<string>(new Date().toISOString());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
-  const [zahialgaBtn, setZahialgaBtn] = useState<boolean>(false);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
 
   const dateSlotGiver = async (date: Date) => {
     setIsLoading(true);
+    setSelectedTimeSlots([]);
     try {
       const odor: string = date.toISOString().split("T")[0];
-
       setToday(odor);
-      console.log(formData.sportHallID);
-      const tempZaal = "674c9367f5b8455cd83d70c2";
-      console.log(tempZaal);
-
       const response = await axiosInstanceRegular.get("/timeslotscheck", {
-        params: { zaalniID: tempZaal, odor },
+        params: { zaalniID: sportHallID, odor },
       });
+      console.log(response.status);
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
-  console.log(sportHallID);
-  const handlePressTimeSlot = (timeSlot: any) => {
-    console.log(`Time slot pressed: ${timeSlot}`);
-    setZahialgaBtn(true);
+  const handleOrder = () => {
+    console.log(selectedTimeSlots);
+    console.log("order process");
   };
+
   return (
     <View style={styles.zahialgaView}>
       {isLoading ? (
@@ -108,49 +134,147 @@ const OrderScreen: React.FC<OrderScreenProps> = ({
           <ActivityIndicator size="large" color="blue" style={styles.loader} />
         </View>
       ) : (
-        <>
-          <CalendarStrip
-            style={styles.calendars}
-            daySelectionAnimation={{
-              type: "background",
-              duration: 200,
-              highlightColor: Colors.primary,
-              animType: "timing",
-              animUpdateType: "timing",
-              animProperty: "backgroundColor",
-              animSpringDamping: 1,
+        <SafeAreaView
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: Colors.white,
+          }}
+        >
+          <View
+            style={{
+              height: "20%",
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
-            selectedDate={new Date(today)}
-            onDateSelected={(date: any) => dateSlotGiver(date)}
-            calendarAnimation={{ type: "sequence", duration: 5 }}
-            dateNumberStyle={{ fontSize: 18, fontWeight: "400" }}
-            dateNameStyle={{ fontSize: 10, fontWeight: "400" }}
-            calendarHeaderStyle={{ fontSize: 18, fontWeight: "500" }}
-          />
+          >
+            <TouchableOpacity
+              onPress={() => setIsOrderScreenVisible(false)}
+              style={{
+                width: "5%",
+                height: "30%",
+              }}
+            >
+              <Ionicons name="close" size={20} color={Colors.darkGrey} />
+            </TouchableOpacity>
+            <CalendarStrip
+              style={styles.calendars}
+              selectedDate={new Date(today)}
+              calendarAnimation={{ type: "parallel", duration: 30 }}
+              onDateSelected={(date: any) => dateSlotGiver(date)}
+              dateNumberStyle={{
+                fontSize: 18,
+                fontWeight: "400",
+                color: "#464646",
+              }}
+              dateNameStyle={{
+                fontSize: 10,
+                fontWeight: "400",
+                color: Colors.littleDark,
+              }}
+              calendarHeaderStyle={{
+                fontSize: 18,
+                fontWeight: "500",
+                color: Colors.littleDark,
+              }}
+              calendarHeaderContainerStyle={{
+                width: "100%",
+                height: "30%",
+              }}
+            />
+            <View
+              style={{
+                width: "5%",
+                height: "30%",
+              }}
+            ></View>
+          </View>
+          {/* Header */}
+
           <View style={styles.LLR_style}>
             {/* Render available and unavailable time slots */}
-            {baseTimeSlot?.map((timeSlot, index) => {
-              const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
-              const isDisabled = unavailableTimes.some(
-                (time: any) =>
-                  time.time === timeString && time.status.includes("Completed")
-              );
-              const isPending = unavailableTimes.some(
-                (time: any) =>
-                  time.time === timeString && time.status.includes("Pending")
-              );
-              return (
-                <TimeSlot
-                  key={index}
-                  timeString={timeString}
-                  isDisabled={isDisabled}
-                  isPending={isPending}
-                  handlePressTimeSlot={handlePressTimeSlot}
+            <View
+              style={{
+                paddingVertical: 20,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  borderColor: selectedTimeSlots.includes("WHOLE_DAY")
+                    ? Colors.darkGrey
+                    : Colors.littleDarkGrey,
+                  borderWidth: 1,
+                  padding: 15,
+                  borderRadius: 5,
+                }}
+                onPress={() => {
+                  setSelectedTimeSlots(["WHOLE_DAY"]);
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: 20,
+                    color: Colors.littleDark,
+                  }}
+                >
+                  Select Whole Day
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={{
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                flexDirection: "row",
+              }}
+            >
+              {baseTimeSlot?.map((timeSlot) => (
+                <TimeSlotItem
+                  key={`${timeSlot.start_time}~${timeSlot.end_time}`}
+                  timeSlot={timeSlot}
+                  unavailableTimes={unavailableTimes}
+                  selectedTimeSlots={selectedTimeSlots}
+                  onSelect={setSelectedTimeSlots}
                 />
-              );
-            })}
+              ))}
+            </View>
           </View>
-        </>
+          <View
+            style={{
+              justifyContent: "center",
+              width: "100%",
+              alignItems: "center",
+            }}
+          >
+            {selectedTimeSlots.length !== 0 && (
+              <TouchableOpacity
+                style={{
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  padding: 15,
+                  width: "50%",
+                  borderRadius: 5,
+                  borderColor: Colors.primary,
+                  backgroundColor: Colors.secondary,
+                }}
+                onPress={() => handleOrder()}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: 20,
+                    fontWeight: 400,
+                    color: Colors.littleDark,
+                  }}
+                >
+                  Order
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </SafeAreaView>
       )}
     </View>
   );
@@ -161,23 +285,21 @@ export default OrderScreen;
 const styles = StyleSheet.create({
   loader: {
     height: "100%",
-    color: "black",
   },
   zahialgaView: {
-    height: "95%",
-    paddingBottom: "30%",
-    borderBottomWidth: 1,
-    borderColor: Colors.primary,
     width: "100%",
+    height: "100%",
+    flex: 1,
+    backgroundColor: Colors.white,
   },
   timeSlotView: {
-    paddingTop: 10,
     flexDirection: "row",
     //backgroundColor: "black",
   },
   lalarinSdaBtn: {
-    borderWidth: 0.5,
-    borderRadius: 20,
+    borderWidth: 1,
+
+    borderRadius: 5,
     marginBottom: 10,
     width: "50%",
     padding: 10,
@@ -186,13 +308,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   calendars: {
-    height: "20%",
-    borderBottomWidth: 1,
-    borderColor: Colors.primary,
+    height: "100%",
+    width: "90%",
   },
   LLR_style: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    padding: 10,
   },
 });

@@ -113,8 +113,7 @@ const DetailsPage = () => {
     endTime: "",
   });
 
-  const router = useRouter();
-  const { addHall } = useSavedHalls();
+ 
 
   
 
@@ -501,13 +500,11 @@ const DetailsPage = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity onPress={() => setIsOrderScreenVisible(false)}>
-              <Ionicons name="close" size={24} color={Colors.grey} />
-            </TouchableOpacity>
             <OrderScreen
               formData={formData}
               setFormData={setFormData}
               sportHallID={listing?.sportHallID ?? ""}
+              setIsOrderScreenVisible={setIsOrderScreenVisible}
               baseTimeSlot={
                 Array.isArray(listing?.availableTimeSlots)
                   ? listing.availableTimeSlots
@@ -669,8 +666,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   modalContent: {
-    backgroundColor: Colors.white,
-    padding: 20,
+    backgroundColor: Colors.light,
     borderRadius: 10,
     width: "90%",
     height: "90%",

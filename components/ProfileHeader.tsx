@@ -16,7 +16,7 @@ import ProfileData from './profileData';
 
 import Colors from '../constants/Colors';
 import { FlatList, ScrollView } from "react-native-gesture-handler";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
 import { auth_swr } from "@/hooks/useswr";
 import { useAuth } from "@/app/(modals)/context/authContext";
@@ -29,7 +29,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 
 
 const IMG_HEIGHT = 200;
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 interface UserData {
   unique_user_ID: string;
   firstName?: string;
@@ -43,7 +43,6 @@ interface SavedCourt {
   image: any; // You can use ImageSourcePropType for stricter typing
   location: string;
 }
-
 
 
 interface ProfileHeaderProps {
@@ -60,7 +59,15 @@ const menu = [
   { name: "Rewards", icon: require("@/assets/tab-icons/athlete.png") },
 ];
 
-function CarouselItem({ item, index, scrollX }: { item: any; index: number; scrollX: any }) {
+function CarouselItem({
+  item,
+  index,
+  scrollX,
+}: {
+  item: any;
+  index: number;
+  scrollX: any;
+}) {
   const animatedStyle = useAnimatedStyle(() => {
     const inputRange = [index - 1, index, index + 1];
     const scale = interpolate(scrollX.value, inputRange, [0.7, 1, 0.7], );
@@ -85,14 +92,21 @@ function CarouselItem({ item, index, scrollX }: { item: any; index: number; scro
   );
 }
 
-
-
 const _itemSize = width / 3;
 const _spacing = 10;
 const _itemTotalSize = _itemSize + _spacing;
 
+interface Court {
+  id: string;
+  name: string;
+  image: any; // You can use ImageSourcePropType from 'react-native' for stricter typing
+  location: string;
+}
 
-
+const handleCourtPress = (court: Court): void => {
+  console.log("Tapped court:", court.name);
+  // You can navigate or show details here
+};
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   copyToClipboard,
@@ -102,29 +116,38 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 }) => {
   const flatListRef = useRef<FlatList>(null);
 
-
-  const scrollref = useAnimatedRef<Animated.ScrollView>();
+  const scrollref = useAnimatedRef<Animated.ScrollView>(null);
   const scrollOffset = useScrollViewOffset(scrollref);
   const navigation = useNavigation();
 
-
   const [userData, setUserData] = useState<UserData | null>(null);
   const scrollX = useSharedValue(0);
-   const { LoginStatus, logIn } = useAuth();
+  const { LoginStatus, logIn } = useAuth();
   const [selectedItem, setSelectedItem] = useState(menu[1].name); // Default center
-   const { data, error } = auth_swr(
-      {
-        item: {
-          pathname: "main",
-          cacheKey: "RoleAndProfile_main",
-          loginStatus: LoginStatus,
-        },
+
+  const { data, error } = auth_swr(
+    {
+      item: {
+        pathname: "main",
+        cacheKey: "RoleAndProfile_main",
+        loginStatus: LoginStatus,
       },
-      {
-        revalidateOnFocus: true,
-        revalidateOnMount: true,
+    },
+    {
+      revalidateOnFocus: true,
+    }
+  );
+  useEffect(() => {
+    const loadSavedCourts = async () => {
+      try {
+        const data = await AsyncStorage.getItem("savedCourts");
+        if (data) setSavedCourts(JSON.parse(data));
+      } catch (error) {
+        console.error("Error loading courts:", error);
       }
-    );
+    };
+    loadSavedCourts();
+  }, []);
 
     const [savedCourts, setSavedCourts] = useState<SavedCourt[]>([]);
 
@@ -196,7 +219,9 @@ const renderRightActions = (courtId: string) => (
   });
 
   const handleMomentumScrollEnd = (event: any): void => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / _itemTotalSize);
+    const index = Math.round(
+      event.nativeEvent.contentOffset.x / _itemTotalSize
+    );
     setSelectedItem(menu[index]?.name);
   };
    useEffect(() => {
@@ -221,7 +246,25 @@ const renderRightActions = (courtId: string) => (
         typeof data.profileData == "string"
           ? JSON.parse(data.profileData)
           : data.profileData;
-  
+      setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
+      logIn();
+    } else if (error) {
+      //logOut();
+      console.log("Error fetching user data: Pisda", error);
+    }
+  }, [data, error]);
+
+  useEffect(() => {
+    //console.log("LoginStatus changed:", LoginStatus);
+  }, [LoginStatus]);
+
+  useEffect(() => {
+    if (data) {
+      const parsedData =
+        typeof data.profileData == "string"
+          ? JSON.parse(data.profileData)
+          : data.profileData;
+
       setUserData(Array.isArray(parsedData) ? parsedData[0] : parsedData);
       logIn();
     } else if (error) {
@@ -229,61 +272,48 @@ const renderRightActions = (courtId: string) => (
     }
   }, [data, error]);
 
-  
-
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      headerTitle: '',
+      headerTitle: "",
       headerTransparent: true,
-      headerTintColor: 'transparent',
-      
+      headerTintColor: "transparent",
+
       headerStyle: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         elevation: 0,
         shadowOpacity: 0,
-        
-       
-
       },
-
     });
     navigation.setOptions({
-      headerBackground: () => (
-        <Animated.View
-        style = {[styles.header]}
-        />
-      ),
+      headerBackground: () => <Animated.View style={[styles.header]} />,
       headerRight: () => (
         <View style={styles.bar}>
-          <TouchableOpacity onPress={() => Share.share({
-            message: 'Check out this profile!',
-          })}>
-           <Image
-              source={require('@/assets/images/listingicons/share.png')}
+          <TouchableOpacity
+            onPress={() =>
+              Share.share({
+                message: "Check out this profile!",
+              })
+            }
+          >
+            <Image
+              source={require("@/assets/images/listingicons/share.png")}
               style={{ width: 30, height: 30 }}
             />
           </TouchableOpacity>
         </View>
       ),
       headerLeft: () => (
-        <View style={{marginLeft: 10
-
-
-        }}>
-          
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-         <Image
-            source={require('@/assets/images/listingicons/arrow.png')}
-            style={{ width: 30, height: 30 }}
-          />
-        </TouchableOpacity>
+        <View style={{ marginLeft: 10 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require("@/assets/images/listingicons/arrow.png")}
+              style={{ width: 30, height: 30 }}
+            />
+          </TouchableOpacity>
         </View>
       ),
-    
     });
-
   }, [navigation]);
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
@@ -293,9 +323,9 @@ const renderRightActions = (courtId: string) => (
         {
           translateY: interpolate(
             scrollOffset.value,
-          [-IMG_HEIGHT, 0, IMG_HEIGHT],
-          [-IMG_HEIGHT/2, 0, IMG_HEIGHT * 0.75],
-            'clamp'
+            [-IMG_HEIGHT, 0, IMG_HEIGHT],
+            [-IMG_HEIGHT / 2, 0, IMG_HEIGHT * 0.75],
+            "clamp"
           ),
         },
         {
@@ -303,86 +333,20 @@ const renderRightActions = (courtId: string) => (
             scrollOffset.value,
             [-IMG_HEIGHT, 0, IMG_HEIGHT],
             [1.5, 1, 0.75],
-            'clamp'
+            "clamp"
           ),
         },
       ],
     };
   });
 
-  
-
   return (
     <View style={styles.container}>
-       <LinearGradient
-              colors={["#e5f0ff", "#ffffff"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-             
-            />
-              
-  <Animated.ScrollView
-    ref={scrollref}
-    scrollEventThrottle={16}
-  >
-    <Animated.Image 
-      source={require('../assets/images/profileIcons/profile.jpg')}
-      style={[styles.image, imageAnimatedStyle]}
-      resizeMode="cover"
-    />
-
-    {/* Use a marginTop instead of position: 'absolute' */}
-    
-    <Animated.View
-
-      entering={SlideInDown}
-      style={{
-        marginTop: -20, // slight overlap if desired
-        marginHorizontal: 20,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        padding: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        borderWidth: 2,
-        borderColor: Colors.primary,
-      }}
-    >
-      <Text style={styles.headerTitle}>Profile</Text>
-      <Text style={styles.titleText}>Username :</Text>
-      <Text style={styles.subHeader}>{userData?.unique_user_ID}</Text>
-      <Text style={styles.titleText}>Name :</Text>
-      <Text style={styles.subHeader}>{userData?.firstName} {userData?.lastName}</Text>
-      <Text style={styles.titleText}>Email :</Text>
-      <Text style={styles.subHeader}>{userData?.email}</Text>
-    </Animated.View>
-
-    {/* Carousel Section */}
-    <Animated.View entering={SlideInDown} style={[styles.menuContainer, { marginTop: 30 }]}>
-      <Animated.FlatList
-        ref={flatListRef}
-        data={menu}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <CarouselItem item={item} index={index} scrollX={scrollX} />
-        )}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
-        scrollEventThrottle={16}
-        snapToInterval={_itemTotalSize}
-        decelerationRate="fast"
-        contentContainerStyle={{
-          paddingHorizontal: width / 2 - _itemSize / 2,
-          height: 200,
-        }}
-        style={{ flexGrow: 0, paddingVertical: 10 }}
+      <LinearGradient
+        colors={["#e5f0ff", "#ffffff"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       />
-    </Animated.View>
 
     {/* Dynamic Section */}
     <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
@@ -425,29 +389,116 @@ const renderRightActions = (courtId: string) => (
     )}
   </Animated.View>
 
-  </Animated.ScrollView>
-</View>
+        {/* Use a marginTop instead of position: 'absolute' */}
+
+        <Animated.View
+          entering={SlideInDown}
+          style={{
+            marginTop: -20, // slight overlap if desired
+            marginHorizontal: 20,
+            backgroundColor: "#fff",
+            borderRadius: 10,
+            padding: 20,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            borderWidth: 2,
+            borderColor: Colors.primary,
+          }}
+        >
+          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={styles.titleText}>Username :</Text>
+          <Text style={styles.subHeader}>{userData?.unique_user_ID}</Text>
+          <Text style={styles.titleText}>Name :</Text>
+          <Text style={styles.subHeader}>
+            {userData?.firstName} {userData?.lastName}
+          </Text>
+          <Text style={styles.titleText}>Email :</Text>
+          <Text style={styles.subHeader}>{userData?.email}</Text>
+        </Animated.View>
+
+        {/* Carousel Section */}
+        <Animated.View
+          entering={SlideInDown}
+          style={[styles.menuContainer, { marginTop: 30 }]}
+        >
+          <Animated.FlatList
+            ref={flatListRef}
+            data={menu}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <CarouselItem item={item} index={index} scrollX={scrollX} />
+            )}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            onScroll={onScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
+            scrollEventThrottle={16}
+            snapToInterval={_itemTotalSize}
+            decelerationRate="fast"
+            contentContainerStyle={{
+              paddingHorizontal: width / 2 - _itemSize / 2,
+              height: 200,
+            }}
+            style={{ flexGrow: 0, paddingVertical: 10 }}
+          />
+        </Animated.View>
+
+        {/* Dynamic Section */}
+        <Animated.View style={{ marginTop: 30, paddingHorizontal: 20 }}>
+          {selectedItem === "Saved Halls" && (
+            <ScrollView
+              style={styles.savedListContainer}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {savedCourts.length > 0 ? (
+                savedCourts.map((court) => (
+                  <TouchableOpacity
+                    key={court.id}
+                    style={styles.card}
+                    onPress={() => handleCourtPress(court)} // You define this
+                    activeOpacity={0.8}
+                  >
+                    <Image source={court.image} style={styles.cardImage} />
+                    <View style={styles.cardTextContainer}>
+                      <Text style={styles.cardTitle}>{court.name}</Text>
+                      <Text style={styles.cardSubtitle}>{court.location}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.dynamicText}>No saved courts yet.</Text>
+              )}
+            </ScrollView>
+          )}
+          {selectedItem === "Achievements" && <ProfileData />}
+          {selectedItem === "Rewards" && (
+            <Text style={styles.dynamicText}>
+              🎁 Rewards or statistics shown here.
+            </Text>
+          )}
+        </Animated.View>
+    </View>
   );
-}
-
-
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-   
+
     marginTop: 25,
-    
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
     color: Colors.primary,
   },
   subHeader: {
     fontSize: 24,
-    color: '#666',
+    color: "#666",
   },
   titleText: {
     color: Colors.dark,
@@ -463,7 +514,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 20,
   },
-   menuItem: {
+  menuItem: {
     flex: 1,
     flexDirection: "column",
     padding: 10,
@@ -476,12 +527,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   savedListContainer: {
-  maxHeight: 300, // You can adjust based on your layout
-  paddingHorizontal: 10,
-},
-scrollContent: {
-  paddingBottom: 10,
-},
+    maxHeight: 300, // You can adjust based on your layout
+    paddingHorizontal: 10,
+  },
+  scrollContent: {
+    paddingBottom: 10,
+  },
 
   menuContainer: {
     flexDirection: "row",
@@ -495,7 +546,6 @@ scrollContent: {
     borderColor: Colors.primary,
     marginTop: 100,
     height: 200,
-    
   },
   dynamicText: {
     fontSize: 18,
@@ -506,61 +556,55 @@ scrollContent: {
     borderRadius: 10,
   },
 
-  image:{
+  image: {
     height: IMG_HEIGHT,
     width: width,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-
   },
   bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
     marginRight: 20,
-
-    
   },
-  header :{
-    backgroundColor: 'transparent',
+  header: {
+    backgroundColor: "transparent",
     height: 80,
-    
   },
-  
-card: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#fff",
-  padding: 10,
-  marginBottom: 10,
-  borderRadius: 10,
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 3,
-},
-cardImage: {
-  width: 60,
-  height: 60,
-  borderRadius: 8,
-  marginRight: 10,
-},
-cardTextContainer: {
-  flex: 1,
-},
-cardTitle: {
-  fontSize: 16,
-  fontWeight: "bold",
-},
-cardSubtitle: {
-  fontSize: 14,
-  color: "gray",
-},
+
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  cardImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  cardTextContainer: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "gray",
+  },
 });
 
 export default ProfileHeader;
-
-
