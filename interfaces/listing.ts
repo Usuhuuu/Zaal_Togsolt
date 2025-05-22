@@ -12,6 +12,10 @@ interface SportHallFeature {
   billiards: boolean;
   darts: boolean;
 }
+interface SportHallPrice {
+  oneHour: string;
+  wholeDay: string;
+}
 
 export interface SportHallDataType {
   sportHallID: string;
@@ -20,7 +24,7 @@ export interface SportHallDataType {
   imageUrls: string[];
   phoneNumber: string;
   workTime: string;
-  price:string;
+  price:SportHallPrice;
   location: {
     latitude: string;
     longitude: string;

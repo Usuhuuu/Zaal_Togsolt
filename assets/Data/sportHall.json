@@ -6,7 +6,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "77112233",
     "workTime": "08:00-22:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "10:00", "end_time": "11:00" },
       { "start_time": "11:00", "end_time": "12:00" },
@@ -50,7 +53,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "77223344",
     "workTime": "09:00-23:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "16:00", "end_time": "18:00" }
@@ -82,7 +88,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "88009900",
     "workTime": "10:00-20:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -117,7 +126,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "99112233",
     "workTime": "06:00-22:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -152,7 +164,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "77445566",
     "workTime": "07:00-21:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -187,7 +202,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "88990077",
     "workTime": "08:00-20:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -222,7 +240,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "88008800",
     "workTime": "09:00-21:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -257,7 +278,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "99001122",
     "workTime": "06:00-22:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
    "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -292,7 +316,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "88887766",
     "workTime": "08:00-22:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },
@@ -327,7 +354,10 @@
     "imageUrls": ["https://images.adsttc.com/media/images/6111/a12c/770b/fe01/6517/ae05/newsletter/016-modrice-slavik.jpg?1628545353"],
     "phoneNumber": "77220011",
     "workTime": "07:00-21:00",
-    "price":"100",
+    "price":{
+      "oneHour":1000,
+      "wholeDay":24000
+    },
     "availableTimeSlots": [
       { "start_time": "08:00", "end_time": "10:00" },
       { "start_time": "10:00", "end_time": "12:00" },

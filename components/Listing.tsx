@@ -84,7 +84,7 @@ const ListingComponent = ({ listings: items, category }: Props) => {
                 <Text style={styles.text}>{item.neighbourhood}</Text> */}
               </View>
 
-              <Text style={styles.text}>${item.price} tugrug</Text>
+              <Text style={styles.text}>${item.price.oneHour} tugrug</Text>
 
               <TouchableOpacity style={styles.viewButton}>
                 <Image

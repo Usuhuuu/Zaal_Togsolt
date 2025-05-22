@@ -689,6 +689,7 @@ const ChatComponent: React.FC = () => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
+            backgroundColor: Colors.white,
           }}
         >
           <View
@@ -699,9 +700,20 @@ const ChatComponent: React.FC = () => {
           >
             <Image
               source={require("@/assets/images/profileIcons/no_chat_img.png")}
-              style={{ width: "100%", height: "100%" }}
+              style={{ width: 250, height: 200 }}
               resizeMode="cover"
             />
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontWeight: "bold", fontSize: 30 }}>
+              No Chats Yet
+            </Text>
+            <Text style={{ fontSize: 20, fontWeight: 300 }}>
+              Once you join a game or make a frind,
+            </Text>
+            <Text style={{ fontSize: 20, fontWeight: 300 }}>
+              your chats will appear here
+            </Text>
           </View>
         </View>
       ) : (

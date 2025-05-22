@@ -2025,7 +2025,7 @@ PODS:
   - RNGoogleSignin (13.2.0):
     - GoogleSignIn (~> 7.1)
     - React-Core
-  - RNReanimated (3.16.7):
+  - RNReanimated (3.17.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2037,7 +2037,9 @@ PODS:
     - React-Fabric
     - React-featureflags
     - React-graphics
+    - React-hermes
     - React-ImageManager
+    - React-jsi
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -2045,10 +2047,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 3.16.7)
-    - RNReanimated/worklets (= 3.16.7)
+    - RNReanimated/reanimated (= 3.17.5)
+    - RNReanimated/worklets (= 3.17.5)
     - Yoga
-  - RNReanimated/reanimated (3.16.7):
+  - RNReanimated/reanimated (3.17.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2060,7 +2062,9 @@ PODS:
     - React-Fabric
     - React-featureflags
     - React-graphics
+    - React-hermes
     - React-ImageManager
+    - React-jsi
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -2068,9 +2072,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 3.16.7)
+    - RNReanimated/reanimated/apple (= 3.17.5)
     - Yoga
-  - RNReanimated/reanimated/apple (3.16.7):
+  - RNReanimated/reanimated/apple (3.17.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2082,7 +2086,9 @@ PODS:
     - React-Fabric
     - React-featureflags
     - React-graphics
+    - React-hermes
     - React-ImageManager
+    - React-jsi
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -2091,7 +2097,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNReanimated/worklets (3.16.7):
+  - RNReanimated/worklets (3.17.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2103,7 +2109,33 @@ PODS:
     - React-Fabric
     - React-featureflags
     - React-graphics
+    - React-hermes
     - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNReanimated/worklets/apple (= 3.17.5)
+    - Yoga
+  - RNReanimated/worklets/apple (3.17.5):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.10.14.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -2720,7 +2752,7 @@ SPEC CHECKSUMS:
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
   RNGestureHandler: c5753d613f9a9ae4546e2c932f759db7c5f158d3
   RNGoogleSignin: b8760528f2a7cbe157ecfdcc13bdb7d2745c9389
-  RNReanimated: 6d22a1aec06a9787b797bc0c40fc2779be0599a5
+  RNReanimated: 9a9be32b5f0f613fa593dee04d1c992aafb85399
   RNScreens: 295d9c0aaeb7f680d03d7e9b476569a4959aae89
   RNSentry: 8c96b2bdad455fed97a50b2faeec5510a771dfb8
   RNSslPinning: 4478c22fed7179a22be2bdd7d7f235fc51bf85dc

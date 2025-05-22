@@ -118,7 +118,7 @@ const DetailsPage = () => {
   
 
   const { sportHallID } = useLocalSearchParams();
-  const listing = (SportHallData as SportHallDataType[]).find(
+  const listing = (SportHallData as unknown as SportHallDataType[]).find(
     (item) => item.sportHallID == sportHallID
   );
   const navigation = useNavigation();
@@ -453,7 +453,7 @@ const DetailsPage = () => {
           }}
         >
           <TouchableOpacity style={styles.footerText}>
-            <Text style={styles.footerPrice}>€{listing?.price}</Text>
+            <Text style={styles.footerPrice}>₮{listing?.price.oneHour}</Text>
             <Text>/1 tsag</Text>
           </TouchableOpacity>
 
