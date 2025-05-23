@@ -451,7 +451,7 @@ const DetailsPage = () => {
           }}
         >
           <TouchableOpacity style={styles.footerText}>
-            <Text style={styles.footerPrice}>€{listing?.price}</Text>
+            <Text style={styles.footerPrice}>€{listing?.price.oneHour}</Text>
             <Text>/1 tsag</Text>
           </TouchableOpacity>
 
