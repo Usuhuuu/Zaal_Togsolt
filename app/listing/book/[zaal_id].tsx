@@ -1,9 +1,17 @@
 import { useBookingStore } from "@/app/(modals)/context/store";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from "react-native";
 import Colors from "@/constants/Colors";
 import {
+  AntDesign,
   Feather,
   Ionicons,
   MaterialCommunityIcons,
@@ -12,6 +20,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import StepIndicator from "react-native-step-indicator";
 import { format } from "date-fns";
+import axiosInstance from "@/app/(modals)/functions/axiosInstance";
 
 const labels = ["Players Needed", "Confirm Info", "Booking Complete"];
 const customStyles = {
@@ -76,18 +85,60 @@ const groupConnectedTimeSlots = (slots: string[]) => {
 const TransactionPage = () => {
   const [steps, setSteps] = useState<number>(0);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[][]>([]);
-  const [playersNeeded, setPlayersNeeded] = useState("");
+  const [playersNeeded, setPlayersNeeded] = useState<{ [key: number]: number }>(
+    {}
+  );
 
-  const zaal_id = useLocalSearchParams();
   const bookingDetails = useBookingStore((state) => state.bookingDetails);
 
   useEffect(() => {
     setSelectedTimeSlots(() =>
       groupConnectedTimeSlots(bookingDetails?.selectedTimeSlots ?? [])
     );
-    console.log(selectedTimeSlots);
-    console.log(bookingDetails);
+    const total_player_number_needed = Object.values(playersNeeded).map(
+      (needed) => needed + 1
+    );
   }, []);
+
+  const paymentPerPeopleArray: number[] = [];
+  const totalBookerPaymentArray: number[] = [];
+
+  const handleOrder = async () => {
+    try {
+      const reservationBlocks = selectedTimeSlots.map((group, index) => {
+        const [startTime] = group[0].split("~");
+        const [, endTime] = group[group.length - 1].split("~");
+
+        return {
+          start_time: startTime,
+          end_time: endTime,
+          num_players: playersNeeded[index],
+          time_slots: group,
+        };
+      });
+
+      const response = await axiosInstance.post("/auth/reserve", {
+        sport_hall_id: bookingDetails?.sportHallID,
+        date: bookingDetails?.date,
+        total_amount:
+          (bookingDetails?.selectedTimeSlots?.length ?? 0) *
+          Number(bookingDetails?.price.oneHour),
+        one_hour_price: Number(bookingDetails?.price.oneHour),
+        reserved_blocks: reservationBlocks,
+      });
+      if (response.status === 200 && response.data.success) {
+        Alert.alert("Successfully Booked");
+        router.replace("/");
+      } else if (response.status === 400 && !response.data.success) {
+        Alert.alert("Already Booked");
+      }
+    } catch (err: any) {
+      console.log(err);
+      if (err.response.status === 400) {
+        Alert.alert("Already Booked");
+      }
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -132,7 +183,7 @@ const TransactionPage = () => {
             </TouchableOpacity>
           </View>
           {/* Body */}
-          <View
+          <ScrollView
             style={{
               backgroundColor: Colors.white,
               width: "100%",
@@ -255,19 +306,23 @@ const TransactionPage = () => {
                 </View>
                 <View
                   style={{
-                    justifyContent: "space-between",
+                    flexDirection: "row",
                     width: "90%",
-                    padding: 20,
+                    justifyContent: "center",
+                    gap: 20,
+                    alignItems: "center",
+                    flex: 1,
                   }}
                 >
+                  <View></View>
                   <TouchableOpacity
+                    style={[
+                      styles.buttons,
+                      { backgroundColor: Colors.primary },
+                    ]}
                     onPress={() => setSteps(steps + 1)}
-                    style={{
-                      borderWidth: 1,
-                      alignSelf: "flex-end",
-                    }}
                   >
-                    <Text style={{ padding: 10 }}>Next</Text>
+                    <Text style={{ color: Colors.white }}>Next</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -327,7 +382,36 @@ const TransactionPage = () => {
                             />
                             <Text>Peoples Needed</Text>
                           </View>
-                          <Text style={{ paddingRight: 10 }}>{3}</Text>
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                            }}
+                          >
+                            <TouchableOpacity
+                              onPress={() => {
+                                setPlayersNeeded((prev) => ({
+                                  ...prev,
+                                  [index]: (prev[index] || 0) + 1,
+                                }));
+                              }}
+                            >
+                              <AntDesign name="plus" size={20} color="black" />
+                            </TouchableOpacity>
+                            <Text style={{ fontSize: 20 }}>
+                              {playersNeeded[index] || 0}{" "}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => {
+                                setPlayersNeeded((prev) => ({
+                                  ...prev,
+                                  [index]: (prev[index] || 0) - 1,
+                                }));
+                              }}
+                            >
+                              <AntDesign name="minus" size={20} color="black" />
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
                     );
@@ -365,6 +449,235 @@ const TransactionPage = () => {
               <View style={[styles.innerContainer, {}]}>
                 <View
                   style={{
+                    width: "90%",
+                    gap: 10,
+                  }}
+                >
+                  <Text style={{ fontSize: 24 }}>Booking Confirmation</Text>
+
+                  <View
+                    style={{
+                      gap: 10,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        borderWidth: 1,
+                        padding: 20,
+                        borderRadius: 5,
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                        {bookingDetails?.name}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        borderWidth: 1,
+                        padding: 20,
+                        borderRadius: 5,
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                        Date
+                      </Text>
+                      <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                        {bookingDetails?.date
+                          ? format(
+                              new Date(bookingDetails.date),
+                              "MMMM d, yyyy"
+                            )
+                          : ""}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 24 }}>Times & Player Needed</Text>
+                  <View style={{ gap: 10 }}>
+                    <View style={{ gap: 10 }}>
+                      {selectedTimeSlots.map((group, index) => {
+                        const startTime = group[0].split("~")[0];
+                        const endTime = group[group.length - 1].split("~")[1];
+                        const isLast = index === selectedTimeSlots.length - 1;
+                        return (
+                          <View
+                            key={index}
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              padding: 10,
+                              gap: 5,
+                              borderWidth: 1,
+                              borderColor: Colors.littleDark,
+                              borderRadius: 5,
+                            }}
+                          >
+                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                              {startTime} – {endTime}
+                            </Text>
+                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                              {playersNeeded[index] || 0} Person
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        gap: 5,
+                        borderWidth: 1,
+                        borderColor: Colors.littleDark,
+                        borderRadius: 5,
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          padding: 20,
+                          borderBottomWidth: 1,
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            gap: 5,
+                            alignItems: "center",
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="clock-time-nine-outline"
+                            size={24}
+                            color="black"
+                          />
+                          <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                            1 Hour
+                          </Text>
+                        </View>
+                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                          ₮{bookingDetails?.price.oneHour}
+                        </Text>
+                      </View>
+                      <View>
+                        {(() => {
+                          return (
+                            <>
+                              {selectedTimeSlots.map((group, index) => {
+                                const startTime = group[0].split("~")[0];
+                                const endTime =
+                                  group[group.length - 1].split("~")[1];
+
+                                const getHour = (time: string) => {
+                                  const [hourStr] = time.split(":");
+                                  return parseInt(hourStr, 10);
+                                };
+
+                                const startHour = getHour(startTime);
+                                const endHour = getHour(endTime);
+                                const durationHours = endHour - startHour;
+
+                                const costPerHour = 1000;
+                                const totalCost = durationHours * costPerHour;
+
+                                const totalPeople =
+                                  (playersNeeded[index] || 0) + 1;
+
+                                const paymentPerPeople =
+                                  totalPeople > 0 ? totalCost / totalPeople : 0;
+
+                                // Add to booker’s total
+                                paymentPerPeopleArray.push(paymentPerPeople);
+                                totalBookerPaymentArray.push(paymentPerPeople);
+
+                                return (
+                                  <View
+                                    key={index}
+                                    style={{
+                                      flexDirection: "column",
+                                      justifyContent: "space-evenly",
+                                      padding: 10,
+                                    }}
+                                  >
+                                    <Text
+                                      style={{
+                                        fontSize: 16,
+                                        fontWeight: "300",
+                                      }}
+                                    >
+                                      Session {index + 1}:
+                                    </Text>
+                                    <View
+                                      style={{
+                                        flexDirection: "row",
+                                        justifyContent: "space-around",
+                                      }}
+                                    >
+                                      <Text
+                                        style={{
+                                          fontSize: 18,
+                                          fontWeight: 300,
+                                        }}
+                                      >
+                                        {durationHours} hours
+                                      </Text>
+                                      <Text
+                                        style={{
+                                          fontSize: 18,
+                                          fontWeight: 300,
+                                        }}
+                                      >
+                                        {totalPeople} players
+                                      </Text>
+                                      <Text
+                                        style={{
+                                          fontSize: 18,
+                                          fontWeight: 300,
+                                        }}
+                                      >
+                                        ₮{paymentPerPeople.toFixed(2)} per
+                                        person
+                                      </Text>
+                                    </View>
+                                  </View>
+                                );
+                              })}
+
+                              <View
+                                style={{
+                                  marginTop: 10,
+                                  padding: 10,
+                                  borderTopWidth: 1,
+                                  borderColor: Colors.littleDark,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: "bold",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  Booker's Total: ₮
+                                  {totalBookerPaymentArray
+                                    .reduce((sum, v) => sum + v, 0)
+                                    .toFixed(2)}
+                                </Text>
+                              </View>
+                            </>
+                          );
+                        })()}
+                      </View>
+                    </View>
+                  </View>
+                </View>
+                <View
+                  style={{
                     flexDirection: "row",
                     width: "90%",
                     justifyContent: "center",
@@ -384,14 +697,14 @@ const TransactionPage = () => {
                       styles.buttons,
                       { backgroundColor: Colors.primary },
                     ]}
-                    onPress={() => setSteps(steps + 1)}
+                    onPress={() => handleOrder()}
                   >
-                    <Text style={{ color: Colors.white }}>Next</Text>
+                    <Text style={{ color: Colors.white }}>Complete</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
-          </View>
+          </ScrollView>
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
