@@ -30,7 +30,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { defaultStyles } from "@/constants/Styles";
 import { LinearGradient } from "expo-linear-gradient";
-
 import OrderScreen, { FormData } from "./detail";
 import { SportHallDataType } from "@/interfaces/listing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
