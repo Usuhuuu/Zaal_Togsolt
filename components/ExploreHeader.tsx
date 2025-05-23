@@ -7,17 +7,25 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Href, router, useNavigation } from "expo-router";
-import { DrawerActions } from "@react-navigation/native";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
+
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import "@/utils/i18";
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
+} from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
+import { router } from "expo-router";
 
+// ICON MAP
 const iconMap: { [key: string]: any } = {
   basketball: require("../assets/sport-icons/test_icons/basketball.png"),
   football: require("../assets/sport-icons/test_icons/football.png"),
@@ -29,15 +37,30 @@ const iconMap: { [key: string]: any } = {
 
 interface Props {
   onCategoryChanged: (category: string) => void;
+  bottomSheetY: SharedValue<number>;
 }
-const ExploreHeader = ({ onCategoryChanged }: Props) => {
-  const scrollRef = useRef<ScrollView>(null);
-  const itemsRef = useRef<React.RefObject<typeof TouchableOpacity>[]>([]);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const navigation = useNavigation(); // Initialize navigation hook
 
+const ExploreHeader = ({ onCategoryChanged, bottomSheetY }: Props) => {
+  const navigation = useNavigation();
+  const scrollRef = useRef<ScrollView>(null);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const { t } = useTranslation();
   const sportDetail: any = t("sportTextIcons", { returnObjects: true });
+  const windowHeight = Dimensions.get("window").height;
+
+  const animatedIconStyle = useAnimatedStyle(() => {
+    const translateYValue = interpolate(
+      bottomSheetY.value,
+      [0,   windowHeight * 0.5],
+      [-80, 0],
+      Extrapolate.CLAMP
+    );
+    return {
+      transform: [{ translateY: translateYValue }],
+    };
+  });
+
+  const itemsRef = useRef<(View | null)[]>([]);
 
   const selectCategory = (index: number) => {
     const selected = itemsRef.current[index];
@@ -54,7 +77,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
     onCategoryChanged(sportDetail[index].name);
   };
 
-  const openDrawer = () => {
+   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
@@ -62,64 +85,49 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar barStyle="light-content" backgroundColor="#61b3fa" />
       <View style={styles.container}>
-        <LinearGradient
-          colors={["transparent", "#61b3fa"]}
-          start={{ x: 0, y: 0.8 }}
-          end={{ x: 0, y: 1.3 }}
-          style={styles.background}
-        />
-        <View style={styles.content}>
-          <View style={styles.actionRow}>
-            <View style={styles.titleContainer}>
-              <TouchableOpacity style={styles.search}>
-                <Image
-                  source={require("../assets/images/ranking.png")}
-                  style={{ width: 30, height: 30, right: 100 }}
-                />
-              </TouchableOpacity>
-            </View>
+        
 
-            <TouchableOpacity
-              style={styles.notification}
-              onPress={() =>
-                router.push(
-                  "/listing/notification" as Href<"/listing/notification">
-                )
+        
+
+        {/* ACTION ROW */}
+        <View style={styles.actionRowWrapper}>
+          <TouchableOpacity style={styles.search}>
+            <Image
+              source={require("../assets/images/ranking.png")}
+              style={{ width: 30, height: 30, right: 100 }}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.notification}
+          
+            onPress={() =>
+                router.push("/listing/notification")
               }
-            >
-              {/* <Image
-                source={require("../assets/sport-icons/notifications.png")}
-                style={{ width: 23, height: 23 }}
-              /> */}
-              <Ionicons
-                name="notifications"
-                size={25}
-                style={{ color: Colors.primary }}
-              />
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.notification} onPress={openDrawer}>
-              {/* <Image
-                source={require("../assets/images/category.png")}
-                style={{ width: 20, height: 20 }}
-              /> */}
-              <Ionicons
-                name="menu"
-                size={25}
-                style={{ color: Colors.primary }}
-              />
-            </TouchableOpacity>
-          </View>
+          >
+            <Ionicons name="notifications" size={25} color={Colors.primary} />
+
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.notification}
+          onPress={openDrawer}
+          >
+            <Ionicons name="menu" size={25} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ICON SECTION */}
+        <Animated.View style={[styles.iconsWrapper, animatedIconStyle]}>
           <ScrollView
             ref={scrollRef}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollViewContent}
           >
-            {sportDetail?.map((item: any, index: any) => (
+            {sportDetail?.map((item: any, index: number) => (
               <TouchableOpacity
                 key={index}
-                //ref={(el) => (itemsRef.current[index] = el)}
+                ref={(el) => (itemsRef.current[index] = el)}
                 style={
                   activeIndex === index
                     ? styles.categoriesBtnActive
@@ -137,7 +145,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
+        </Animated.View>
       </View>
     </SafeAreaView>
   );
@@ -145,8 +153,8 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 150,
-    overflow: "hidden",
+    height: 170,
+    overflow: "visible",
     backgroundColor: "transparent",
   },
   background: {
@@ -158,17 +166,14 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  content: {
-    flex: 1,
-    justifyContent: "space-between",
-    padding: 10,
-  },
-  actionRow: {
+  actionRowWrapper: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingBottom: 6,
-    backgroundColor: "transparent",
+    paddingTop: 10,
+    paddingHorizontal: 10,
+    borderColor: "#b0d9fc",
+    borderWidth: 2,
   },
   search: {
     justifyContent: "center",
@@ -180,7 +185,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 20,
     elevation: 10,
-
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
@@ -192,33 +196,29 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: Colors.light,
     elevation: 10,
-
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
-  titleContainer: {
-    height: 50,
-    justifyContent: "space-around",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  titleText: {
-    color: Colors.dark,
-    fontWeight: "condensed",
+  iconsWrapper: {
+    position: "absolute",
+    top: 65,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    borderColor: "#b0d9fc",
+    borderWidth: 2,
   },
   scrollViewContent: {
     flexDirection: "row",
-    justifyContent: "flex-start",
     alignItems: "center",
     gap: 15,
+    paddingHorizontal: 10,
   },
   categoriesBtn: {
-    flex: 1,
     alignItems: "center",
     paddingBottom: 6,
   },
   categoriesBtnActive: {
-    flex: 1,
     alignItems: "center",
     borderBottomColor: Colors.primary,
     borderBottomWidth: 2,
@@ -231,9 +231,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 5,
     elevation: 10,
-
     shadowOpacity: 0.3,
     shadowRadius: 3,
+  },
+  titleText: {
+    color: Colors.dark,
+    fontWeight: "500",
   },
 });
 

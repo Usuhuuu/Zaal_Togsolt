@@ -30,10 +30,13 @@ import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
 import FriendReqModal from "../(modals)/friendReqModal";
 import RegisterZaal from "@/components/profileScreens/contractorScreen/register_zaal";
+import { useSharedValue } from "react-native-reanimated";
+
 // Create a Drawer Navigator
 export const TabsLayout = () => {
   const { t } = useTranslation();
   const { LoginStatus } = useAuth();
+  const bottomSheetY = useSharedValue(0);
 
   return (
     <Tabs
@@ -60,7 +63,9 @@ export const TabsLayout = () => {
           tabBarLabel: t("home"),
           header: () => (
             <ExploreHeader
-              onCategoryChanged={(category) => console.log(category)}
+              onCategoryChanged={(category) => console.log(category)
+              }
+               bottomSheetY={bottomSheetY}
             />
           ),
           tabBarIcon: ({ focused }) => (
@@ -451,3 +456,4 @@ const Layout = () => {
 };
 
 export default Layout;
+

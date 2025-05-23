@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
-  Touchable,
   Platform,
   Linking,
+  Button,
 } from "react-native";
-import React, { useEffect, useState , useRef} from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 
 import Animated, {
@@ -23,8 +23,7 @@ import Animated, {
   withTiming,
   Easing,
   FadeIn,
- withDelay,
-  useAnimatedProps,
+  withDelay,
 } from "react-native-reanimated";
 import CalendarStrip from "react-native-calendar-strip";
 
@@ -33,14 +32,9 @@ import Colors from "@/constants/Colors";
 import { SportHallDataType } from "@/interfaces/listing";
 import SportHall from "@/assets/Data/sportHall.json";
 
-
-
-
 const { width } = Dimensions.get("window");
 const SWIPE_WIDTH = width - 170;
 const BUTTON_WIDTH = 40;
-
-
 
 const Page = () => {
   const [sportHalls, setSportHalls] = useState<SportHallDataType[] | null>(
@@ -49,151 +43,174 @@ const Page = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedParent, setSelectedParent] = useState<string | null>(null);
   const [selectedSort, setSelectedSort] = useState<string | null>(null);
-  const [today,setToday] = useState<string>(new Date().toISOString());
+  const [today, setToday] = useState<string>(new Date().toISOString());
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [modalJoin, setModalJoin] = useState(false);
 
- 
-interface CallWaveButtonProps {
-  partnersLookingFor: number | string;
-  playersNeeded: number | string;
-  onPress: () => void;
-}
+  interface CallWaveButtonProps {
+    partnersLookingFor: number | string;
+    playersNeeded: number | string;
+    onPress: () => void;
+  }
 
-const Wave = ({ delay = 0 }: { delay?: number }) => {
-  const scale = useSharedValue(0);
+  const Wave = ({ delay = 0 }: { delay?: number }) => {
+    const scale = useSharedValue(0);
 
-  useEffect(() => {
-    scale.value = withDelay(
-      delay,
-      withRepeat(
-        withTiming(1.5, {
-          duration: 1200,
-          easing: Easing.out(Easing.ease),
-        }),
-        -1,
-        true
-      )
+    useEffect(() => {
+      scale.value = withDelay(
+        delay,
+        withRepeat(
+          withTiming(1.5, {
+            duration: 1200,
+            easing: Easing.out(Easing.ease),
+          }),
+          -1,
+          true
+        )
+      );
+    }, [delay]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+      opacity: 1.5 - scale.value,
+    }));
+
+    return (
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            backgroundColor: "rgba(33, 150, 243, 0.2)",
+          },
+          animatedStyle,
+        ]}
+      />
     );
-  }, [delay]);
+  };
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: 1.5 - scale.value,
-  }));
+  const handleJoin = (sportHallID: string) => {
+    console.log("Joining sport hall with ID:", sportHallID);
+    // Add your join logic here
+    setModalJoin(false); // Close the modal after joining
+  };
 
-  return (
-    <Animated.View
-      style={[
-        {
-          position: "absolute",
-          width: 100,
-          height: 100,
-          borderRadius: 50,
-          backgroundColor: "rgba(33, 150, 243, 0.2)",
-        },
-        animatedStyle,
-      ]}
-    />
-  );
-};
-
-const CallWaveButton = ({
-  partnersLookingFor,
-  playersNeeded,
-  onPress,
-}: CallWaveButtonProps) => {
-  return (
-    <View style={{ alignItems: "center" }}>
-      {/* Title above the button */}
-      <Text style={{ marginBottom: 8, fontWeight: "600", fontSize: 16, color: Colors.primary }}>
-        {partnersLookingFor} partners looking for
-      </Text>
-
-      <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={{ width: 100, height: 100, justifyContent: "center", alignItems: "center" }}>
-        {/* Waves container */}
-        <View style={{ position: "absolute", width: 100, height: 100, justifyContent: "center", alignItems: "center" }}>
-          <Wave delay={0} />
-         
-         
-          <Wave delay={1000} />
-        </View>
-
-        {/* Number inside the circle */}
-        <View
+  const CallWaveButton = ({
+    partnersLookingFor,
+    playersNeeded,
+    onPress,
+  }: CallWaveButtonProps) => {
+    return (
+      <View style={{ alignItems: "center" }}>
+        {/* Title above the button */}
+        <Text
           style={{
-            width: 60,
-            height: 60,
-            borderRadius: 30,
-            backgroundColor: Colors.primary,
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 10,
+            marginBottom: 8,
+            fontWeight: "600",
+            fontSize: 16,
+            color: Colors.primary,
           }}
         >
-          <Text style={{ color: "white", fontWeight: "bold", fontSize: 24 }}>
-            {playersNeeded}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-};
+          {partnersLookingFor} partners looking for
+        </Text>
 
+        <TouchableOpacity
+          onPress={onPress}
+          activeOpacity={0.8}
+          style={{
+            width: 100,
+            height: 100,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* Waves container */}
+          <View
+            style={{
+              position: "absolute",
+              width: 100,
+              height: 100,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Wave delay={0} />
 
+            <Wave delay={1000} />
+          </View>
 
+          {/* Number inside the circle */}
+          <View
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 30,
+              backgroundColor: Colors.primary,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 10,
+            }}
+          >
+            <Text style={{ color: "white", fontWeight: "bold", fontSize: 24 }}>
+              {playersNeeded}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const sortOptions = [
     { label: "Distance", children: ["Nearest First", "Farthest First"] },
     { label: "Rating", children: ["Highest First", "Lowest First"] },
     { label: "Price", children: ["Lowest First", "Highest First"] },
-   
   ];
 
   const sortSlotGiver = (date: Date) => {
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const selectedDateStr = date.toISOString().split("T")[0];
-    setToday(selectedDateStr);
+    try {
+      const selectedDateStr = date.toISOString().split("T")[0];
+      setToday(selectedDateStr);
 
-    // Filter halls with available slots on the selected date AND looking for partner
-    const filtered = SportHall.filter(
-      (hall) =>
-        hall.lookingForPartner === false && // only halls looking for partner
-        hall.availableTimeSlots.some((slot) =>
-          slot.start_time.startsWith(selectedDateStr)
-        )
-    );
+      // Filter halls with available slots on the selected date AND looking for partner
+      const filtered = SportHall.filter(
+        (hall) =>
+          hall.lookingForPartner === false && // only halls looking for partner
+          hall.availableTimeSlots.some((slot) =>
+            slot.start_time.startsWith(selectedDateStr)
+          )
+      );
 
-    setSportHalls(
-      filtered.map((hall) => ({
-        ...hall,
-        price:
-          typeof hall.price === "object"
-            ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
-            : hall.price,
-      }))
-    );
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setIsLoading(false);
-  }
-};
+      setSportHalls(
+        filtered.map((hall) => ({
+          ...hall,
+          price:
+            typeof hall.price === "object"
+              ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
+              : hall.price,
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const translateX = useSharedValue(0);
   const isSwiping = useSharedValue(false);
   const scale = useSharedValue(0);
-   
-
-  
 
   useEffect(() => {
     setSportHalls(
       SportHall.map((hall) => ({
         ...hall,
-        price: typeof hall.price === "object"
-          ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
-          : hall.price,
+        price:
+          typeof hall.price === "object"
+            ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
+            : hall.price,
       }))
     );
   }, []);
@@ -209,34 +226,25 @@ const CallWaveButton = ({
     );
   }, []);
 
- 
-
-
-
-
   const handleCompleteSwipe = () => {
+    // Reset filters and reload data
+    setIsLoading(true);
 
-
-
-  // Reset filters and reload data
-  setIsLoading(true);
-
-  setTimeout(() => {
-    // Reset to full unfiltered list
-    setSportHalls(
-      SportHall.map((hall) => ({
-        ...hall,
-        price:
-          typeof hall.price === "object"
-            ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
-            : hall.price,
-      }))
-    );
-    setToday(new Date().toISOString());
-    setIsLoading(false);
-  }, 500); // simulate network delay or update
-};
-
+    setTimeout(() => {
+      // Reset to full unfiltered list
+      setSportHalls(
+        SportHall.map((hall) => ({
+          ...hall,
+          price:
+            typeof hall.price === "object"
+              ? `One Hour: ${hall.price.oneHour}, Whole Day: ${hall.price.wholeDay}`
+              : hall.price,
+        }))
+      );
+      setToday(new Date().toISOString());
+      setIsLoading(false);
+    }, 500); // simulate network delay or update
+  };
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -302,58 +310,62 @@ const CallWaveButton = ({
   }));
 
   const sortSportHalls = (option: string) => {
-  // option example: "Distance:Nearest First"
-  const [parent, child] = option.split(":");
-  const sorted = [...(sportHalls || [])]; // copy current list
+    // option example: "Distance:Nearest First"
+    const [parent, child] = option.split(":");
+    const sorted = [...(sportHalls || [])]; // copy current list
 
-  switch (parent) {
-    case "Distance":
-      sorted.sort((a, b) =>
-        child === "Farthest First"
-          ? (b.distance ?? 0) - (a.distance ?? 0)
-          : (a.distance ?? 0) - (b.distance ?? 0)
-      );
-      break;
+    switch (parent) {
+      case "Distance":
+        sorted.sort((a, b) =>
+          child === "Farthest First"
+            ? (b.distance ?? 0) - (a.distance ?? 0)
+            : (a.distance ?? 0) - (b.distance ?? 0)
+        );
+        break;
 
-    case "Rating":
-      sorted.sort((a, b) =>
-        child === "Lowest First"
-          ? (a.rating ?? 0) - (b.rating ?? 0)
-          : (b.rating ?? 0) - (a.rating ?? 0)
-      );
-      break;
+      case "Rating":
+        sorted.sort((a, b) =>
+          child === "Lowest First"
+            ? (a.rating ?? 0) - (b.rating ?? 0)
+            : (b.rating ?? 0) - (a.rating ?? 0)
+        );
+        break;
 
-    case "Price":
-      sorted.sort((a, b) =>
-        child === "Highest First"
-          ? (b.price ?? 0) - (a.price ?? 0)
-          : (a.price ?? 0) - (b.price ?? 0)
-      );
-      break;
+      case "Price":
+        sorted.sort((a, b) =>
+          child === "Highest First"
+            ? (b.price ?? 0) - (a.price ?? 0)
+            : (a.price ?? 0) - (b.price ?? 0)
+        );
+        break;
 
-    default:
-      break;
-  }
+      default:
+        break;
+    }
 
-  setSportHalls(sorted);        // update the state to re-render list
-  setSelectedSort(option);      // optionally store the selected sort option
-  setModalVisible(false);       // close the sort modal
-  setSelectedParent(null);      // reset sort sub-menu if any
-};
+    setSportHalls(sorted); // update the state to re-render list
+    setSelectedSort(option); // optionally store the selected sort option
+    setModalVisible(false); // close the sort modal
+    setSelectedParent(null); // reset sort sub-menu if any
+  };
 
-
-
-  function openGoogleMaps(arg0: number, arg1: number, address: string): void {
+  function openGoogleMaps(
+    arg0: number,
+    arg1: number,
+    address: string
+  ): void {
     const scheme = Platform.select({
-      ios: 'maps://0,0?q=',
-      android: 'geo:0,0?q='
+      ios: "maps://0,0?q=",
+      android: "geo:0,0?q=",
     });
 
     const latLng = `${arg0},${arg1}`;
     const query = address ? `${address}@${latLng}` : latLng;
     const url = `${scheme}${encodeURIComponent(query)}`;
 
-    Linking.openURL(url).catch(err => console.error('An error occurred', err));
+    Linking.openURL(url).catch((err) =>
+      console.error("An error occurred", err)
+    );
   }
 
   return (
@@ -364,7 +376,9 @@ const CallWaveButton = ({
       <Text style={styles.text}>
         Swipe right to show unfiltered orders sport hall.
       </Text>
-      <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between" }}>
+      <View
+        style={{ flex: 1, flexDirection: "row", justifyContent: "space-between" }}
+      >
         <Animated.View style={[styles.rail, railAnimatedStyle]}>
           <GestureDetector gesture={panGesture}>
             <Animated.View style={[styles.swipeButton, animatedStyle]}>
@@ -399,32 +413,32 @@ const CallWaveButton = ({
             >
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Sort by</Text>
-                 <CalendarStrip
-              style={styles.calendars}
-              selectedDate={new Date(today)}
-              calendarAnimation={{ type: "parallel", duration: 30 }}
-              onDateSelected={(date: any) => sortSlotGiver(date)}
-              dateNumberStyle={{
-                fontSize: 18,
-                fontWeight: "400",
-                color: "#464646",
-              }}
-              dateNameStyle={{
-                fontSize: 10,
-                fontWeight: "400",
-                color: Colors.littleDark,
-              }}
-              calendarHeaderStyle={{
-                fontSize: 18,
-                fontWeight: "500",
-                color: Colors.littleDark,
-              }}
-              calendarHeaderContainerStyle={{
-                width: "100%",
-                height: "30%",
-              }}
-            />
-           
+                <CalendarStrip
+                  style={styles.calendars}
+                  selectedDate={new Date(today)}
+                  calendarAnimation={{ type: "parallel", duration: 30 }}
+                  onDateSelected={(date: any) => sortSlotGiver(date)}
+                  dateNumberStyle={{
+                    fontSize: 18,
+                    fontWeight: "400",
+                    color: "#464646",
+                  }}
+                  dateNameStyle={{
+                    fontSize: 10,
+                    fontWeight: "400",
+                    color: Colors.littleDark,
+                  }}
+                  calendarHeaderStyle={{
+                    fontSize: 18,
+                    fontWeight: "500",
+                    color: Colors.littleDark,
+                  }}
+                  calendarHeaderContainerStyle={{
+                    width: "100%",
+                    height: "30%",
+                  }}
+                />
+
                 {!selectedParent ? (
                   sortOptions.map((option) => (
                     <TouchableOpacity
@@ -447,21 +461,22 @@ const CallWaveButton = ({
                       </Text>
                     </TouchableOpacity>
                     {sortOptions
-  .find((opt) => opt.label === selectedParent)
-  ?.children.map((child, index) => (
-    <Animated.View
-      key={child}
-      entering={FadeIn.duration(300).delay(index * 100)}
-    >
-      <TouchableOpacity
-        style={styles.option}
-        onPress={() => sortSportHalls(`${selectedParent}:${child}`)}
-      >
-        <Text style={styles.optionText}>{child}</Text>
-      </TouchableOpacity>
-    </Animated.View>
-  ))}
-
+                      .find((opt) => opt.label === selectedParent)
+                      ?.children.map((child, index) => (
+                        <Animated.View
+                          key={child}
+                          entering={FadeIn.duration(300).delay(index * 100)}
+                        >
+                          <TouchableOpacity
+                            style={styles.option}
+                            onPress={() =>
+                              sortSportHalls(`${selectedParent}:${child}`)
+                            }
+                          >
+                            <Text style={styles.optionText}>{child}</Text>
+                          </TouchableOpacity>
+                        </Animated.View>
+                      ))}
                   </>
                 )}
               </View>
@@ -479,50 +494,80 @@ const CallWaveButton = ({
           />
           <Text style={styles.title}>{item.name}</Text>
 
-           
-        
           <Text style={styles.subTitle}>📞 {item.phoneNumber}</Text>
 
           <CallWaveButton
-  partnersLookingFor={item.partnersLookingFor ?? 0}
-  playersNeeded={item.playersNeeded ?? 0}
-  onPress={() => {
-    // handle press here if needed
-    console.log(`Pressed button for ${item.name}`);
-  }}
-/>
+            partnersLookingFor={item.partnersLookingFor ?? 0}
+            playersNeeded={item.playersNeeded ?? 0}
+            onPress={() => setModalJoin(true)}
+          />
+          <Modal
+            transparent={true}
+            animationType="slide"
+            visible={modalJoin}
+            onRequestClose={() => setModalJoin(false)}
+          >
+            <Pressable
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(242, 234, 234, 0.21)",
+              }}
+            >
+              <View style={{ backgroundColor: "white", padding: 20, borderRadius: 10 }}>
+                <Text>Do you want to join {item.name}?</Text>
+                <View style={{ marginVertical: 10 , 
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                 }}>
+                  <Button title="Cancel" onPress={() => setModalJoin(false)} />
+                  <Button
+                    title="Join"
+                    onPress={() => {
+                      handleJoin(item.sportHallID);
+                      setModalVisible(false);
+                    }}
+                  />
+                </View>
+              </View>
+            </Pressable>
+          </Modal>
 
-         <TouchableOpacity
-  onPress={() =>openGoogleMaps (
-    parseFloat(item.location.latitude),
-    parseFloat(item.location.longitude),
-    item.address
-  )}
-  style={{ marginBottom: 10 , 
-    marginTop: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: Colors.primary,
-    backgroundColor: Colors.light,
-    alignItems: "center",
-    justifyContent: "center",
-  }}
->
-  <Text style={styles.text}>📍{item.address}</Text>
-</TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              openGoogleMaps(
+                parseFloat(item.location.latitude),
+                parseFloat(item.location.longitude),
+                item.address
+              )
+            }
+            style={{
+              marginBottom: 10,
+              marginTop: 10,
+              padding: 10,
+              borderWidth: 1,
+              borderRadius: 10,
+              borderColor: Colors.primary,
+              backgroundColor: Colors.light,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={styles.text}>📍{item.address}</Text>
+          </TouchableOpacity>
 
           <Text style={styles.subTitle}>🎯 Features:</Text>
           <View style={styles.featuresContainer}>
-  {Object.entries(item.feature)
-    .filter(([_, value]) => value) // show only enabled features
-    .map(([key]) => (
-      <View key={key} style={styles.featureBadge}>
-        <Text style={styles.featureText}>✔️ {key}</Text>
-      </View>
-    ))}
-</View>
-
+            {Object.entries(item.feature)
+              .filter(([_, value]) => value) // show only enabled features
+              .map(([key]) => (
+                <View key={key} style={styles.featureBadge}>
+                  <Text style={styles.featureText}>✔️ {key}</Text>
+                </View>
+              ))}
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -546,13 +591,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
   },
 
-   wave: {
-  position: 'absolute',
-  width: 100,
-  height: 100,
-  borderRadius: 50,
-  backgroundColor: 'rgba(33, 150, 243, 0.3)', // blueish wave
-},
   rail: {
     width: SWIPE_WIDTH,
     height: 40,
@@ -617,24 +655,24 @@ const styles = StyleSheet.create({
     color: "#555",
   },
   featuresContainer: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: 8,
-  marginTop: 8,
-},
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+  },
   featureBadge: {
-  backgroundColor: "#e6f4ea",
-  paddingHorizontal: 10,
-  paddingVertical: 6,
-  borderRadius: 20,
-  borderWidth: 1,
-  borderColor: "#a5d6a7",
-},
-featureText: {
-  fontSize: 12,
-  color: "#2e7d32",
-  fontWeight: "500",
-},
+    backgroundColor: "#e6f4ea",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#a5d6a7",
+  },
+  featureText: {
+    fontSize: 12,
+    color: "#2e7d32",
+    fontWeight: "500",
+  },
   animatedSort: {
     marginTop: 8,
     marginBottom: 8,
@@ -643,12 +681,12 @@ featureText: {
     padding: 16,
     backgroundColor: "#f8f9fa",
   },
-   wave: {
-    position: 'absolute',
+  wave: {
+    position: "absolute",
     width: 150,
     height: 150,
     borderRadius: 75,
-    backgroundColor: 'rgba(33, 150, 243, 0.3)', // blueish wave
+    backgroundColor: "rgba(33, 150, 243, 0.3)", // blueish wave
   },
   sortButton: {
     backgroundColor: "#eee",
@@ -680,7 +718,6 @@ featureText: {
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 10,
-
   },
   modalTitle: {
     fontSize: 20,
@@ -701,5 +738,3 @@ featureText: {
 });
 
 export default Page;
-
-

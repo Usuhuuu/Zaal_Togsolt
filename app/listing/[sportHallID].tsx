@@ -89,13 +89,23 @@ const featureIcons = {
   // darts: { icon: "target", label: "Дартс" },
 };
 
+
+
+const ScheduleScreen = () => (
+  <View style={styles.modalContent}>
+    <Text>This is the schedule screen!</Text>
+  </View>
+);
+
 const DetailsPage = () => {
+  const [isScheduleVisible, setIsScheduleVisible] = useState<boolean>(false);
   const [isOrderScreenVisible, setIsOrderScreenVisible] =
     useState<boolean>(false);
   const [infoHeight, setInfoHeight] = useState(0);
   const [iconsOverflow, setIconsOverflow] = useState<boolean>(false);
   const [footerBgColor, setFooterBgColor] = useState(`rgba(255, 255, 255, 1)`);
   const [formData, setFormData] = useState<FormData>({
+    
     sportHallID: "",
     date: "",
     name: "",
@@ -139,48 +149,48 @@ const DetailsPage = () => {
   };
 
   const handleSaveCourt = async () => {
-    try {
+  try {
       const existing = await AsyncStorage.getItem("savedCourts");
 
-      // Define the structure of a saved court
-      interface SavedCourt {
-        id: string;
-        name: string;
+    // Define the structure of a saved court
+    interface SavedCourt {
+      id: string;
+      name: string;
         image?: string; // optional
         location?: string; // optional
-      }
-
-      const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
-
-      const alreadySaved = saved.some(
-        (court) => court.id === listing?.sportHallID
-      );
-
-      if (alreadySaved) {
-        alert("Court already saved!");
-        return;
-      }
-
-      const newCourt: SavedCourt = {
-        id: listing?.sportHallID ?? "",
-        name: listing?.name ?? "Unknown",
-        image: Array.isArray(listing?.imageUrls)
-          ? listing?.imageUrls[0] ?? ""
-          : listing?.imageUrls ?? "", // Add image if available
-        location:
-          typeof listing?.location === "string"
-            ? listing.location
-            : listing?.location?.smart_location ?? "", // Add location if available
-      };
-
-      const updated = [...saved, newCourt];
-
-      await AsyncStorage.setItem("savedCourts", JSON.stringify(updated));
-      alert("Court saved!");
-    } catch (error) {
-      console.error("Failed to save court:", error);
     }
-  };
+
+    const saved: SavedCourt[] = existing ? JSON.parse(existing) : [];
+
+    const alreadySaved = saved.some(
+      (court) => court.id === listing?.sportHallID
+    );
+
+    if (alreadySaved) {
+      alert("Court already saved!");
+      return;
+    }
+
+    const newCourt: SavedCourt = {
+      id: listing?.sportHallID ?? "",
+      name: listing?.name ?? "Unknown",
+      image: Array.isArray(listing?.imageUrls)
+        ? listing?.imageUrls[0] ?? ""
+        : listing?.imageUrls ?? "",         // Add image if available
+      location: typeof listing?.location === "string"
+        ? listing.location
+        : listing?.location?.smart_location ?? "",   // Add location if available
+    };
+
+    const updated = [...saved, newCourt];
+
+    await AsyncStorage.setItem('savedCourts', JSON.stringify(updated));
+    alert("Court saved!");
+  } catch (error) {
+    console.error("Failed to save court:", error);
+  }
+};
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -200,10 +210,7 @@ const DetailsPage = () => {
               style={styles.headerButton}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleSaveCourt}
-            style={styles.roundButton}
-          >
+          <TouchableOpacity onPress={handleSaveCourt} style={styles.roundButton}>
             <Image
               source={require("@/assets/images/saved.png")}
               style={styles.headerButton}
@@ -443,8 +450,17 @@ const DetailsPage = () => {
           }}
         >
           <TouchableOpacity style={styles.footerText}>
-            <Text style={styles.footerPrice}>€{listing?.price.oneHour}</Text>
+            <Text style={styles.footerPrice}>€{listing?.price}</Text>
             <Text>/1 tsag</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsScheduleVisible(true);
+            }}
+            style={[styles.btn, { paddingRight: 20, paddingLeft: 20 }]}
+          >
+            <Text style={defaultStyles.btnText}>tsagiin huvaari</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -455,6 +471,23 @@ const DetailsPage = () => {
           </TouchableOpacity>
         </View>
       </Animated.View>
+
+      {/* Modal for Schedule Screen */}
+      <Modal
+        animationType="slide"
+        visible={isScheduleVisible}
+        transparent={true}
+        onRequestClose={() => setIsScheduleVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => setIsScheduleVisible(false)}>
+              <Ionicons name="close" size={24} color={Colors.grey} />
+            </TouchableOpacity>
+            <ScheduleScreen />
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         animationType="slide"

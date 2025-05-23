@@ -37,6 +37,9 @@ const ListingsMap = memo(({ listings }: { listings: SportHallDataType[] }) => {
     router.push(`/listing/${item.sportHallID}`);
   };
 
+
+  
+
   const goToUserLocation = () => {
     if (userLocation && mapRef.current) {
       mapRef.current.animateToRegion({

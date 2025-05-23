@@ -5,12 +5,19 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { SportHallDataType } from "@/interfaces/listing";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import type { SharedValue } from "react-native-reanimated";
 
 interface ListingBottomSheetProps {
   listing: SportHallDataType[];
   category: string;
+  bottomSheetY: SharedValue<number>; // Shared value to track bottom sheet position
 }
-const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
+
+const ListingBottomSheet = ({
+  listing,
+  category,
+  bottomSheetY,
+}: ListingBottomSheetProps) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const [refresh, setrefresh] = useState<number>(0);
@@ -19,13 +26,16 @@ const ListingBottomSheet = ({ listing, category }: ListingBottomSheetProps) => {
     bottomSheetRef.current?.collapse();
     setrefresh(refresh + 1);
   };
-  const snapPoints = useMemo(() => ["10%", "87%"], []);
+
+  const snapPoints = useMemo(() => ["5%", "90%"], []);
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
       enableOverDrag={false}
+      animatedPosition={bottomSheetY} // Connect shared value hereW
+      // Connect shared value here
       handleIndicatorStyle={{
         backgroundColor: Colors.primary,
         width: 60,
@@ -72,13 +82,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    elevation: 5,
     bottom: 30,
-
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.2,
-    // shadowRadius: 4,
-    // elevation: 5, // For Android shadow
   },
   btnText: {
     color: "#fff",
@@ -93,19 +98,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
-  },
-  handleIndicator: {
-    backgroundColor: Colors.primary,
-    width: 60,
-    height: 6,
-    borderRadius: 3,
-    marginTop: 8,
-    alignSelf: "center",
-
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3, // For Android shadow
   },
 });
 
