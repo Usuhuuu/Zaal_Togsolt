@@ -12,7 +12,7 @@ import {
 import { regular_swr } from "@/hooks/useswr";
 import { Avatar } from "react-native-paper";
 import { AntDesign } from "@expo/vector-icons";
-import axiosInstance from "../../axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
 import { useAuth } from "@/app/(modals)/context/authContext";

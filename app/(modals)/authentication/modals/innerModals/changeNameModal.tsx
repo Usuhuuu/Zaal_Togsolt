@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { HelperText, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import axiosInstance from "../../axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 import { router } from "expo-router";
 
 interface ChangeNameModalProps {

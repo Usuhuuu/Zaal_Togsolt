@@ -14,7 +14,7 @@ import ContractorPage from "@/components/profileScreens/contractor";
 import ProfileAdmin from "@/components/profileScreens/admin";
 import NormalUser from "@/components/profileScreens/normalUser";
 import { useAuth } from "../(modals)/context/authContext";
-import Page from "../(modals)/login";
+import Page from "../(modals)/authentication/login";
 import { auth_swr } from "../../hooks/useswr";
 
 const Profile: React.FC = () => {

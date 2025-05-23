@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 import * as SecureStore from "expo-secure-store";
 
 export const fetchRoleAndProfile = async (

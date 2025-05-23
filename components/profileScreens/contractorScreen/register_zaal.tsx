@@ -14,7 +14,7 @@ import { TextInput } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
-import axiosInstance from "@/app/(modals)/functions/axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 
 type FormDataTypes = {
   zaal_types: string[];

@@ -11,7 +11,7 @@ import {
 import Colors from "@/constants/Colors";
 import { MultiSelect } from "react-native-element-dropdown";
 import { TextInput } from "react-native-gesture-handler";
-import axiosInstance from "@/app/(modals)/functions/axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 
 interface ProfileNotificationProps {
   copyToClipboard: () => void;
@@ -26,7 +26,7 @@ const ProfileNotification = ({ data = [] }) => {
   const renderLabel = () => {
     if (value || isFocus) {
       return (
-        <Text style={[styles.label, isFocus && { color: "blue" }]}>
+        <Text style={[styles.label, isFocus && { color: Colors.dark }]}>
           User Type Select
         </Text>
       );
@@ -84,7 +84,7 @@ const ProfileNotification = ({ data = [] }) => {
         <View style={styles.userType}>
           {renderLabel()}
           <MultiSelect
-            style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+            style={[styles.dropdown, isFocus && { borderColor: Colors.dark }]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
@@ -109,7 +109,7 @@ const ProfileNotification = ({ data = [] }) => {
                   handleTitleChange(e);
                 }}
                 placeholder="Title"
-                placeholderTextColor={Colors.grey}
+                placeholderTextColor={Colors.darkGrey}
                 style={styles.textInput}
               />
             </TouchableOpacity>
@@ -119,7 +119,7 @@ const ProfileNotification = ({ data = [] }) => {
                   handleSubtitleChange(e);
                 }}
                 placeholder="Sub Title"
-                placeholderTextColor={Colors.grey}
+                placeholderTextColor={Colors.darkGrey}
                 style={styles.textInput}
               />
             </TouchableOpacity>
@@ -129,7 +129,7 @@ const ProfileNotification = ({ data = [] }) => {
                   handleBodyChange(e);
                 }}
                 placeholder="Body"
-                placeholderTextColor={Colors.grey}
+                placeholderTextColor={Colors.darkGrey}
                 style={styles.textInput}
               />
             </TouchableOpacity>
@@ -138,7 +138,7 @@ const ProfileNotification = ({ data = [] }) => {
                 onPress={() => {
                   conformSend();
                 }}
-                style={{ fontSize: 20, color: Colors.light }}
+                style={{ fontSize: 20, color: Colors.white }}
               >
                 Send notification
               </Text>
@@ -153,7 +153,7 @@ const ProfileNotification = ({ data = [] }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light,
+    backgroundColor: Colors.white,
     height: Dimensions.get("window").height,
   },
   containerView: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   userType: {
-    backgroundColor: Colors.light,
+    backgroundColor: Colors.white,
     marginHorizontal: 20,
     marginVertical: 10,
     height: "20%",
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     height: 50,
-    borderColor: Colors.primary,
+    borderColor: Colors.darkGrey,
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
@@ -182,14 +182,14 @@ const styles = StyleSheet.create({
     zIndex: 999,
     paddingHorizontal: 8,
     fontSize: 14,
-    color: Colors.grey,
+    color: Colors.darkGrey,
   },
   selectedTextStyle: {
     fontSize: 16,
   },
   placeholderStyle: {
     fontSize: 16,
-    color: Colors.grey,
+    color: Colors.darkGrey,
   },
   iconStyle: {
     width: 20,
@@ -203,11 +203,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   notificationTouchable: {
-    backgroundColor: Colors.light,
+    backgroundColor: Colors.white,
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,
-    borderColor: Colors.primary,
+    borderColor: Colors.darkGrey,
     borderWidth: 0.5,
   },
   textInput: {
@@ -215,19 +215,19 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   notificationSubTouchable: {
-    backgroundColor: Colors.light,
+    backgroundColor: Colors.white,
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,
-    borderColor: Colors.primary,
+    borderColor: Colors.darkGrey,
     borderWidth: 0.5,
   },
   notificationBodyTouchable: {
-    backgroundColor: Colors.light,
+    backgroundColor: Colors.white,
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,
-    borderColor: Colors.primary,
+    borderColor: Colors.darkGrey,
     borderWidth: 0.5,
     height: 150,
   },

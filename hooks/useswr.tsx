@@ -1,8 +1,5 @@
 import useSWR, { SWRConfiguration } from "swr";
-import {
-  fetchRoleAndProfile,
-  normalFetch,
-} from "../app/(modals)/functions/profile_data_fetch";
+import { fetchRoleAndProfile, normalFetch } from "@/hooks/profile_data_fetch";
 
 interface useSWRProps {
   pathname?: string;

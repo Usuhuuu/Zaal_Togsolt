@@ -261,15 +261,17 @@ const DetailsPage = () => {
     };
   }, []);
 
-  const handleZaalId = (input: any) => {
+  const handleZaalId = (input: any, name: any, price: any) => {
     setFormData((prev) => ({
       ...prev,
-      zaalId: input,
+      sport_hall_id: input,
+      name: name,
+      price: price,
     }));
   };
 
   useEffect(() => {
-    handleZaalId(sportHallID);
+    handleZaalId(sportHallID, listing?.name, listing?.price);
   }, [sportHallID]);
 
   return (

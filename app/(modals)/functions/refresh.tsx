@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import { axiosInstanceRegular } from "./axiosInstance";
+import { axiosInstanceRegular } from "../../../hooks/axiosInstance";
 import { useAuth } from "../context/authContext";
 
 export const auth_Refresh_Function = async (refreshToken: string) => {

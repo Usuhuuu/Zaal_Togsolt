@@ -2,7 +2,6 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 import { Alert } from "react-native";
-import { fetch, ReactNativeSSLPinning } from "react-native-ssl-pinning";
 
 const apiUrl =
   Constants.expoConfig?.extra?.apiUrl ??
