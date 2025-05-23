@@ -1,5 +1,5 @@
 import { useAuth } from "@/app/(modals)/context/authContext";
-import axiosInstance from "@/app/(modals)/functions/axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 import { auth_swr } from "@/hooks/useswr";
 import Colors from "@/constants/Colors";
 import React, { useEffect, useState } from "react";

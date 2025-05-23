@@ -19,7 +19,7 @@ import {
 import { useAuth } from "../context/authContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { axiosInstanceRegular } from "./axiosInstance";
+import { axiosInstanceRegular } from "../../../hooks/axiosInstance";
 import * as SecureStore from "expo-secure-store";
 import { Avatar, Badge, TextInput } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";

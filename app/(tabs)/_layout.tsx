@@ -30,6 +30,7 @@ import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr } from "../../hooks/useswr";
 import FriendReqModal from "../(modals)/friendReqModal";
 import RegisterZaal from "@/components/profileScreens/contractorScreen/register_zaal";
+import MailComponent from "@/components/profileScreens/drawerScreen/mail";
 // Create a Drawer Navigator
 export const TabsLayout = () => {
   const { t } = useTranslation();
@@ -226,7 +227,6 @@ export const TabsLayout = () => {
       <Tabs.Screen
         name="profile"
         options={{
-         
           tabBarLabel: `${t("profile")}`, // Profile Tab
           tabBarIcon: ({ focused }) => (
             <View
@@ -302,6 +302,12 @@ const Layout = () => {
         component: ProfileNotification,
         icon: "notifications",
       },
+      {
+        name: "mail",
+        component: MailComponent,
+        icon: "mail",
+      },
+
       {
         name: adminDrawerLng.settings,
         component: ProfileSettings,

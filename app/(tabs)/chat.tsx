@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Socket } from "socket.io-client";
 import * as Sentry from "@sentry/react-native";
-import Constants from "expo-constants";
 import Colors from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -23,12 +22,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
 import { auth_swr, regular_swr } from "../../hooks/useswr";
-import MainChatModal from "../(modals)/functions/modals/mainChatModal";
+import MainChatModal from "@/app/(modals)/authentication/modals/mainChatModal";
 import { Avatar } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
 import { connectSocket, getSocket } from "@/hooks/socketConnection";
-
-const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
 export interface Message {
   sender_unique_name: string;

@@ -20,7 +20,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import StepIndicator from "react-native-step-indicator";
 import { format } from "date-fns";
-import axiosInstance from "@/app/(modals)/functions/axiosInstance";
+import axiosInstance from "@/hooks/axiosInstance";
 
 const labels = ["Players Needed", "Confirm Info", "Booking Complete"];
 const customStyles = {
@@ -112,14 +112,15 @@ const TransactionPage = () => {
         return {
           start_time: startTime,
           end_time: endTime,
-          num_players: playersNeeded[index],
+          num_players: playersNeeded[index] ?? 0,
           time_slots: group,
         };
       });
-
+      const slashedDate = bookingDetails?.date.split("T");
+      console.log(slashedDate);
       const response = await axiosInstance.post("/auth/reserve", {
         sport_hall_id: bookingDetails?.sportHallID,
-        date: bookingDetails?.date,
+        date: slashedDate,
         total_amount:
           (bookingDetails?.selectedTimeSlots?.length ?? 0) *
           Number(bookingDetails?.price.oneHour),

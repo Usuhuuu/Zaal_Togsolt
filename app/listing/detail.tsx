@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   ActivityIndicator,
@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
-import { axiosInstanceRegular } from "../(modals)/functions/axiosInstance";
+import { axiosInstanceRegular } from "../../hooks/axiosInstance";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useBookingStore } from "../(modals)/context/store";
@@ -33,7 +33,10 @@ type TimeSlotItemProps = {
     start_time: string;
     end_time: string;
   };
-  unavailableTimes: any[];
+  unavailableTimes: {
+    joinable: string[];
+    unavailable: string[];
+  };
   selectedTimeSlots: string[];
   onSelect: (timeString: string[]) => void;
 };
@@ -41,12 +44,9 @@ type TimeSlotItemProps = {
 const TimeSlotItem: React.FC<TimeSlotItemProps> = React.memo(
   ({ timeSlot, unavailableTimes, selectedTimeSlots, onSelect }) => {
     const timeString = `${timeSlot.start_time}~${timeSlot.end_time}`;
-    const isDisabled = unavailableTimes.some(
-      (time) => time.time === timeString && time.status.includes("Completed")
-    );
-    const isPending = unavailableTimes.some(
-      (time) => time.time === timeString && time.status.includes("Pending")
-    );
+    const isUnavailable = unavailableTimes.unavailable.includes(timeString);
+    const isJoinable = unavailableTimes.joinable.includes(timeString);
+    const isSelected = selectedTimeSlots.includes(timeString);
 
     return (
       <View style={styles.timeSlotView}>
@@ -61,21 +61,19 @@ const TimeSlotItem: React.FC<TimeSlotItemProps> = React.memo(
               onSelect([...newSelected, timeString]);
             }
           }}
-          disabled={isDisabled}
           style={[
             styles.lalarinSdaBtn,
             {
-              backgroundColor: isDisabled
-                ? "red"
-                : isPending
-                ? "yellow"
-                : "white",
-              opacity: isDisabled || isPending ? 0.5 : 1,
-              borderColor: selectedTimeSlots.includes(timeString)
+              borderColor: isSelected
                 ? Colors.dark
+                : isUnavailable
+                ? Colors.grey
                 : Colors.littleDarkGrey,
+
+              backgroundColor: isJoinable ? Colors.lightGreen : Colors.white,
             },
           ]}
+          disabled={isUnavailable}
         >
           <Text style={{ color: Colors.darkGrey }}>{timeString}</Text>
         </TouchableOpacity>
@@ -103,30 +101,58 @@ const OrderScreen: React.FC<OrderScreenProps> = ({
   const [today, setToday] = useState<string>(new Date().toISOString());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
+  const [unavailableTimes, setUnavailableTimes] = useState<{
+    joinable: string[];
+    unavailable: string[];
+  }>({
+    joinable: [],
+    unavailable: [],
+  });
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const dateSlotGiver = async (date: Date) => {
     setIsLoading(true);
     setSelectedTimeSlots([]);
     try {
+      setUnavailableTimes({
+        joinable: [],
+        unavailable: [],
+      });
       const odor: string = date.toISOString().split("T")[0];
       setToday(odor);
       const response = await axiosInstanceRegular.get("/timeslotscheck", {
         params: { zaalniID: sportHallID, odor },
       });
-      console.log(response.status);
-    } catch (err) {
-      console.error(err);
+      if (response.status === 200 && response.data.success) {
+        const flat = response.data.orderedTime.flat();
+        const result = {
+          joinable: flat
+            .filter((item: { num_players: number }) => item.num_players > 0)
+            .flatMap((item: { time_slots: Array<string> }) => item.time_slots),
+
+          unavailable: flat
+            .filter((item: { num_players: number }) => item.num_players === 0)
+            .flatMap((item: { time_slots: Array<string> }) => item.time_slots),
+        };
+        setUnavailableTimes(result);
+      }
+    } catch (err: any) {
+      if (err.response && [400, 409].includes(err.response.status)) {
+        console.log("lalr", err);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    dateSlotGiver(new Date());
+  }, []);
   const handleOrder = () => {
     const zaal_id = sportHallID;
     setIsOrderScreenVisible(false);
 
     useBookingStore.getState().setBookingDetails({
       ...formData,
+      sportHallID: zaal_id,
       selectedTimeSlots: selectedTimeSlots,
       date: today,
     });
@@ -327,4 +353,3 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
-

@@ -14,17 +14,17 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { Platform } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as Sentry from "@sentry/react-native";
-import { axiosInstanceRegular } from "./functions/axiosInstance";
+import { axiosInstanceRegular } from "../../../hooks/axiosInstance";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "./context/authContext";
+import { useAuth } from "../context/authContext";
 import { Href } from "expo-router";
 import {
   loginWithFacebook,
   loginWithGoogle,
   loginWithApple,
-} from "./functions/third_party_instance";
-import SignupModal from "./functions/signup_modal";
+} from "../functions/third_party_instance";
+import SignupModal from "./signup_modal";
 import { TextInput } from "react-native-paper";
 
 type LoginInput = {
@@ -48,7 +48,7 @@ const Page = () => {
   const [isItApple, setIsITApple] = useState<boolean>(false);
   const [path, setPath] = useState<string>("");
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [steps, setSteps] = useState<number>(0);
   const [formData, setFormData] = useState<LoginInput>({
     userName: "",
@@ -181,7 +181,7 @@ const Page = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/zurag1.jpg")}
+      source={require("@/assets/images/zurag1.jpg")}
       style={styles.background}
       resizeMode="cover"
     >

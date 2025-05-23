@@ -5,7 +5,7 @@ import {
   Settings,
   AuthenticationToken,
 } from "react-native-fbsdk-next";
-import { axiosInstanceRegular } from "./axiosInstance";
+import { axiosInstanceRegular } from "../../../hooks/axiosInstance";
 import * as Sentry from "@sentry/react-native";
 import {
   isErrorWithCode,

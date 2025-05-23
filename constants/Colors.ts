@@ -10,4 +10,5 @@ export default {
   blue: `#007AFF`,
   littleDark:"#464646",
   littleDarkGrey:"#BDBDBD",
+  lightGreen:"#edffe3"
 };
