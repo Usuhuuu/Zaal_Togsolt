@@ -549,7 +549,10 @@ const ChatComponent: React.FC = () => {
     useCallback(() => {
       const initSocket = async () => {
         const socket = await connectSocket();
-        if (!socket) return;
+        if (!socket) {
+          setNoChatExist(!noChatExist);
+          return;
+        }
         socketRef.current = socket;
       };
       initSocket();
@@ -696,19 +699,23 @@ const ChatComponent: React.FC = () => {
             }}
           >
             <Image
-              source={require("@/assets/images/profileIcons/no_chat_img.png")}
-              style={{ width: 250, height: 200 }}
-              resizeMode="cover"
+              source={require("@/assets/images/profileIcons/no_chat_backgroundless.png")}
+              style={{ width: 300, height: 500 }}
+              resizeMode="contain"
             />
           </View>
           <View style={{ alignItems: "center" }}>
             <Text style={{ fontWeight: "bold", fontSize: 30 }}>
               No Chats Yet
             </Text>
-            <Text style={{ fontSize: 20, fontWeight: 300 }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 300, color: Colors.darkGrey }}
+            >
               Once you join a game or make a frind,
             </Text>
-            <Text style={{ fontSize: 20, fontWeight: 300 }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 300, color: Colors.darkGrey }}
+            >
               your chats will appear here
             </Text>
           </View>
@@ -729,7 +736,7 @@ const ChatComponent: React.FC = () => {
             <View style={[styles.container]}>
               {userLoading ? (
                 <View>
-                  <ActivityIndicator color={Colors.primary} size={"small"} />
+                  <ActivityIndicator color={Colors.primary} size={"large"} />
                 </View>
               ) : (
                 <View

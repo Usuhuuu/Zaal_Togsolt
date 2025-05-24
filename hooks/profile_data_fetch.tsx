@@ -33,3 +33,16 @@ export const normalFetch = async (url: string) => {
     throw new Error("Failed to fetch data");
   }
 };
+
+export const postFetch = async (path: string, body: string[]) => {
+  try {
+    const response = await axiosInstance.post(`${path}`, {
+      body,
+    });
+    console.log("sdaa", response.data);
+    return response.data;
+  } catch (err) {
+    console.log(postFetch);
+    if (err) throw new Error("Error on fetch");
+  }
+};

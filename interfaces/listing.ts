@@ -17,6 +17,10 @@ interface SportHallPrice {
   oneHour: string;
     wholeDay: string;
 }
+interface SportHallWorkTime {
+  startTime: string;
+  endTime: string;
+}
 
 
 export interface SportHallDataType {
@@ -25,7 +29,7 @@ export interface SportHallDataType {
   address: string;
   imageUrls: string[];
   phoneNumber: string;
-  workTime: string;
+  workTime: SportHallWorkTime;
   price:SportHallPrice;
   location: {
     latitude: string;

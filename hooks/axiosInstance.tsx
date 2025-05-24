@@ -8,8 +8,8 @@ const apiUrl =
   "https://8f9e-118-176-174-110.ngrok-free.app";
 
 const tokenWithRetry = async (
-  maxRetry: number = 5,
-  maxInterval: number = 1000
+  maxRetry: number = 3,
+  maxInterval: number = 500
 ) => {
   let token = null;
   let retry = 0;

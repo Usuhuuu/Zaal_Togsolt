@@ -21,6 +21,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import StepIndicator from "react-native-step-indicator";
 import { format } from "date-fns";
 import axiosInstance from "@/hooks/axiosInstance";
+import { AxiosResponse } from "axios";
 
 const labels = ["Players Needed", "Confirm Info", "Booking Complete"];
 const customStyles = {
@@ -88,16 +89,17 @@ const TransactionPage = () => {
   const [playersNeeded, setPlayersNeeded] = useState<{ [key: number]: number }>(
     {}
   );
+  const [wholeDayPeople, setWholeDayPeople] = useState<number>(0);
+  const [wholeDay, setWholeDay] = useState<boolean>(false);
 
   const bookingDetails = useBookingStore((state) => state.bookingDetails);
 
   useEffect(() => {
-    setSelectedTimeSlots(() =>
-      groupConnectedTimeSlots(bookingDetails?.selectedTimeSlots ?? [])
-    );
-    const total_player_number_needed = Object.values(playersNeeded).map(
-      (needed) => needed + 1
-    );
+    bookingDetails?.selectedTimeSlots.includes("WHOLE_DAY")
+      ? setWholeDay(true)
+      : setSelectedTimeSlots(() =>
+          groupConnectedTimeSlots(bookingDetails?.selectedTimeSlots ?? [])
+        );
   }, []);
 
   const paymentPerPeopleArray: number[] = [];
@@ -105,28 +107,46 @@ const TransactionPage = () => {
 
   const handleOrder = async () => {
     try {
-      const reservationBlocks = selectedTimeSlots.map((group, index) => {
-        const [startTime] = group[0].split("~");
-        const [, endTime] = group[group.length - 1].split("~");
+      if (!bookingDetails) {
+        Alert.alert("Missing booking details.");
+        return;
+      }
 
-        return {
-          start_time: startTime,
-          end_time: endTime,
-          num_players: playersNeeded[index] ?? 0,
-          time_slots: group,
-        };
-      });
-      const slashedDate = bookingDetails?.date.split("T");
-      console.log(slashedDate);
-      const response = await axiosInstance.post("/auth/reserve", {
-        sport_hall_id: bookingDetails?.sportHallID,
-        date: slashedDate,
-        total_amount:
-          (bookingDetails?.selectedTimeSlots?.length ?? 0) *
-          Number(bookingDetails?.price.oneHour),
-        one_hour_price: Number(bookingDetails?.price.oneHour),
-        reserved_blocks: reservationBlocks,
-      });
+      const dateOnly = bookingDetails.date.split("T")[0];
+      let response: AxiosResponse;
+
+      if (!wholeDay) {
+        const reservationBlocks = selectedTimeSlots.map((group, index) => {
+          const [startTime] = group[0].split("~");
+          const [, endTime] = group[group.length - 1].split("~");
+
+          return {
+            start_time: startTime,
+            end_time: endTime,
+            num_players: playersNeeded[index] ?? 0,
+            time_slots: group,
+          };
+        });
+
+        response = await axiosInstance.post("/auth/book", {
+          sport_hall_id: bookingDetails.sportHallID,
+          date: dateOnly,
+          reserved_blocks: reservationBlocks,
+        });
+      } else {
+        response = await axiosInstance.post("/auth/book", {
+          sport_hall_id: bookingDetails.sportHallID,
+          date: dateOnly,
+          reserved_blocks: [
+            {
+              wholeDay: true,
+              num_players: wholeDayPeople,
+              time_slots: ["wholeDay"],
+            },
+          ],
+        });
+      }
+
       if (response.status === 200 && response.data.success) {
         Alert.alert("Successfully Booked");
         router.replace("/");
@@ -134,9 +154,12 @@ const TransactionPage = () => {
         Alert.alert("Already Booked");
       }
     } catch (err: any) {
-      console.log(err);
-      if (err.response.status === 400) {
+      if (err?.response?.status === 400) {
         Alert.alert("Already Booked");
+      } else if (err.message === "Token not found after retries") {
+        Alert.alert("Please Login");
+      } else {
+        Alert.alert("Booking failed try again later");
       }
     }
   };
@@ -227,29 +250,48 @@ const TransactionPage = () => {
                       flexDirection: "column",
                     }}
                   >
-                    {selectedTimeSlots.map((group, index) => {
-                      const startTime = group[0].split("~")[0];
-                      const endTime = group[group.length - 1].split("~")[1];
-                      const isLast = index === selectedTimeSlots.length - 1;
-                      return (
-                        <View
-                          key={index}
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            padding: 20,
-                            borderBottomWidth: isLast ? 0 : 1,
-                          }}
-                        >
-                          <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                            Time {index + 1}
-                          </Text>
-                          <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                            {startTime} – {endTime}
-                          </Text>
-                        </View>
-                      );
-                    })}
+                    {wholeDay ? (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          padding: 20,
+                        }}
+                      >
+                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                          Time
+                        </Text>
+                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                          {bookingDetails?.workTime}
+                        </Text>
+                      </View>
+                    ) : (
+                      <>
+                        {selectedTimeSlots.map((group, index) => {
+                          const startTime = group[0].split("~")[0];
+                          const endTime = group[group.length - 1].split("~")[1];
+                          const isLast = index === selectedTimeSlots.length - 1;
+                          return (
+                            <View
+                              key={index}
+                              style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                padding: 20,
+                                borderBottomWidth: isLast ? 0 : 1,
+                              }}
+                            >
+                              <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                                Time {index + 1}
+                              </Text>
+                              <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                                {startTime} – {endTime}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </>
+                    )}
                   </View>
                 </View>
                 {/* price section */}
@@ -261,35 +303,37 @@ const TransactionPage = () => {
                     borderColor: Colors.littleDark,
                   }}
                 >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      padding: 20,
-                      borderBottomWidth: 1,
-                      alignItems: "center",
-                    }}
-                  >
+                  {!wholeDay && (
                     <View
                       style={{
                         flexDirection: "row",
-                        gap: 5,
+                        justifyContent: "space-between",
+                        padding: 20,
+                        borderBottomWidth: 1,
                         alignItems: "center",
                       }}
                     >
-                      <MaterialCommunityIcons
-                        name="clock-time-nine-outline"
-                        size={24}
-                        color="black"
-                      />
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          gap: 5,
+                          alignItems: "center",
+                        }}
+                      >
+                        <MaterialCommunityIcons
+                          name="clock-time-nine-outline"
+                          size={24}
+                          color="black"
+                        />
+                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                          1 Hour
+                        </Text>
+                      </View>
                       <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                        1 Hour
+                        ₮{bookingDetails?.price.oneHour}
                       </Text>
                     </View>
-                    <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                      ₮{bookingDetails?.price.oneHour}
-                    </Text>
-                  </View>
+                  )}
                   <View
                     style={{
                       flexDirection: "row",
@@ -300,8 +344,10 @@ const TransactionPage = () => {
                     <Text>TOTAL</Text>
                     <Text>
                       ₮
-                      {(bookingDetails?.selectedTimeSlots.length ?? 0) *
-                        Number(bookingDetails?.price.oneHour)}
+                      {wholeDay
+                        ? bookingDetails?.price?.wholeDay
+                        : (bookingDetails?.selectedTimeSlots.length ?? 0) *
+                          Number(bookingDetails?.price.oneHour)}
                     </Text>
                   </View>
                 </View>
@@ -336,87 +382,162 @@ const TransactionPage = () => {
                     gap: 10,
                   }}
                 >
-                  {selectedTimeSlots.map((group, index) => {
-                    const startTime = group[0].split("~")[0];
-                    const endTime = group[group.length - 1].split("~")[1];
-                    const isLast = index === selectedTimeSlots.length - 1;
-                    return (
+                  {wholeDay ? (
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        padding: 10,
+                        gap: 5,
+                        borderWidth: 1,
+                        borderColor: Colors.littleDark,
+                        borderRadius: 5,
+                      }}
+                    >
+                      <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                        {bookingDetails?.workTime}
+                      </Text>
                       <View
-                        key={index}
                         style={{
-                          flexDirection: "column",
+                          flexDirection: "row",
+                          alignItems: "center",
                           justifyContent: "space-between",
-                          padding: 10,
-                          gap: 5,
                           borderWidth: 1,
+                          padding: 5,
                           borderColor: Colors.littleDark,
-                          borderRadius: 5,
                         }}
                       >
-                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                          Session {index + 1}
-                        </Text>
-                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                          {startTime} – {endTime}
-                        </Text>
                         <View
                           style={{
                             flexDirection: "row",
                             alignItems: "center",
-                            justifyContent: "space-between",
-                            borderWidth: 1,
-                            padding: 5,
-                            borderColor: Colors.littleDark,
+                            gap: 5,
                           }}
                         >
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              gap: 5,
+                          <MaterialIcons
+                            name="people-alt"
+                            size={24}
+                            color="black"
+                          />
+                          <Text>Peoples Needed</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                          }}
+                        >
+                          <TouchableOpacity
+                            onPress={() => {
+                              setWholeDayPeople(wholeDayPeople + 1);
                             }}
                           >
-                            <MaterialIcons
-                              name="people-alt"
-                              size={24}
-                              color="black"
-                            />
-                            <Text>Peoples Needed</Text>
-                          </View>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
+                            <AntDesign name="plus" size={20} color="black" />
+                          </TouchableOpacity>
+                          <Text style={{ fontSize: 20 }}>{wholeDayPeople}</Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setWholeDayPeople(wholeDayPeople - 1);
                             }}
                           >
-                            <TouchableOpacity
-                              onPress={() => {
-                                setPlayersNeeded((prev) => ({
-                                  ...prev,
-                                  [index]: (prev[index] || 0) + 1,
-                                }));
-                              }}
-                            >
-                              <AntDesign name="plus" size={20} color="black" />
-                            </TouchableOpacity>
-                            <Text style={{ fontSize: 20 }}>
-                              {playersNeeded[index] || 0}{" "}
-                            </Text>
-                            <TouchableOpacity
-                              onPress={() => {
-                                setPlayersNeeded((prev) => ({
-                                  ...prev,
-                                  [index]: (prev[index] || 0) - 1,
-                                }));
-                              }}
-                            >
-                              <AntDesign name="minus" size={20} color="black" />
-                            </TouchableOpacity>
-                          </View>
+                            <AntDesign name="minus" size={20} color="black" />
+                          </TouchableOpacity>
                         </View>
                       </View>
-                    );
-                  })}
+                    </View>
+                  ) : (
+                    <>
+                      {selectedTimeSlots.map((group, index) => {
+                        const startTime = group[0].split("~")[0];
+                        const endTime = group[group.length - 1].split("~")[1];
+                        const isLast = index === selectedTimeSlots.length - 1;
+                        return (
+                          <View
+                            key={index}
+                            style={{
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                              padding: 10,
+                              gap: 5,
+                              borderWidth: 1,
+                              borderColor: Colors.littleDark,
+                              borderRadius: 5,
+                            }}
+                          >
+                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                              Session {index + 1}
+                            </Text>
+                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                              {startTime} – {endTime}
+                            </Text>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                borderWidth: 1,
+                                padding: 5,
+                                borderColor: Colors.littleDark,
+                              }}
+                            >
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  gap: 5,
+                                }}
+                              >
+                                <MaterialIcons
+                                  name="people-alt"
+                                  size={24}
+                                  color="black"
+                                />
+                                <Text>Peoples Needed</Text>
+                              </View>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setPlayersNeeded((prev) => ({
+                                      ...prev,
+                                      [index]: (prev[index] || 0) + 1,
+                                    }));
+                                  }}
+                                >
+                                  <AntDesign
+                                    name="plus"
+                                    size={20}
+                                    color="black"
+                                  />
+                                </TouchableOpacity>
+                                <Text style={{ fontSize: 20 }}>
+                                  {playersNeeded[index] || 0}{" "}
+                                </Text>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setPlayersNeeded((prev) => ({
+                                      ...prev,
+                                      [index]: (prev[index] || 0) - 1,
+                                    }));
+                                  }}
+                                >
+                                  <AntDesign
+                                    name="minus"
+                                    size={20}
+                                    color="black"
+                                  />
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </>
+                  )}
                 </View>
                 <View
                   style={{
@@ -498,183 +619,292 @@ const TransactionPage = () => {
                   </View>
                   <Text style={{ fontSize: 24 }}>Times & Player Needed</Text>
                   <View style={{ gap: 10 }}>
-                    <View style={{ gap: 10 }}>
-                      {selectedTimeSlots.map((group, index) => {
-                        const startTime = group[0].split("~")[0];
-                        const endTime = group[group.length - 1].split("~")[1];
-                        const isLast = index === selectedTimeSlots.length - 1;
-                        return (
-                          <View
-                            key={index}
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                              padding: 10,
-                              gap: 5,
-                              borderWidth: 1,
-                              borderColor: Colors.littleDark,
-                              borderRadius: 5,
-                            }}
-                          >
-                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                              {startTime} – {endTime}
-                            </Text>
-                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                              {playersNeeded[index] || 0} Person
-                            </Text>
-                          </View>
-                        );
-                      })}
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        gap: 5,
-                        borderWidth: 1,
-                        borderColor: Colors.littleDark,
-                        borderRadius: 5,
-                      }}
-                    >
+                    {wholeDay ? (
                       <View
                         style={{
-                          flexDirection: "row",
+                          flexDirection: "column",
                           justifyContent: "space-between",
-                          padding: 20,
-                          borderBottomWidth: 1,
-                          alignItems: "center",
+                          gap: 5,
+                          borderWidth: 1,
+                          borderColor: Colors.littleDark,
+                          borderRadius: 5,
                         }}
                       >
                         <View
                           style={{
                             flexDirection: "row",
-                            gap: 5,
+                            justifyContent: "space-between",
+                            padding: 20,
+                            borderBottomWidth: 1,
                             alignItems: "center",
                           }}
                         >
-                          <MaterialCommunityIcons
-                            name="clock-time-nine-outline"
-                            size={24}
-                            color="black"
-                          />
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              gap: 5,
+                              alignItems: "center",
+                            }}
+                          >
+                            <MaterialCommunityIcons
+                              name="clock-time-nine-outline"
+                              size={24}
+                              color="black"
+                            />
+                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                              Whole Day
+                            </Text>
+                          </View>
                           <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                            1 Hour
+                            ₮{bookingDetails?.price.wholeDay}
                           </Text>
                         </View>
-                        <Text style={{ fontSize: 18, fontWeight: 300 }}>
-                          ₮{bookingDetails?.price.oneHour}
-                        </Text>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: 20,
+                            borderBottomWidth: 1,
+                            alignItems: "center",
+                          }}
+                        >
+                          <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                            Peoples
+                          </Text>
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 18,
+                                fontWeight: 300,
+                              }}
+                            >
+                              {wholeDayPeople}
+                            </Text>
+                            <MaterialIcons
+                              name="people-alt"
+                              size={24}
+                              color={Colors.dark}
+                            />
+                          </View>
+                        </View>
+                        <View
+                          style={{
+                            marginTop: 10,
+                            padding: 10,
+                            gap: 5,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 18,
+                              fontWeight: "bold",
+                              textAlign: "center",
+                            }}
+                          >
+                            Booker's Total: ₮
+                            {wholeDayPeople <= 0
+                              ? bookingDetails?.price.wholeDay
+                              : Number(bookingDetails?.price.wholeDay) /
+                                wholeDayPeople}
+                          </Text>
+                        </View>
                       </View>
-                      <View>
-                        {(() => {
-                          return (
-                            <>
-                              {selectedTimeSlots.map((group, index) => {
-                                const startTime = group[0].split("~")[0];
-                                const endTime =
-                                  group[group.length - 1].split("~")[1];
+                    ) : (
+                      <>
+                        <View style={{ gap: 10 }}>
+                          {selectedTimeSlots.map((group, index) => {
+                            const startTime = group[0].split("~")[0];
+                            const endTime =
+                              group[group.length - 1].split("~")[1];
+                            const isLast =
+                              index === selectedTimeSlots.length - 1;
+                            return (
+                              <View
+                                key={index}
+                                style={{
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                  padding: 10,
+                                  gap: 5,
+                                  borderWidth: 1,
+                                  borderColor: Colors.littleDark,
+                                  borderRadius: 5,
+                                }}
+                              >
+                                <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                                  {startTime} – {endTime}
+                                </Text>
+                                <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                                  {playersNeeded[index] || 0} Person
+                                </Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            gap: 5,
+                            borderWidth: 1,
+                            borderColor: Colors.littleDark,
+                            borderRadius: 5,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              padding: 20,
+                              borderBottomWidth: 1,
+                              alignItems: "center",
+                            }}
+                          >
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                gap: 5,
+                                alignItems: "center",
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                name="clock-time-nine-outline"
+                                size={24}
+                                color="black"
+                              />
+                              <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                                1 Hour
+                              </Text>
+                            </View>
+                            <Text style={{ fontSize: 18, fontWeight: 300 }}>
+                              ₮{bookingDetails?.price.oneHour}
+                            </Text>
+                          </View>
+                          <View>
+                            {(() => {
+                              return (
+                                <>
+                                  {selectedTimeSlots.map((group, index) => {
+                                    const startTime = group[0].split("~")[0];
+                                    const endTime =
+                                      group[group.length - 1].split("~")[1];
 
-                                const getHour = (time: string) => {
-                                  const [hourStr] = time.split(":");
-                                  return parseInt(hourStr, 10);
-                                };
+                                    const getHour = (time: string) => {
+                                      const [hourStr] = time.split(":");
+                                      return parseInt(hourStr, 10);
+                                    };
 
-                                const startHour = getHour(startTime);
-                                const endHour = getHour(endTime);
-                                const durationHours = endHour - startHour;
+                                    const startHour = getHour(startTime);
+                                    const endHour = getHour(endTime);
+                                    const durationHours = endHour - startHour;
 
-                                const costPerHour = 1000;
-                                const totalCost = durationHours * costPerHour;
+                                    const costPerHour = 1000;
+                                    const totalCost =
+                                      durationHours * costPerHour;
 
-                                const totalPeople =
-                                  (playersNeeded[index] || 0) + 1;
+                                    const totalPeople =
+                                      (playersNeeded[index] || 0) + 1;
 
-                                const paymentPerPeople =
-                                  totalPeople > 0 ? totalCost / totalPeople : 0;
+                                    const paymentPerPeople =
+                                      totalPeople > 0
+                                        ? totalCost / totalPeople
+                                        : 0;
 
-                                // Add to booker’s total
-                                paymentPerPeopleArray.push(paymentPerPeople);
-                                totalBookerPaymentArray.push(paymentPerPeople);
+                                    // Add to booker’s total
+                                    paymentPerPeopleArray.push(
+                                      paymentPerPeople
+                                    );
+                                    totalBookerPaymentArray.push(
+                                      paymentPerPeople
+                                    );
 
-                                return (
+                                    return (
+                                      <View
+                                        key={index}
+                                        style={{
+                                          flexDirection: "column",
+                                          justifyContent: "space-evenly",
+                                          padding: 10,
+                                        }}
+                                      >
+                                        <Text
+                                          style={{
+                                            fontSize: 16,
+                                            fontWeight: "300",
+                                          }}
+                                        >
+                                          Session {index + 1}:
+                                        </Text>
+                                        <View
+                                          style={{
+                                            flexDirection: "row",
+                                            justifyContent: "space-around",
+                                          }}
+                                        >
+                                          <Text
+                                            style={{
+                                              fontSize: 18,
+                                              fontWeight: 300,
+                                            }}
+                                          >
+                                            {durationHours} hours
+                                          </Text>
+                                          <Text
+                                            style={{
+                                              fontSize: 18,
+                                              fontWeight: 300,
+                                            }}
+                                          >
+                                            {totalPeople} players
+                                          </Text>
+                                          <Text
+                                            style={{
+                                              fontSize: 18,
+                                              fontWeight: 300,
+                                            }}
+                                          >
+                                            ₮{paymentPerPeople.toFixed(2)} per
+                                            person
+                                          </Text>
+                                        </View>
+                                      </View>
+                                    );
+                                  })}
+
                                   <View
-                                    key={index}
                                     style={{
-                                      flexDirection: "column",
-                                      justifyContent: "space-evenly",
+                                      marginTop: 10,
                                       padding: 10,
+                                      borderTopWidth: 1,
+                                      borderColor: Colors.littleDark,
                                     }}
                                   >
                                     <Text
                                       style={{
-                                        fontSize: 16,
-                                        fontWeight: "300",
+                                        fontSize: 18,
+                                        fontWeight: "bold",
+                                        textAlign: "center",
                                       }}
                                     >
-                                      Session {index + 1}:
+                                      Booker's Total: ₮
+                                      {totalBookerPaymentArray
+                                        .reduce((sum, v) => sum + v, 0)
+                                        .toFixed(2)}
                                     </Text>
-                                    <View
-                                      style={{
-                                        flexDirection: "row",
-                                        justifyContent: "space-around",
-                                      }}
-                                    >
-                                      <Text
-                                        style={{
-                                          fontSize: 18,
-                                          fontWeight: 300,
-                                        }}
-                                      >
-                                        {durationHours} hours
-                                      </Text>
-                                      <Text
-                                        style={{
-                                          fontSize: 18,
-                                          fontWeight: 300,
-                                        }}
-                                      >
-                                        {totalPeople} players
-                                      </Text>
-                                      <Text
-                                        style={{
-                                          fontSize: 18,
-                                          fontWeight: 300,
-                                        }}
-                                      >
-                                        ₮{paymentPerPeople.toFixed(2)} per
-                                        person
-                                      </Text>
-                                    </View>
                                   </View>
-                                );
-                              })}
-
-                              <View
-                                style={{
-                                  marginTop: 10,
-                                  padding: 10,
-                                  borderTopWidth: 1,
-                                  borderColor: Colors.littleDark,
-                                }}
-                              >
-                                <Text
-                                  style={{
-                                    fontSize: 18,
-                                    fontWeight: "bold",
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  Booker's Total: ₮
-                                  {totalBookerPaymentArray
-                                    .reduce((sum, v) => sum + v, 0)
-                                    .toFixed(2)}
-                                </Text>
-                              </View>
-                            </>
-                          );
-                        })()}
-                      </View>
-                    </View>
+                                </>
+                              );
+                            })()}
+                          </View>
+                        </View>
+                      </>
+                    )}
                   </View>
                 </View>
                 <View

@@ -31,7 +31,7 @@ export const connectSocket = async (): Promise<Socket | null> => {
       console.warn("🚫 No token found");
       isConnecting = false;
       resolve(null);
-      return;
+      return false;
     }
 
     const { accessToken, refreshToken } = JSON.parse(token);

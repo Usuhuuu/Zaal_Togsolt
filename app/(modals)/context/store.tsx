@@ -10,6 +10,7 @@ type BookingData = {
     wholeDay: string;
   };
   selectedTimeSlots: string[];
+  workTime?: string;
 };
 
 type BookingState = {

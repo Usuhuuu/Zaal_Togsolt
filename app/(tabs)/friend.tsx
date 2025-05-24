@@ -8,12 +8,13 @@ import {
   FlatList,
   Alert,
 } from "react-native";
+import { Image } from "react-native";
 import { mutate } from "swr";
 import Colors from "@/constants/Colors";
 import axiosInstance from "../../hooks/axiosInstance";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../(modals)/context/authContext";
-import { auth_swr } from "../../hooks/useswr";
+import { auth_swr, post_auth_swr } from "../../hooks/useswr";
 import { Avatar, Searchbar } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -34,6 +35,7 @@ const FriendRequest = () => {
   const [friendInfo, setFriendInfo] = useState<FriendProfileType[]>([]);
   const [entireFriendData, setEntireFriendData] = useState<any>(null);
   const [showFriends, setShowFriends] = useState<boolean>(false);
+  const [noFriend, setNoFriend] = useState<boolean>(false);
 
   const [isitLoading, setIsitLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -179,224 +181,282 @@ const FriendRequest = () => {
         setShowFriends(true);
       }
     };
-    if (LoginStatus) {
-      fetchUserInfo();
-    }
+    LoginStatus ? fetchUserInfo() : setNoFriend(true);
   }, [entireFriendData]);
+
+  const {
+    data: userLarar,
+    error: userInfoError,
+    isLoading: userInfoLoading,
+  } = post_auth_swr({
+    item: {
+      pathname: "/auth/friend_data",
+      cacheKey: "friend_profile_info",
+      loginStatus: LoginStatus,
+      body: entireFriendData,
+    },
+  });
+  useEffect(() => {
+    console.log("sda", userLarar);
+  }, []);
 
   const uniqueCurrentData = Array.from(new Set(currentData));
   return (
     <View style={{ backgroundColor: Colors.lightGrey, flex: 1 }}>
-      {isitLoading ? (
-        <ActivityIndicator size="large" color={Colors.secondary} />
-      ) : (
+      {noFriend ? (
         <View
           style={{
-            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
             height: "100%",
           }}
         >
-          {showFriends ? (
-            <View style={style.subContainer}>
-              <Searchbar
-                mode="bar"
-                placeholder="Search & Add Friends"
-                value={searchQuery}
-                onChangeText={(text) => setSearchQuery(text)}
-                style={{
-                  width: "100%",
-                  backgroundColor: Colors.white,
-                  borderRadius: 10,
-                  borderBottomColor: Colors.white,
-                  marginTop: 10,
-                }}
-                placeholderTextColor={Colors.darkGrey}
-                right={() => (
-                  <TouchableOpacity onPress={() => handleRequestSend()}>
-                    <Text>sda</Text>
-                  </TouchableOpacity>
-                )}
-              />
-
-              <View style={style.allFriendContainer}>
-                <View style={style.friendContainer}>
-                  {options.map((label) => (
-                    <TouchableOpacity
-                      key={label}
-                      style={[
-                        style.innerFriend,
-                        {
-                          backgroundColor:
-                            friendShow === label
-                              ? Colors.secondary
-                              : Colors.white,
-                        },
-                      ]}
-                      onPress={() => {
-                        setFriendShow(label);
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color:
-                            friendShow === label
-                              ? Colors.white
-                              : Colors.darkGrey,
-                          writingDirection: "ltr",
-                        }}
-                      >
-                        {label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-              <View style={style.outFriendContainer}>
-                <FlatList
-                  data={uniqueCurrentData}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => {
-                    const matchedFriend = friendInfo?.find(
-                      (friend) => friend.unique_user_ID === item
-                    );
-                    return (
-                      <View
-                        style={{
-                          backgroundColor: Colors.grey,
-                          marginHorizontal: 20,
-                          padding: 15,
-                          borderRadius: 10,
-                          marginTop: 10,
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        {matchedFriend && (
-                          <View
-                            style={{
-                              flexDirection: "row",
-                            }}
-                          >
-                            <Avatar.Image
-                              source={{ uri: matchedFriend.userImage }}
-                              size={60}
-                              style={{
-                                backgroundColor: Colors.primary,
-                              }}
-                            />
-                            <View
-                              style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <Text
-                                style={{
-                                  fontSize: 16,
-                                  color: Colors.dark,
-                                  fontWeight: "bold",
-                                  alignSelf: "flex-start",
-                                }}
-                              >
-                                {item.charAt(0).toUpperCase() + item.slice(1)}
-                              </Text>
-                              <Text
-                                style={{
-                                  fontSize: 16,
-                                  color: Colors.darkGrey,
-                                }}
-                              >
-                                {matchedFriend.email}
-                              </Text>
-                            </View>
-                          </View>
-                        )}
-
-                        {currentData === userRequestData && (
-                          <View
-                            style={{
-                              flexDirection: "column",
-                            }}
-                          >
-                            <TouchableOpacity
-                              style={{
-                                backgroundColor: Colors.secondary,
-                                borderRadius: 10,
-                                padding: 10,
-                                width: 90,
-                                alignItems: "center",
-                              }}
-                              onPress={() => handleAccept(item)}
-                            >
-                              <Text
-                                style={{ color: Colors.white, fontSize: 17 }}
-                              >
-                                Accept
-                              </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                              style={{
-                                borderRadius: 10,
-                                width: 90,
-                                alignItems: "center",
-                              }}
-                              onPress={() => handleCancel(item)}
-                            >
-                              <Text
-                                style={{ color: Colors.darkGrey, fontSize: 17 }}
-                              >
-                                Cancel
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                        {currentData === friendData && (
-                          <View style={{ flexDirection: "row", gap: 5 }}>
-                            <TouchableOpacity
-                              onPress={() => {
-                                router.push(`/(modals)/chat/${item}`);
-                              }}
-                            >
-                              <Ionicons
-                                name="chatbubble-sharp"
-                                size={25}
-                                color={Colors.primary}
-                              />
-                            </TouchableOpacity>
-                            <TouchableOpacity>
-                              <Ionicons
-                                name="person-circle-outline"
-                                size={25}
-                                color={Colors.primary}
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      </View>
-                    );
-                  }}
-                />
-              </View>
-            </View>
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <Image
+              source={require("@/assets/images/profileIcons/no_friend_image.png")}
+              style={{ width: 300, height: 400 }}
+              resizeMode="contain"
+            />
+            <Text style={{ fontWeight: "bold", fontSize: 30 }}>
+              No friend requests yet.
+            </Text>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 300,
+                color: Colors.darkGrey,
+              }}
+            >
+              Want to meet new friends?
+            </Text>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 300,
+                color: Colors.darkGrey,
+              }}
+            >
+              Start discovering players nearby.
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <>
+          {isitLoading ? (
+            <ActivityIndicator size="large" color={Colors.primary} />
           ) : (
             <View
               style={{
-                alignItems: "center",
-                justifyContent: "center",
+                width: "100%",
                 height: "100%",
               }}
             >
-              <ActivityIndicator
-                size="large"
-                color={Colors.primary}
-                style={{ alignItems: "center", justifyContent: "center" }}
-              />
+              {showFriends ? (
+                <View style={style.subContainer}>
+                  <Searchbar
+                    mode="bar"
+                    placeholder="Search & Add Friends"
+                    value={searchQuery}
+                    onChangeText={(text) => setSearchQuery(text)}
+                    style={{
+                      width: "100%",
+                      backgroundColor: Colors.white,
+                      borderRadius: 10,
+                      borderBottomColor: Colors.white,
+                      marginTop: 10,
+                    }}
+                    placeholderTextColor={Colors.darkGrey}
+                    right={() => (
+                      <TouchableOpacity onPress={() => handleRequestSend()}>
+                        <Text>sda</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+
+                  <View style={style.allFriendContainer}>
+                    <View style={style.friendContainer}>
+                      {options.map((label) => (
+                        <TouchableOpacity
+                          key={label}
+                          style={[
+                            style.innerFriend,
+                            {
+                              backgroundColor:
+                                friendShow === label
+                                  ? Colors.secondary
+                                  : Colors.white,
+                            },
+                          ]}
+                          onPress={() => {
+                            setFriendShow(label);
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              color:
+                                friendShow === label
+                                  ? Colors.white
+                                  : Colors.darkGrey,
+                              writingDirection: "ltr",
+                            }}
+                          >
+                            {label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                  <View style={style.outFriendContainer}>
+                    <FlatList
+                      data={uniqueCurrentData}
+                      keyExtractor={(item) => item}
+                      renderItem={({ item }) => {
+                        const matchedFriend = friendInfo?.find(
+                          (friend) => friend.unique_user_ID === item
+                        );
+                        return (
+                          <View
+                            style={{
+                              backgroundColor: Colors.grey,
+                              marginHorizontal: 20,
+                              padding: 15,
+                              borderRadius: 10,
+                              marginTop: 10,
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            {matchedFriend && (
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                }}
+                              >
+                                <Avatar.Image
+                                  source={{ uri: matchedFriend.userImage }}
+                                  size={60}
+                                  style={{
+                                    backgroundColor: Colors.primary,
+                                  }}
+                                />
+                                <View
+                                  style={{
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 16,
+                                      color: Colors.dark,
+                                      fontWeight: "bold",
+                                      alignSelf: "flex-start",
+                                    }}
+                                  >
+                                    {item.charAt(0).toUpperCase() +
+                                      item.slice(1)}
+                                  </Text>
+                                  <Text
+                                    style={{
+                                      fontSize: 16,
+                                      color: Colors.darkGrey,
+                                    }}
+                                  >
+                                    {matchedFriend.email}
+                                  </Text>
+                                </View>
+                              </View>
+                            )}
+
+                            {currentData === userRequestData && (
+                              <View
+                                style={{
+                                  flexDirection: "column",
+                                }}
+                              >
+                                <TouchableOpacity
+                                  style={{
+                                    backgroundColor: Colors.secondary,
+                                    borderRadius: 10,
+                                    padding: 10,
+                                    width: 90,
+                                    alignItems: "center",
+                                  }}
+                                  onPress={() => handleAccept(item)}
+                                >
+                                  <Text
+                                    style={{
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                    }}
+                                  >
+                                    Accept
+                                  </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={{
+                                    borderRadius: 10,
+                                    width: 90,
+                                    alignItems: "center",
+                                  }}
+                                  onPress={() => handleCancel(item)}
+                                >
+                                  <Text
+                                    style={{
+                                      color: Colors.darkGrey,
+                                      fontSize: 17,
+                                    }}
+                                  >
+                                    Cancel
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                            {currentData === friendData && (
+                              <View style={{ flexDirection: "row", gap: 5 }}>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    router.push(`/(modals)/chat/${item}`);
+                                  }}
+                                >
+                                  <Ionicons
+                                    name="chatbubble-sharp"
+                                    size={25}
+                                    color={Colors.primary}
+                                  />
+                                </TouchableOpacity>
+                                <TouchableOpacity>
+                                  <Ionicons
+                                    name="person-circle-outline"
+                                    size={25}
+                                    color={Colors.primary}
+                                  />
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                          </View>
+                        );
+                      }}
+                    />
+                  </View>
+                </View>
+              ) : (
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                  }}
+                >
+                  <ActivityIndicator size={"large"} color={Colors.primary} />
+                </View>
+              )}
             </View>
           )}
-        </View>
+        </>
       )}
     </View>
   );

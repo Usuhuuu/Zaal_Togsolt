@@ -254,17 +254,28 @@ const DetailsPage = () => {
     };
   }, []);
 
-  const handleZaalId = (input: any, name: any, price: any) => {
+  const handleZaalId = (
+    input: any,
+    name: any,
+    price: any,
+    workTime: string | undefined
+  ) => {
     setFormData((prev) => ({
       ...prev,
       sport_hall_id: input,
       name: name,
       price: price,
+      workTime: workTime,
     }));
   };
 
   useEffect(() => {
-    handleZaalId(sportHallID, listing?.name, listing?.price);
+    handleZaalId(
+      sportHallID,
+      listing?.name,
+      listing?.price,
+      `${listing?.workTime.startTime}~${listing?.workTime.endTime}`
+    );
   }, [sportHallID]);
 
   return (
@@ -427,7 +438,10 @@ const DetailsPage = () => {
           <View>
             <Text style={styles.description}>{listing?.address}</Text>
             <Text>{listing?.phoneNumber}</Text>
-            <Text>{listing?.workTime}</Text>
+            <Text>
+              {listing?.workTime.startTime}
+              {listing?.workTime.endTime}
+            </Text>
           </View>
         </View>
       </Animated.ScrollView>
